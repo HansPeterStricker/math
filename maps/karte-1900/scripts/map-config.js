@@ -100,6 +100,9 @@
     // Read by maps/shared_scripts/map-page.js (see its head for the keys); the fonts of the names are set by the CSS of
     // index.html (Old Standard TT), here the fonts the page waits for before it measures the names.
     STYLE: {
+      // buildings of the period (user, 2026-10-23; maps/shared_scripts/epoch-symbols.js, sketch maps/skizzen/gebaeude-epochen.html):
+      // Gründerzeit town houses with mansard roofs (row "1900 A: Gründerzeit"); same footprints as line B, so the layout stays valid
+      buildings: "gruenderzeit",
       fonts: ['16px "Old Standard TT"', 'bold 16px "Old Standard TT"', 'italic 16px "Old Standard TT"'],
       halo: "#f8f6ef",          // halo of the names: the colour of the paper
       land: "#f8f6ef",          // white machine paper of the style sheet

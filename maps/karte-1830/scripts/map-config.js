@@ -94,6 +94,9 @@
     // by maps/shared_scripts/map-page.js; a map without this block is drawn as draft 12. The fonts of the names are set by
     // the CSS of index.html (Cormorant Garamond); here the fonts the page waits for before it measures the names.
     STYLE: {
+      // buildings of the period (user, 2026-10-23; maps/shared_scripts/epoch-symbols.js, sketch maps/skizzen/gebaeude-epochen.html):
+      // classicist town houses and a palais (row "1830: Klassizismus"); same footprints as line B, so the layout stays valid
+      buildings: "classicism",
       fonts: ['600 16px "Cormorant Garamond"', '700 16px "Cormorant Garamond"', 'italic 600 16px "Cormorant Garamond"', '16px "Pinyon Script"'],
       halo: "#f5efdf",          // halo of the names: the colour of the paper
       land: "#f5efdf",          // white laid paper instead of parchment
