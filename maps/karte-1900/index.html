@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mathematik um 1900</title>
+<link rel="icon" href="../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../scripts/site-icon-180.png">
+<!-- Fonts of the style sheet of the 19th century (maps/stile/stil-4-19-jahrhundert.html): Old Standard TT, a modern face
+     after the Didot and Walbaum types of the period, for all names and the page -->
+<link href="https://fonts.googleapis.com/css2?family=Old+Standard+TT:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root { --holz: #2e241c; --tinte: #3a2a1c; --pergament: #f8f3e6; --hinweis: #d8c79f; --verweis: #f0dca8; --rot: #9b2a1a; }
+  html, body { margin: 0; background: var(--holz); }
+  body { font-family: "Old Standard TT", Georgia, serif; color: var(--tinte); display: flex; flex-direction: column;
+    align-items: center; padding: 16px; box-sizing: border-box; }
+  /* Toolbar in the style of the map (todos B47, B69 i): parchment buttons with ink, group titles in small capitals,
+     groups separated by a thin brown rule, check boxes in the brown of the frame */
+  .leiste { width: 100%; max-width: 1880px; display: flex; gap: 8px 0; align-items: center; flex-wrap: wrap;
+    color: var(--hinweis); font-size: 15px; margin-bottom: 10px; }
+  .leiste button, .leiste select { font-family: inherit; font-size: 15px; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; border-radius: 2px; padding: 2px 12px 3px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .leiste button:hover { background: #e6d3a3; }
+  .leiste button:active { box-shadow: inset 0 1px 2px rgba(0,0,0,.3); }
+  .leiste button:focus-visible, .leiste input:focus-visible { outline: 2px solid var(--verweis); outline-offset: 1px; }
+  .leiste button.rund { min-width: 30px; padding: 2px 6px 3px; font-size: 17px; line-height: 1.05; }
+  .leiste label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .leiste label:hover { color: var(--verweis); }
+  .leiste input[type="checkbox"] { accent-color: #8a5a2b; width: 15px; height: 15px; margin: 0; cursor: pointer; }
+  .leiste .gruppe { display: flex; gap: 6px 12px; align-items: center; padding: 0 16px; border-left: 1px solid #6b5236; }
+  .leiste .gruppe:first-child { padding-left: 0; border-left: none; }
+  .leiste .gruppe-titel { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; color: var(--verweis); font-size: 16px; }
+  #stufe { min-width: 5.5em; font-variant-numeric: tabular-nums; }
+  /* Search field with suggestions (todo B35) */
+  .suche { position: relative; }
+  #suche { font-family: inherit; font-size: 15px; width: 16em; max-width: 70vw; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; border-radius: 2px; padding: 3px 8px; box-sizing: border-box; box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
+  #vorschlaege { position: absolute; left: 0; top: calc(100% + 2px); z-index: 7; width: 26em; max-width: calc(100vw - 32px);
+    max-height: 60vh; overflow-y: auto; margin: 0; padding: 2px 0; list-style: none; background: var(--pergament);
+    border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45); color: var(--tinte); }
+  #vorschlaege li { padding: 3px 10px 4px; cursor: pointer; line-height: 1.25; }
+  #vorschlaege li.aktiv { background: #e6d3a3; }
+  #vorschlaege li.leer { cursor: default; font-style: italic; color: #5a4632; }
+  #vorschlaege li.kopf { cursor: default; font-variant: small-caps; letter-spacing: 0.04em; font-size: 13px; color: #5a4632; border-bottom: 1px solid #c9b48a; padding-top: 6px; }
+  #vorschlaege .vort { font-size: 13px; font-style: italic; color: #5a4632; }
+  .kartenreihe { position: relative; width: 100%; max-width: 1880px; display: flex; gap: 12px; height: calc(100vh - 96px); min-height: 440px; }
+  #legende-seite { flex: none; width: 340px; overflow-y: auto; background: var(--pergament); border: 1px solid #6b5236;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); padding: 8px 12px 12px; box-sizing: border-box; font-size: 14px; line-height: 1.25; }
+  #legende-seite h2 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 21px; margin: 0 0 2px; text-align: center; }
+  #legende-seite h3 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 15px; margin: 10px 0 4px;
+    border-top: 1px solid #c9b48a; padding-top: 5px; }
+  #legende-seite .eintrag { display: flex; gap: 8px; align-items: center; margin: 3px 0; }
+  #legende-seite svg { flex: none; width: 46px; height: 32px; }
+  #legende-seite .bed { font-size: 14px; }
+  #legende-seite .bed::first-letter { text-transform: uppercase; }
+  #buehne { position: relative; flex: 1; min-width: 0; height: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); background: #f5efdf; overflow: hidden; touch-action: none; user-select: none;
+    -webkit-user-select: none; cursor: grab; }
+  #buehne.zieht, #buehne.zieht * { cursor: grabbing !important; }
+  #karte, #papier { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+  #papier { pointer-events: none; mix-blend-mode: multiply; will-change: transform; }
+  .karte-e8 text { font-family: "Old Standard TT", Georgia, serif; fill: #3a2a1c; }
+  .karte-e8 .sc { font-family: "Old Standard TT", Georgia, serif; }
+  .karte-e8 .element, .karte-e8 .bname { cursor: pointer; }
+  /* Todo B32: a symbol is either shown or not; only the change is soft in time. The fade-in runs whenever the group
+     goes from display:none to shown; the fade-out is a transition, after which the code sets display:none. */
+  #e8-symbole > .element { transition: opacity .25s; animation: e8-ein .25s ease-out; }
+  #e8-symbole > .element.aus { opacity: 0; pointer-events: none; }
+  @keyframes e8-ein { from { opacity: 0; } to { opacity: 1; } }
+  .karte-e8 .bname { transition: opacity .18s; }
+  .karte-e8 .bname.aus { opacity: 0; pointer-events: none; }
+  .karte-e8 .fname { pointer-events: none; transition: opacity .25s; }
+  .karte-e8 .fname.aus { opacity: 0 !important; }
+  /* Todo B40: the visible names of countries and provinces react to the pointer (box with a short description);
+     mountains lie above them and keep priority */
+  .karte-e8 .fname:not(.aus) text { pointer-events: visiblePainted; }
+  #e8-symbole path, #e8-symbole line, #e8-symbole ellipse, #e8-symbole circle { vector-effect: non-scaling-stroke; }
+  #karte.bewegt #e8-symbole { filter: none; }
+  #zeiger { position: fixed; pointer-events: none; background: var(--pergament); border: 1px solid #6b5236;
+    padding: 4px 9px 5px; font-size: 14.5px; line-height: 1.3; display: none; max-width: 380px; box-shadow: 0 2px 8px rgba(0,0,0,.4); z-index: 5; }
+  #zeiger .titel { font-weight: bold; }
+  #zeiger .titel .msc { font-weight: normal; }
+  /* Todo B60: country above the name of a province, a little smaller */
+  /* Todos B69 a, b: the country (area) above a province or a theory, in italics */
+  #zeiger .land { font-size: 12.5px; font-style: italic; color: #5a4632; margin-bottom: 1px; }
+  #zeiger .zusatz { font-size: 13px; font-style: italic; color: #5a4632; margin-top: 2px; }
+  #zeiger .kurz { font-size: 13.5px; margin-top: 3px; }
+  #zeiger .formel-umbruch { display: block; text-align: center; margin: 4px 0 1px; line-height: 1.8; font-size: 13.5px; }
+  /* The full card of a theorem covers the legend, not the map (user's decision, 20 October 2026) */
+  #info { position: absolute; right: 0; top: 0; width: 340px; max-height: 100%;
+    overflow: auto; background: var(--pergament); border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45);
+    padding: 12px 16px; font-size: 15.5px; line-height: 1.38; display: none; box-sizing: border-box; z-index: 4; }
+  #info h2 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 22px; margin: 0 26px 4px 0; }
+  #info h3 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 17px; margin: 12px 0 4px;
+    border-top: 1px solid #c9b48a; padding-top: 6px; }
+  #info .art { font-style: italic; color: #6b4a2e; }
+  #info .klein { font-size: 14px; color: #5a4632; }
+  #info .zu { position: absolute; right: 10px; top: 6px; font-size: 22px; cursor: pointer; background: none; border: none;
+    color: var(--tinte); font-family: inherit; }
+  #info a { color: #7a2a14; cursor: pointer; }
+  #info .wahl { color: #7a2a14; text-decoration: underline; cursor: pointer; }
+  #info ul { margin: 2px 0; padding-left: 18px; }
+  /* Stepping through the proofs (todo B30) */
+  #info .beweiswahl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0 2px; font-size: 14.5px; }
+  #info .beweiswahl button { font-family: inherit; font-size: 17px; line-height: 1; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; padding: 1px 8px 3px; cursor: pointer; }
+  #info .beweiswahl .bw-stand { min-width: 7.5em; text-align: center; font-variant-numeric: tabular-nums; }
+  #info .beweiswahl label { margin-left: 6px; cursor: pointer; }
+  #info .bw-farbe { display: inline-block; width: 18px; height: 4px; margin: 0 6px 3px 0; vertical-align: middle; }
+  #info li { margin-bottom: 4px; }
+  #info .formel-umbruch { display: block; text-align: center; margin: 6px 0; line-height: 1.9; overflow-x: auto; overflow-y: hidden; }
+  /* Info box after todo B44: line 2 as in the hover box, statement, explanation, collapsed parts, long lists */
+  #info .zeile2 { font-size: 14px; font-style: italic; color: #5a4632; margin: -2px 0 2px; }
+  #info .kurz { margin-top: 6px; }
+  #info .erlaeuterung { font-size: 14.5px; margin-top: 6px; }
+  /* Plan step P6: historical name below the name (also in the hover box) and the notes of the data of 1900 */
+  #info .altname, #zeiger .altname { font-size: 14px; color: #3b3226; margin: -1px 0 2px; }
+  /* Note on Hilbert's problems (field sourcePlace of the model, ERA_NOTES.source of the settings) */
+  #info .stelle, #zeiger .stelle { font-size: 13.5px; color: #5a3e24; margin: 0 0 2px; }
+  #info .vermerk { font-size: 14px; font-style: italic; color: #6b3a1a; margin-top: 4px; }
+  #info .vermerk.unsicher { color: #5a4632; }
+  /* Plan step P6 of the map 1900: the sentence of a conjecture on what happened after 1900 (ERA_NOTES.resolvedText) */
+  #info .vermerk.nachher { font-style: normal; color: #3b3226; }
+  #info ul.vermerke { margin-top: 0; }
+  /* Card of a clicked dove (user, 2026-10-22): the two ends and the text of the analogy, next to the dove; todo B5 */
+  .taube-karte { position: fixed; z-index: 6; width: 340px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow-y: auto;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45);
+    padding: 10px 16px 12px; font-size: 15.5px; line-height: 1.38; box-sizing: border-box; }
+  .taube-karte[hidden] { display: none; }
+  .taube-karte .art { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-size: 19px; color: #2f5566; margin: 0 26px 4px 0; }
+  .taube-karte .enden { margin-bottom: 6px; }
+  .taube-karte .erlaeuterung { font-size: 14.5px; }
+  .taube-karte .zu { position: absolute; right: 8px; top: 4px; font-size: 22px; cursor: pointer; background: none; border: none;
+    color: var(--tinte); font-family: inherit; padding: 0 4px; }
+  #info h4 { font-weight: normal; font-style: italic; font-size: 14.5px; margin: 6px 0 1px; }
+  #info details summary { cursor: pointer; color: #7a2a14; }
+  #info details.idee, #info details.erl { margin: 1px 0 2px; }
+  #info details.idee[open], #info details.erl[open] { color: #3a2a1c; }
+  #info details.einordnung { margin-top: 12px; border-top: 1px solid #c9b48a; padding-top: 6px; }
+  #info details.einordnung > summary { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-size: 17px; color: var(--tinte); }
+  #info .beweisliste > li.hervor { background: #f6d36b66; outline: 1px solid #c9a23a; outline-offset: 2px; }
+  #info .alle-zeigen { font-family: inherit; font-size: 13.5px; background: none; border: none; padding: 0; color: #7a2a14; text-decoration: underline; cursor: pointer; }
+  /* Info box of a correspondence (bridge, draft 10): dictionary as a table */
+  #info table.woerterbuch { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 4px 0; }
+  #info table.woerterbuch th { font-weight: normal; font-style: italic; text-align: left; border-bottom: 1px solid #c9b48a; padding: 2px 4px; }
+  #info table.woerterbuch td { vertical-align: top; padding: 3px 4px; border-bottom: 1px dotted #d8c79f; }
+  .unten { color: var(--hinweis); max-width: 1100px; width: 100%; line-height: 1.45; font-size: 16px; margin-top: 18px; }
+  .unten h2 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; color: var(--verweis); font-size: 21px; margin: 20px 0 6px; }
+  .unten a { color: var(--verweis); cursor: pointer; }
+  .unten h3 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; color: var(--verweis); font-size: 17px; margin: 14px 0 4px; }
+  .unten ul { margin: 0 0 6px; padding-left: 22px; }
+  .unten li { margin-bottom: 3px; }
+  /* Todo B46: introduction (intro.js), a dialog over the darkened map; button "Intro" at the right end of the toolbar */
+  .leiste .intro-gruppe { margin-left: auto; }
+  html.intro-offen, html.intro-offen body { overflow: hidden; }
+  .intro-hinter { position: fixed; inset: 0; z-index: 20; background: rgba(20, 14, 8, .62); display: flex; align-items: center;
+    justify-content: center; padding: 16px; box-sizing: border-box; }
+  .intro-hinter[hidden] { display: none; }
+  .intro-dialog { position: relative; width: 100%; max-width: 760px; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 10px 40px rgba(0,0,0,.6); box-sizing: border-box; }
+  .intro-inhalt { overflow-y: auto; min-height: 0; flex: 1 1 auto; }
+  /* The dark image has a light frame, so that it stands apart from the darkened map (user, 2026-10-22) */
+  .intro-karte img { display: block; width: calc(100% - 24px); height: auto; aspect-ratio: 2 / 1; margin: 12px 12px 0; box-sizing: border-box;
+    background: var(--holz); border: 4px solid var(--verweis); outline: 1px solid #6b5236; }
+  /* Card 4: two square images of the same size side by side, each with its caption above (user, 2026-10-22) */
+  .intro-paar { display: flex; gap: 12px; margin: 12px 12px 0; }
+  .intro-paar figure { flex: 1 1 0; min-width: 0; margin: 0; }
+  .intro-paar figcaption { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-size: 18px; text-align: center; margin-bottom: 4px; }
+  .intro-karte .intro-paar img { width: 100%; aspect-ratio: 1 / 1; margin: 0; }
+  .intro-karte h2 { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 24px; margin: 12px 22px 4px; }
+  .intro-karte p { margin: 0 22px 8px; font-size: 16.5px; line-height: 1.42; }
+  .intro-fuss { flex: none; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; padding: 8px 22px 14px;
+    border-top: 1px solid #c9b48a; }
+  .intro-punkte { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
+  .intro-punkt { width: 22px; height: 22px; padding: 0; border: none; background: none; cursor: pointer; position: relative; }
+  .intro-punkt::after { content: ""; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px; border-radius: 50%;
+    border: 1px solid #6b5236; box-sizing: border-box; background: transparent; }
+  .intro-punkt.aktiv::after { background: #6b5236; }
+  .intro-merken { font-size: 15px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .intro-merken input { accent-color: #8a5a2b; width: 15px; height: 15px; margin: 0; }
+  .intro-hinweis { font-size: 13px; font-style: italic; color: #5a4632; }
+  .intro-knoepfe { display: flex; gap: 8px; }
+  .intro-dialog button.intro-zurueck, .intro-dialog button.intro-weiter { font-family: inherit; font-size: 16px; background: var(--pergament);
+    color: var(--tinte); border: 1px solid #6b5236; border-radius: 2px; padding: 3px 14px 4px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .intro-dialog button.intro-weiter { background: #6b5236; color: var(--pergament); }
+  .intro-dialog button:disabled { opacity: .45; cursor: default; }
+  .intro-dialog button:focus-visible, .intro-dialog input:focus-visible { outline: 2px solid var(--rot); outline-offset: 2px; }
+  .intro-zu { position: absolute; right: 6px; top: 4px; z-index: 1; width: 34px; height: 34px; font-size: 26px; line-height: 1; cursor: pointer;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; border-radius: 50%; font-family: inherit; padding: 0 0 3px; }
+  @media (max-width: 639px) {
+    .intro-hinter { padding: 0; }
+    .intro-dialog { max-width: none; height: 100%; border: none; }
+    .intro-karte img { width: calc(100% - 16px); margin: 8px 8px 0; border-width: 3px; }
+    .intro-paar { margin: 8px 8px 0; gap: 8px; }
+    .intro-karte h2 { font-size: 21px; margin: 10px 14px 4px; }
+    .intro-karte p { margin: 0 14px 8px; font-size: 15.5px; }
+    .intro-fuss { padding: 6px 14px 12px; }
+    .intro-merken { font-size: 14px; }
+  }
+  /* Todo B74: background information (about.js, texts in about-texts.js), a dialog like the introduction with a list of questions;
+     a click on a question opens its answer. Button "About" right of "Intro" */
+  html.about-offen, html.about-offen body { overflow: hidden; }
+  .about-hinter { position: fixed; inset: 0; z-index: 20; background: rgba(20, 14, 8, .62); display: flex; align-items: center;
+    justify-content: center; padding: 16px; box-sizing: border-box; }
+  .about-hinter[hidden] { display: none; }
+  .about-dialog { position: relative; width: 100%; max-width: 760px; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 10px 40px rgba(0,0,0,.6); box-sizing: border-box; }
+  .about-dialog h2 { flex: none; font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-weight: normal; font-size: 26px; margin: 14px 56px 8px 22px; }
+  .about-inhalt { overflow-y: auto; min-height: 0; flex: 1 1 auto; padding: 0 22px 16px; border-top: 1px solid #c9b48a; }
+  .about-frage { border-bottom: 1px solid #c9b48a; }
+  .about-frage summary { font-family: "Old Standard TT", Georgia, serif; font-variant-caps: small-caps; font-size: 19px; padding: 9px 0 8px; cursor: pointer; }
+  .about-frage[open] summary { color: #6b3a1a; }
+  .about-antwort p { margin: 0 0 8px; font-size: 16px; line-height: 1.45; }
+  .about-antwort { padding: 0 0 6px 18px; }
+  .about-antwort a { color: var(--rot); }
+  .about-dialog summary:focus-visible, .about-dialog button:focus-visible, .about-dialog a:focus-visible { outline: 2px solid var(--rot); outline-offset: 2px; }
+  .about-zu { position: absolute; right: 6px; top: 4px; z-index: 1; width: 34px; height: 34px; font-size: 26px; line-height: 1; cursor: pointer;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; border-radius: 50%; font-family: inherit; padding: 0 0 3px; }
+  @media (max-width: 639px) {
+    .about-hinter { padding: 0; }
+    .about-dialog { max-width: none; height: 100%; border: none; }
+    .about-dialog h2 { font-size: 22px; margin: 10px 50px 6px 14px; }
+    .about-inhalt { padding: 0 14px 12px; }
+    .about-frage summary { font-size: 17px; }
+    .about-antwort { padding-left: 10px; }
+    .about-antwort p { font-size: 15.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="leiste">
+  <span class="gruppe"><button class="rund" id="plus" title="Vergrößern" data-t-title="e12-plus">+</button><button class="rund" id="minus" title="Verkleinern" data-t-title="e12-minus">−</button>
+  <button id="ganz" data-t="e12-ganz">Zurücksetzen</button><span id="stufe" hidden></span></span>
+  <!-- Parts that are not rendered (user, 2026-10-22): each <template data-show="…"> is inserted by the page code (../shared_scripts/map-page.js, setting SHOW in scripts/map-config.js) only
+       when the setting of the same name in SHOW is on. Plan step 3.2 (todo B69 d): "Show only" -->
+  <template data-show="showOnly"><label><span data-t="e12-filter">Nur zeigen</span>
+    <select id="filter">
+      <option value="" data-t="e12-n-alle">alle Sätze</option>
+      <option value="einfach" data-t="e12-n-einfach">einfach zu verstehen</option>
+      <option value="gross" data-t="e12-n-gross">große Sätze und Vermutungen</option>
+    </select></label></template>
+  <template data-show="importance"><label><span data-t="e12-mass">Bedeutung nach</span>
+    <select id="mass">
+      <option value="nutzer" data-t="e12-m-nutzer">direkten Nutzern</option>
+      <option value="folgen" data-t="e12-m-folgen">allen folgenden Sätzen</option>
+    </select></label></template>
+  <template data-show="flags"><label><span data-t="e12-fahnen">Fahnen zeigen:</span>
+    <select id="fahne">
+      <option value="" data-t="e12-f-keine">keine</option>
+      <option value="grundlegend" data-t="e12-f-grundlegend">besonders wichtig</option>
+      <option value="staunen" data-t="e12-f-staunen">erstaunlich</option>
+      <option value="zusammenhang" data-t="e12-f-zusammenhang">schön</option>
+      <option value="verstehen" data-t="e12-f-verstehen">erst nach dem Verstehen erstaunlich</option>
+      <option value="einfach" data-t="e12-f-einfach">einfach zu verstehen</option>
+      <option value="klassifikation" data-t="e12-f-klassifikation">Klassifikationssätze</option>
+    </select></label></template>
+  <span class="gruppe"><span class="gruppe-titel" data-t="e12-zeigen">Beschriftung für</span>
+    <label><input type="checkbox" id="an-laender" checked> <span data-t="e12-an-laender">Gebiete</span></label>
+    <label title="Namen der Teilgebiete; die Grenzen bleiben immer sichtbar" data-t-title="e12-an-provinzen-titel"><input type="checkbox" id="an-provinzen" checked> <span data-t="e12-an-provinzen">Teilgebiete</span></label>
+    <label><input type="checkbox" id="an-berge" checked> <span data-t="e12-an-berge">Sätze</span></label></span>
+  <span class="gruppe"><span class="gruppe-titel" data-t="e12-zeigen-symbole">Alle zeigen</span>
+    <label title="Alle Sätze und Vermutungen als Symbol, auf jeder Vergrößerung; die Namen folgen weiter den Detailstufen" data-t-title="e12-an-alle-titel"><input type="checkbox" id="an-alle"> <span data-t="e12-an-alle">Sätze</span></label>
+    <template data-show="dependencies"><label title="Das ganze Wegenetz: alle Routen der gezeigten Beweise, gebündelt, als Übersicht" data-t-title="e12-an-netz-titel"><input type="checkbox" id="an-netz"> <span data-t="e12-an-netz">Abhängigkeiten</span></label></template>
+    <label title="Alle Analogien, jede mit einer Taube" data-t-title="e12-an-analogien-titel"><input type="checkbox" id="an-analogien"> <span data-t="e12-an-analogien">Analogien</span></label>
+    <template data-show="definitions"><label><input type="checkbox" id="an-baeume"> <span data-t="e12-an-baeume">Definitionen</span></label></template></span>
+  <span class="gruppe suche"><input id="suche" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list"
+    aria-expanded="false" aria-controls="vorschlaege" placeholder="Satz suchen …"><ul id="vorschlaege" role="listbox" hidden></ul></span>
+  <!-- Plan step P7: opens the introduction (scripts/intro.js) on card 1, and the background information (scripts/about.js) -->
+  <span class="gruppe intro-gruppe"><button id="intro-oeffnen" type="button" title="Introduction">Intro</button>
+    <button id="about-oeffnen" type="button" title="Background information">About</button></span>
+  <span data-t="e12-hinweis" hidden>Ziehen verschiebt, Mausrad oder zwei Finger vergrößern. Ein Klick auf ein Gebäude zeigt seine unmittelbaren Voraussetzungen, ein Rechtsklick (langes Drücken) seine unmittelbaren Folgerungen; ein zweiter Klick derselben Art beendet die Auswahl.</span>
+</div>
+<div class="kartenreihe">
+<div id="buehne">
+  <svg id="karte" class="karte-e8" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Karte der Mathematik um 1900 im Meer, mit den Gebieten der Zeit und den Brücken zwischen Algebra und Geometrie"></svg>
+  <svg id="papier" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+</div>
+<aside id="legende-seite" aria-label="Legende"></aside>
+<div id="info"></div>
+</div>
+<div id="zeiger"></div>
+<div class="unten">
+  <!-- Release notes: an entry for every visible change of the map 1900, newest first, in English only. The section is not
+       rendered (setting SHOW.whatsNew in scripts/map-config.js). -->
+  <template data-show="whatsNew"><section id="whats-new">
+  <h2>What's new</h2>
+  <h3>23 October 2026</h3>
+  <ul>
+    <li>First version of the map of mathematics around 1900 (plan step P4): seven areas of the time with 22 subareas, the data of 1900, the bridges between algebra and geometry, provisional layout.</li>
+  </ul>
+  </section></template>
+  <p><a href="../../index.html">Overview of the drafts</a></p>
+</div>
+
+<!-- Data of the map 1900 (plan steps P2, P3): header, areas and foundations, then the parts A to E -->
+<script src="data/theorems.js"></script>
+<script src="data/theorems-a.js"></script>
+<script src="data/theorems-b.js"></script>
+<script src="data/theorems-c.js"></script>
+<script src="data/theorems-d.js"></script>
+<script src="data/theorems-e.js"></script>
+<script src="data/translations.js"></script>
+<!-- texts of the shared map code, then the texts of this map that differ from them -->
+<!-- The map is shown in English only, without the switch DE | EN (as the map 1830) -->
+<script>window.LANG_FIXED = "en";</script>
+<script src="../shared_scripts/language.js"></script>
+<script src="../shared_scripts/drawing.js"></script>
+<script src="../shared_scripts/building-symbols.js"></script>
+<!-- Model of the map 1900 (translates the German data texts itself, see its head) and the weights after the state of 1900 -->
+<script src="scripts/model.js"></script>
+<script src="data/weights.js"></script>
+<script src="../shared_scripts/size-score.js"></script>
+<!-- Layout of plan step P5, computed by the shared scripts (start-layout.js, raster-layout.js, place-elements.js with --map karte-1900) -->
+<script src="data/layout.js"></script>
+<!-- Shared map code (plan step P3): settings of the map 1900, then the shared parts and the page code -->
+<script src="scripts/map-config.js"></script>
+<script src="../shared_scripts/map-core.js"></script>
+<script src="../shared_scripts/map-page.js"></script>
+<!-- Plan step P7: introduction as a carousel of seven cards (images in data/intro/, made by tests/shot-intro.js) -->
+<script src="scripts/intro.js"></script>
+<!-- Plan step P7: background information; texts in data/about-texts.js -->
+<script src="data/about-texts.js"></script>
+<script src="scripts/about.js"></script>
+</body>
+</html>

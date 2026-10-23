@@ -113,10 +113,16 @@
       // unchanged; draft 12, plan step P7)
       const g = (cfg.BRIDGE_GENERALITY || {})[n.key];
       n.correspondence = g != null && c.generality == null ? Object.assign({}, c, { generality: g }) : c;
+      // Settings of the map, FJORD_SIDES (optional): provinces of the two sides of a group of bridges ("a,b|c,d" as below)
+      // that the map uses instead of those of the data (draft 12, plan step P7a: the Langlands fjord separates 11R/11S
+      // from 11F; 22E, Lie groups, is not a side on the map)
+      const rawKey = (c.sides || []).map((s) => (s.provinces || []).join(",")).join("|");
+      const over = (cfg.FJORD_SIDES || {})[rawKey];
+      if (over) n.correspondence = Object.assign({}, n.correspondence, { sides: n.correspondence.sides.map((s, i) => Object.assign({}, s, { provinces: over[i] })) });
       // Settings of the map, FJORD_GROUPS (optional): the groups of bridges (sides "a,b|c,d" as below) that have a fjord.
       // A correspondence of another group stays drawn as the building of its theorem or conjecture until the user has
       // decided on its fjord (draft 12, plan step P7); its info box still shows the two sides
-      const sidesKey = (c.sides || []).map((s) => (s.provinces || []).join(",")).join("|");
+      const sidesKey = (n.correspondence.sides || []).map((s) => (s.provinces || []).join(",")).join("|");
       if (cfg.FJORD_GROUPS && !cfg.FJORD_GROUPS.includes(sidesKey)) { n.awaitingFjord = sidesKey; return; }
       n.kind = "bruecke";
       n.stage = n.type === "satz" ? "fertig" : n.state === "teilweise" ? "imbau" : "bauplan";
