@@ -1516,7 +1516,9 @@
       text(U(CFG.cartoucheTitle[0]), { x: 200, y: 20.5, "font-size": 12.5, "font-style": "italic", "text-anchor": "middle" }, cartouche);
       // title case for the italic title, except the conjunction
       const title = U(CFG.cartoucheTitle[1]).replace(/\b(?!and\b|und\b)\p{Ll}/gu, (c) => c.toUpperCase());
-      text(title, { x: 200, y: 46, "font-size": 22, "font-style": "italic", "text-anchor": "middle" }, cartouche);
+      // Plan step P8 of draft 12: a map with a longer title sets a smaller size in cartoucheTitleSize of its settings
+      // (default 22; the title must fit the inner rule of 386 units)
+      text(title, { x: 200, y: 46, "font-size": CFG.cartoucheTitleSize || 22, "font-style": "italic", "text-anchor": "middle" }, cartouche);
     }
   }
   // Plan step P6 of the map 1830, style of the 18th century (maps/stile/style-3-18th-century.js): white laid paper (fine
