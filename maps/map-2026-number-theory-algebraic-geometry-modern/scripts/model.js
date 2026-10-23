@@ -2,7 +2,8 @@
 // regional-model.js, plan step 2.1, user's decision of 2026-10-21).
 // Drafts 7 and 8 are frozen and keep loading regional-model.js, which stays unchanged. This copy is loaded by
 // index.html (window.E11_MODEL) and by the Node scripts for draft 11 (tests/measure-layout.js,
-// tests/test-concepts-model.js). Differences from regional-model.js: the concepts (definitions) are merged into the
+// tests/test-concepts-model.js). Map 2020 (todo B78, 23 October 2026): unchanged copy of the model of draft 11, now under the
+// name window.K2020_MODEL (modelGlobal of scripts/map-config.js), loaded by index.html and by maps/tools/map-context.js. Differences from regional-model.js: the concepts (definitions) are merged into the
 // model, the provinces of concepts without a province of their own are added, and the forests are computed (see the
 // section "Concepts" below). The theorem part is the same code, so the elements and their keys are the same as in
 // draft 7.
@@ -474,5 +475,5 @@
   const conceptSize = (c) => 6.5 * Math.sqrt(1 + Math.max(c.count, 1));
   const api = { generate, size, conceptSize, COUNTRIES, PROVINCES, CONDO, number, CONCEPT_MERGE, FOREST_MIN, FOREST_NAMES };
   if (typeof module !== "undefined" && module.exports) module.exports = api;
-  else root.E11_MODEL = api;
+  else root.K2020_MODEL = api;
 })(typeof window !== "undefined" ? window : this);

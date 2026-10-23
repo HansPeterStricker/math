@@ -224,7 +224,7 @@
 <div class="leiste">
   <span class="gruppe"><button class="rund" id="plus" title="Vergrößern" data-t-title="e11-plus">+</button><button class="rund" id="minus" title="Verkleinern" data-t-title="e11-minus">−</button>
   <button id="ganz" data-t="e11-ganz">Zurücksetzen</button><span id="stufe" hidden></span></span>
-  <!-- Parts that are not rendered (user, 2026-10-22): each <template data-show="…"> is inserted by scripts/map-page.js only
+  <!-- Parts that are not rendered (user, 2026-10-22): each <template data-show="…"> is inserted by the page code (../shared_scripts/map-page.js, setting SHOW in scripts/map-config.js) only
        when the setting of the same name in SHOW is on. Plan step 3.2 (todo B69 d): "Show only" -->
   <template data-show="showOnly"><label><span data-t="e11-filter">Nur zeigen</span>
     <select id="filter">
@@ -252,7 +252,8 @@
     <label title="Namen der Teilgebiete; die Grenzen bleiben immer sichtbar" data-t-title="e11-an-provinzen-titel"><input type="checkbox" id="an-provinzen" checked> <span data-t="e11-an-provinzen">Teilgebiete</span></label>
     <label><input type="checkbox" id="an-berge" checked> <span data-t="e11-an-berge">Sätze</span></label></span>
   <span class="gruppe"><span class="gruppe-titel" data-t="e11-zeigen-symbole">Alle zeigen</span>
-    <label title="Alle Sätze und Vermutungen als Symbol, auf jeder Vergrößerung; die Namen folgen weiter den Detailstufen" data-t-title="e11-an-alle-titel"><input type="checkbox" id="an-alle"> <span data-t="e11-an-alle">Sätze</span></label>
+    <label title="Alle bewiesenen Sätze als Symbol, auf jeder Vergrößerung; die Namen folgen weiter den Detailstufen" data-t-title="e12-an-saetze-titel"><input type="checkbox" id="an-alle"> <span data-t="e11-an-alle">Sätze</span></label>
+    <label title="Alle Vermutungen (offen, bedingt bewiesen, widerlegt) als Symbol, auf jeder Vergrößerung; die Namen folgen weiter den Detailstufen" data-t-title="e12-an-vermutungen-titel"><input type="checkbox" id="an-vermutungen"> <span data-t="e12-an-vermutungen">Vermutungen</span></label>
     <template data-show="dependencies"><label title="Das ganze Wegenetz: alle Routen der gezeigten Beweise, gebündelt, als Übersicht" data-t-title="e11-an-netz-titel"><input type="checkbox" id="an-netz"> <span data-t="e11-an-netz">Abhängigkeiten</span></label></template>
     <label title="Alle Analogien, jede mit einer Taube" data-t-title="e11-an-analogien-titel"><input type="checkbox" id="an-analogien"> <span data-t="e11-an-analogien">Analogien</span></label>
     <template data-show="definitions"><label><input type="checkbox" id="an-baeume"> <span data-t="e11-an-baeume">Definitionen</span></label></template></span>
@@ -276,7 +277,7 @@
 <div id="zeiger"></div>
 <div class="unten">
   <!-- Release notes: add an entry for every visible change of draft 11, newest first, in English only (plan step 1.5).
-       Todo B69 h (user, 2026-10-22): the section is not rendered (setting SHOW.whatsNew in scripts/map-page.js); new entries
+       Todo B69 h (user, 2026-10-22): the section is not rendered (setting SHOW.whatsNew in scripts/map-config.js); new entries
        are still added. -->
   <template data-show="whatsNew"><section id="whats-new">
   <h2>What's new</h2>
@@ -482,16 +483,21 @@
 <script src="data/translations.js"></script>
 <!-- Plan step 1.5: draft 11 (like draft 10) is shown in English only, without the switch DE | EN -->
 <script>window.LANG_FIXED = "en";</script>
-<script src="scripts/language.js"></script>
-<script src="scripts/drawing.js"></script>
-<script src="scripts/building-symbols.js"></script>
+<script src="../shared_scripts/language.js"></script>
+<script src="../shared_scripts/drawing.js"></script>
+<script src="../shared_scripts/building-symbols.js"></script>
+<!-- Todo B78: the modern buildings (STYLE.buildings of scripts/map-config.js) -->
+<script src="../shared_scripts/modern-symbols.js"></script>
 <script src="scripts/model.js"></script>
 <script src="data/weights.js"></script>
-<script src="scripts/size-score.js"></script>
+<script src="../shared_scripts/size-score.js"></script>
 <!-- Layout of plan steps 1.3 to 1.5 (run 8). Draft 11 does not offer the layout before plan step 1.2 (?lage=alt of draft 10). -->
 <script src="data/layout.js"></script>
 <!-- Plan step 3.2: the route network (data/route-network.js) is deferred by the user, 2026-10-22, and not loaded -->
-<script src="scripts/map-page.js"></script>
+<!-- Todo B78 (23 October 2026): shared map code; settings of the map 2020, then the shared parts and the page code -->
+<script src="scripts/map-config.js"></script>
+<script src="../shared_scripts/map-core.js"></script>
+<script src="../shared_scripts/map-page.js"></script>
 <!-- Todo B46: introduction as a carousel of seven cards; images in intro/ (tests/shot-intro.js) -->
 <script src="scripts/intro.js"></script>
 <!-- Todo B74: background information; texts in data/about-texts.js -->

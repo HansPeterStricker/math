@@ -1,8 +1,14 @@
-// Buildings of the modern map (map-2026-number-theory-algebraic-geometry-modern, 23 October 2026), in the manner of
-// the style preview maps/stile/style-5-20th-century.js (Swiss topographic maps, Imhof). Same interface as the copy of
-// draft 11 (window.SKETCH_SYMBOLS), so that the page code places and measures the symbols unchanged: a building is a
-// list of parts { x, w, h, y0, floors } in units of the symbol size s, foot at y = 0, x from about -0.95 s to 0.9 s.
-// The parts keep the footprint and roughly the height of the buildings of draft 11, so the layout stays valid.
+// Modern buildings for the shared map code (todo B78, 23 October 2026): taken over unchanged from the copy of the map 2020
+// (maps/map-2026-number-theory-algebraic-geometry-modern/scripts/building-symbols.js, created the same day), in the manner
+// of the style preview maps/stile/style-5-20th-century.js (Swiss topographic maps, Imhof). A map selects them with the
+// setting STYLE.buildings of its scripts/map-config.js: "modern-a", "modern-b", "modern-c" or "modern-era";
+// maps/shared_scripts/map-page.js then draws buildings, ruins, conjectures and cities with MODERN_SYMBOLS.make(variant)
+// instead of window.SKETCH_SYMBOLS (as with epoch-symbols.js). A map without the setting is not affected. The symbols have
+// their own ink and light colours (those of style 5), so they do not depend on the colours of drawing.js. Same interface
+// as window.SKETCH_SYMBOLS: a building is a list of parts { x, w, h, y0, floors } in units of the symbol size s, foot at
+// y = 0, x from about -0.95 s to 0.9 s; the parts keep the footprint and roughly the height of the buildings of draft 11,
+// so the layout stays valid. Loads after ../shared_scripts/drawing.js; the sketch maps/skizzen/gebaeude-modern.html loads
+// this file too.
 // Three variants for the proposal (?buildings=a|b|c, default b):
 //   a  flat-roofed blocks in ink lines (classic modernism): white front, grey side, ribbon windows
 //   b  volumes in flat colours without hatching, lit from the north-west like the mountains of style 5
@@ -16,9 +22,10 @@
 //              uses variant b for every building (user, 23 October 2026)
 // No towers and no domes in any style (glossary). make(v) returns the symbols of one variant (the sketch page
 // skizzen/gebaeude-modern.html shows all of them).
-(function () {
+window.MODERN_SYMBOLS = (function () {
   "use strict";
-  const T = window.TM, { el, text, f, INK, PAPER } = T, LIGHT = "#ffffff";
+  // ink and light of style 5 (until todo B78 the colours of the own copy of drawing.js of the map 2020)
+  const T = window.TM, { el, text } = T, INK = "#2b2d30", LIGHT = "#ffffff";
   const g2 = (z) => Math.round(z * 100) / 100;
   const poly = (pts, close) => "M" + pts.map((p) => g2(p[0]) + "," + g2(p[1])).join("L") + (close ? "Z" : "");
   const D = 0.16, R = 0.09;   // depth and rise of the side face (as in draft 11, so the boxes stay the same)
@@ -89,7 +96,7 @@
   };
   const ERA_OF = (year) => (year < 1700 ? "medieval" : year < 1900 ? "classical" : "b");
 
-  function make(variant) {
+  function build(variant) {
     const V = ["a", "c", "medieval", "classical"].includes(variant) ? variant : "b", S = STYLES[V === "c" ? "a" : V] || STYLES.b;
     const HIST = !!ERA[V], E = ERA[V];
     const sw = (s) => 0.5 + s / 70;
@@ -360,11 +367,13 @@
     return { variant: V, D, R, QM_MIN, part, ground, building, BUILDINGS, unroofed, RUINS, topOf, conjecture, CITY, city, hills, programme, tree };
   }
 
-  // Default b: one modern style for every building (user, 2026-10-23, after trying the styles by period). Mode "era"
-  // (?buildings=era) keeps that trial: the symbols of variant b, and forYear(y) gives the symbols of the style of year y
-  let chosen = "b";
-  try { chosen = new URLSearchParams(location.search).get("buildings") || window.BUILDING_VARIANT || "b"; } catch (e) { /* default */ }
-  const cache = {}, sym = (v) => cache[v] || (cache[v] = make(v));
-  const forYear = chosen === "era" ? (year) => sym(ERA_OF(year == null ? 9999 : year)) : null;
-  window.SKETCH_SYMBOLS = Object.assign({}, sym(chosen === "era" ? "b" : chosen), { make, forYear, eraOf: ERA_OF, mode: chosen });
+  // make(v): the symbols of variant v ("a", "b", "c", "medieval", "classical"; any other value gives "b"). Mode "era" (user,
+  // 2026-10-23, a trial): the symbols of variant b, and forYear(y) gives the symbols of the style of year y (cities as
+  // well); the map page draws every building with forYear when the symbols have it
+  const cache = {}, sym = (v) => cache[v] || (cache[v] = build(v));
+  function make(v) {
+    if (v === "era") return Object.assign({}, sym("b"), { forYear: (year) => sym(ERA_OF(year == null ? 9999 : year)), eraOf: ERA_OF, mode: "era" });
+    return Object.assign({}, sym(v), { forYear: null, eraOf: ERA_OF, mode: v });
+  }
+  return { make, eraOf: ERA_OF, variants: ["a", "b", "c", "era"] };
 })();

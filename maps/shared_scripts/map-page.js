@@ -10,7 +10,10 @@
 (function () {
   "use strict";
   const CFG = window.MAP_CONFIG, CORE = window.MAP_CORE;
-  const T = window.TM, { el, text, f, INK, PAPER, RED } = T, L = window.E7_LAYOUT, K0 = L.mapData;
+  const T = window.TM, { el, text, f } = T, L = window.E7_LAYOUT, K0 = L.mapData;
+  // Todo B78 (map 2020, style 5 of the 20th century): STYLE.palette { ink, paper, red } replaces the colours of drawing.js
+  // for everything this file draws; without the key the colours of drawing.js
+  const PAL = (CFG.STYLE && CFG.STYLE.palette) || {}, INK = PAL.ink || T.INK, PAPER = PAL.paper || T.PAPER, RED = PAL.red || T.RED;
   const MODEL = window[CFG.modelGlobal], M = MODEL.generate(window), CONDO = MODEL.CONDO;
   const { inPolygon, creditEvent } = CORE;
   // Parts of the page that are not rendered (user, 2026-10-22, plan step F): setting SHOW of the map (map-config.js).
@@ -41,6 +44,16 @@
   // borders with a light inner line, dotted province borders), countryUpper (false: the country names keep their case, for
   // Gothic letters), cartouche.kind "initial" (panel with a red rule, a red initial on gold and the title in Gothic letters,
   // the second line in a book hand; STYLE.cartouche.gothic and .font).
+  // Todo B78 (map 2020, style of the 20th century, maps/stile/style-5-20th-century.js), further keys and values that act
+  // only when a map sets them: palette ({ ink, paper, red }, see above), light (colour of the halos, the decks and the
+  // light edges; default LIGHT of map-core.js), sea and bank (colour of the water and of the shore lines; the water strip
+  // of the legend then takes the colour of the land), crisp (true: the symbols without the hand-drawn filter), borders
+  // "octilinear" (borders of the provinces only horizontal, vertical or at 45 degrees, fewer corners; the province borders
+  // as a thin grey line, the country borders as a dash-dot line on a white band), countryStraight (true: the country
+  // names straight and horizontal), paper "rule" (no paper texture, a single thin grey rule at the clip of the map),
+  // cartouche.kind "modern" (white box with a thin grey edge and a red bar on the left, the title in STYLE.cartouche.font),
+  // buildings "modern-a" | "modern-b" | "modern-c" | "modern-era" (shared_scripts/modern-symbols.js) and buildingsParam
+  // (values of the address parameter ?buildings= that the map allows, each with its value of STYLE.buildings).
   const STYLE = CFG.STYLE || null;
   // Plan step P6 of the map 1830: notes of a historical map in the hover box and the info box (setting ERA_NOTES,
   // optional; German patterns, translated with U). Only elements whose model passes the fields show them.
@@ -64,7 +77,7 @@
   const NET_CLASS_MAX = (zz) => (zz >= 4 ? 4 : zz >= 2 ? 3 : 2);
   const NET_WIDTH = [0, 2.6, 1.9, 1.35, 1], NET_OPACITY = 0.45;
   const NETWORK_SHOWN = CFG.NETWORK_SHOWN;   // whole route network (deferred, plan step 3.2; see map-config.js)
-  const { LIGHT, REF, P, Z_MIN, Z_MAX, Z_ZERO, N_TOTAL, MARGIN } = CORE.CONST;
+  const { REF, P, Z_MIN, Z_MAX, Z_ZERO, N_TOTAL, MARGIN } = CORE.CONST, LIGHT = (STYLE && STYLE.light) || CORE.CONST.LIGHT;
   const stage = document.getElementById("buehne"), svg = document.getElementById("karte"), paper = document.getElementById("papier");
   const pointer = document.getElementById("zeiger"), info = document.getElementById("info");
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -74,6 +87,84 @@
   const FM = (pattern, ...a) => U(pattern).replace(/\{(\d)\}/g, (m, i) => a[i]);
   const decimal = (x, n) => (EN ? x.toFixed(n) : x.toFixed(n).replace(".", ","));
   if (EN) svg.setAttribute("aria-label", U(CFG.ariaLabel));
+
+  // Todo B78: STYLE.borders "octilinear" (map 2020; until then in its own copy of the page code). Modern map (user,
+  // 2026-10-23: "more raster-like borders"): province outlines run only horizontally, vertically or
+  // at 45 degrees, like the routes of style 5. Every corner between two provinces is snapped to a grid of GRID map
+  // units, and between two corners one straight and one diagonal leg are inserted. Both depend only on the points (the
+  // pair is ordered first), so two neighbouring provinces get the same border. Corners at the water stay where they are.
+  if (STYLE && STYLE.borders === "octilinear") (function octilinearCells() {
+    const GRID = 2 * ((L.raster && L.raster.size) || 5);
+    // corners near a city keep their place, so that the city stays inside its province (test-buildings.js)
+    const cities = Object.keys(L.placement).filter((k) => M.K[k] && M.K[k].kind === "gebaeude").map((k) => L.placement[k]);
+    const nearCity = (v) => cities.some((c) => Math.hypot(v[0] - c[0], v[1] - c[1]) < 60);
+    const snap = (v) => (nearCity(v) ? [v[0], v[1]] : [Math.round(v[0] / GRID) * GRID, Math.round(v[1] / GRID) * GRID]);
+    const bend = (A, B) => {
+      const [P, Q] = A[0] < B[0] || (A[0] === B[0] && A[1] <= B[1]) ? [A, B] : [B, A];
+      const dx = Q[0] - P[0], dy = Q[1] - P[1], ax = Math.abs(dx), ay = Math.abs(dy), d = Math.min(ax, ay);
+      if (d < 1e-6 || Math.abs(ax - ay) < 1e-6) return null;
+      // a piece within ANGLE_TOL of a raster direction stays straight: one bend less (user, 2026-10-23)
+      const ang = Math.atan2(ay, ax) * 180 / Math.PI, off45 = Math.min(ang, Math.abs(ang - 45), 90 - ang);
+      if (off45 < ANGLE_TOL) return null;
+      return ax > ay ? [Q[0] - Math.sign(dx) * d, P[1]] : [P[0], Q[1] - Math.sign(dy) * d];
+    };
+    // Fewer corners first (user, 2026-10-23: calmer, straighter borders): every run of edges towards the same neighbour is
+    // simplified with Douglas-Peucker (tolerance TOL), always in the same orientation, so that both neighbours keep the
+    // same corners; corners near a city are kept. Coast edges (neighbour null) stay as they are.
+    // second try (user, 2026-10-23: still fewer bends): tolerance 4.5 grid steps instead of 2.2
+    let TOL = 4.5 * GRID, ANGLE_TOL = 12;
+    try { const t = Number(new URLSearchParams(location.search).get("borderAngle")); if (t >= 0 && new URLSearchParams(location.search).has("borderAngle")) ANGLE_TOL = t; } catch (e) { /* default */ }
+    try { const t = Number(new URLSearchParams(location.search).get("borderTol")); if (t > 0) TOL = t * GRID; } catch (e) { /* default */ }
+    const dp = (pts) => {
+      if (pts.length <= 2) return pts;
+      const [a, b] = [pts[0], pts[pts.length - 1]], L2 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1e-9;
+      let best = -1, at = -1;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const q = pts[i], dist = nearCity(q) ? Infinity : Math.abs((b[0] - a[0]) * (a[1] - q[1]) - (a[0] - q[0]) * (b[1] - a[1])) / L2;
+        if (dist > best) { best = dist; at = i; }
+      }
+      return best <= TOL ? [a, b] : dp(pts.slice(0, at + 1)).slice(0, -1).concat(dp(pts.slice(at)));
+    };
+    const less = (A, B) => A[0] < B[0] || (A[0] === B[0] && A[1] < B[1]);
+    L.provinces.forEach((p) => {
+      const z = p.cell, n = z.length;
+      if (n < 4) return;
+      // start at a corner where the neighbour changes; without one the cell has a single neighbour and stays
+      const s0 = z.findIndex((v, i) => v[2] !== z[(i - 1 + n) % n][2]);
+      if (s0 < 0) return;
+      const r = z.slice(s0).concat(z.slice(0, s0)), out = [];
+      for (let i = 0; i < n;) {
+        let j = i; while (j + 1 < n && r[j + 1][2] === r[i][2]) j++;
+        const run = r.slice(i, j + 1).concat([r[(j + 1) % n]]).map((v) => [v[0], v[1]]);   // corners of edges i..j
+        let keep;
+        if (r[i][2] === null) keep = run;
+        else { const rev = less(run[run.length - 1], run[0]); keep = dp(rev ? run.slice().reverse() : run); if (rev) keep.reverse(); }
+        keep.slice(0, -1).forEach((q) => out.push([q[0], q[1], r[i][2]]));
+        i = j + 1;
+      }
+      p.cell = out;
+    });
+    L.provinces.forEach((p) => {
+      const z = p.cell, n = z.length;
+      const pos = z.map((v, i) => (v[2] !== null && z[(i - 1 + n) % n][2] !== null ? snap(v) : [v[0], v[1]]));
+      const out = [];
+      const push = (x, y, nb) => { const q = out[out.length - 1];
+        if (q && Math.abs(q[0] - x) < 1e-6 && Math.abs(q[1] - y) < 1e-6) q[2] = nb; else out.push([x, y, nb]); };
+      z.forEach((v, i) => {
+        push(pos[i][0], pos[i][1], v[2]);
+        const m = v[2] !== null ? bend(pos[i], pos[(i + 1) % n]) : null;
+        if (m) push(m[0], m[1], v[2]);
+      });
+      const a = out[0], b = out[out.length - 1];
+      if (out.length > 1 && Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6) { a[2] = a[2]; out.pop(); }
+      // a corner between two collinear pieces towards the same neighbour is no bend: drop it (both neighbours drop it)
+      for (let i = out.length - 1; i >= 0 && out.length > 3; i--) {
+        const P = out[(i - 1 + out.length) % out.length], Q = out[i], R = out[(i + 1) % out.length];
+        if (P[2] === Q[2] && Q[2] !== null && Math.abs((Q[0] - P[0]) * (R[1] - Q[1]) - (Q[1] - P[1]) * (R[0] - Q[0])) < 1e-6) out.splice(i, 1);
+      }
+      p.cell = out;
+    });
+  })();
 
   // ------------------------------------------------------------ Additions to the model, bridges, placement, trees, fjords
   // and bridges: in maps/shared_scripts/map-core.js (extendModel), shared with the Node scripts for layout and measurement
@@ -163,7 +254,8 @@
   // Draft 10: bridges (screen coordinates, recomputed for each frame), below the routes and the mountains
   const layerBridge = el("g", { id: "e12-bruecken" }, clipView);
   const dirSel = el("g", { id: "e8-routen-auswahl" }, clipView);
-  const layerSymbols = el("g", { id: "e8-symbole", filter: "url(#e8-hand)" }, clipView);
+  // todo B78: STYLE.crisp draws the symbols without the hand-drawn filter (map 2020)
+  const layerSymbols = el("g", Object.assign({ id: "e8-symbole" }, STYLE && STYLE.crisp ? {} : { filter: "url(#e8-hand)" }), clipView);
   // Proof points above the symbols: they lie just outside the mountain, inside its (transparent) click area
   const pointsSel = el("g", {}, clipView);
   const layerGuide = el("g", { id: "e8-fuehrung", "pointer-events": "none" }, clipView);
@@ -211,7 +303,8 @@
   const countryColour = (c) => COLOR[c] || CFG.DEFAULT_COLOR;
   const outline = (z) => "M" + z.map((v) => f(v[0]) + "," + f(v[1])).join("L") + "Z";
   // Draft 10: sea below everything, the land within the irregular coast, the fjords cut into it
-  const SEA = "#b9cfcb", BANK = "#3f5753";
+  // todo B78: STYLE.sea and STYLE.bank (map 2020: light blue water, blue shore lines)
+  const SEA = (STYLE && STYLE.sea) || "#b9cfcb", BANK = (STYLE && STYLE.bank) || "#3f5753";
   seaFill.setAttribute("fill", SEA);
   defs.insertAdjacentHTML("beforeend", `<clipPath id="e12-kueste" clipPathUnits="userSpaceOnUse"><path d="${outline(coastPoly)}"/></clipPath>`);
   el("rect", { x: K0.CX - 6 * K0.RX, y: K0.CY - 6 * K0.RY, width: 12 * K0.RX, height: 12 * K0.RY, fill: SEA }, worldBottom);
@@ -305,7 +398,12 @@
   const ATLAS = STYLE && STYLE.borders === "atlas";
   // Plan step P9 of the map of antiquity, follow-up: borders of the medieval style sheet (STYLE.borders "redline")
   const REDLINE = STYLE && STYLE.borders === "redline", REDLINE_RED = "#a3221a", REDLINE_INNER = (STYLE && STYLE.land) || PAPER;
-  const provLine = REDLINE
+  // Todo B78: borders of style 5 (STYLE.borders "octilinear", map 2020; the course of the borders is changed at the top):
+  // province borders as a thin grey line, country borders as a dash-dot line on a white band
+  const OCTI = STYLE && STYLE.borders === "octilinear";
+  const provLine = OCTI
+    ? el("path", Object.assign({ d: prov.join(""), stroke: "#7d7f84", "stroke-width": 0.8, opacity: 0.8, "stroke-linejoin": "miter" }, nsk), landG)
+    : REDLINE
     ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1, "stroke-dasharray": "1 4", "stroke-linecap": "round", opacity: 0.8 }, nsk), landG)
     : ATLAS
     ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 0.9, "stroke-dasharray": "4 2.5", opacity: 0.75 }, nsk), landG)
@@ -313,7 +411,10 @@
     ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "0.1 3.4", "stroke-linecap": "round", opacity: 0.9 }, nsk), landG)
     : DASHDOT ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.2 3.6", "stroke-linecap": "round", opacity: 0.85 }, nsk), landG)
     : el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", "stroke-linecap": "round", opacity: 0.75 }, nsk), landG);
-  if (REDLINE) {
+  if (OCTI) {
+    el("path", Object.assign({ d: country.join(""), stroke: "#ffffff", "stroke-width": 4, opacity: 0.8, "stroke-linejoin": "miter" }, nsk), landG);
+    el("path", Object.assign({ d: country.join(""), stroke: INK, "stroke-width": 1.6, "stroke-dasharray": "8 3 2 3", "stroke-linejoin": "miter" }, nsk), landG);
+  } else if (REDLINE) {
     el("path", Object.assign({ d: country.join(""), stroke: REDLINE_RED, "stroke-width": 3.2, opacity: 0.95, "stroke-linecap": "round" }, nsk), landG);
     el("path", Object.assign({ d: country.join(""), stroke: REDLINE_INNER, "stroke-width": 0.9, opacity: 0.9 }, nsk), landG);
   } else if (ATLAS) {
@@ -518,7 +619,9 @@
     Object.entries(countries).forEach(([k, ps]) => {
       const name = k === CONDO ? U(CFG.condoName) : (M.countries[k] ? M.countries[k].name : "");
       if (!name) return;
-      const a = axis(ps.map((p) => ms[p.key])), large = ps.length >= 3;
+      // todo B78: STYLE.countryStraight draws the country names straight and horizontal, not curved (map 2020): th 0, says 0
+      const straight = !!(STYLE && STYLE.countryStraight);
+      const a = straight ? Object.assign(axis(ps.map((p) => ms[p.key])), { th: 0 }) : axis(ps.map((p) => ms[p.key])), large = ps.length >= 3;
       let x = a.x, y = a.y;
       if (L.countries && L.countries[k]) { x = L.countries[k].x; y = L.countries[k].y; }
       // plan 1.5: the layout file gives the anchor of every country name (field lines); older layouts only for large countries
@@ -530,7 +633,7 @@
       // plan step P9 of the map of antiquity, follow-up: STYLE.countryUpper false keeps the case (Gothic letters)
       regionName({ cells: ps.map((p) => p.cell), text: STYLE && STYLE.countryUpper === false ? name : name.toUpperCase(), attrs: Object.assign({ class: "sc", "letter-spacing": (large ? 0.22 : 0.08) * REF }, STYLE && STYLE.countryName), th: a.th,
         x: x + c * (t0 + t1) / 2, y: y + s * (t0 + t1) / 2, len: t1 - t0, height: u1 - u0, fs0, fsMin: 11, fsMax: large ? 44 : 22,
-        country: true, areaKey: k, says: 0.045, provKey: ps.length === 1 ? ps[0].key : null, opacityOf: large ? 0.6 : 0.8 });
+        country: true, areaKey: k, says: straight ? 0 : 0.045, provKey: ps.length === 1 ? ps[0].key : null, opacityOf: large ? 0.6 : 0.8 });
     });
     L.provinces.forEach((p) => {
       if (p.countries.length > 1) return;   // arithmetic geometry: country name suffices
@@ -632,20 +735,35 @@
   // (0.45 s below the centre), so that the symbol stays at its place of plan step 1.4.
   // User, 2026-10-23: STYLE.buildings ("classicism" map 1830, "gruenderzeit" map 1900) draws the buildings of that period
   // (maps/shared_scripts/epoch-symbols.js, same interface and footprints as line B); without the setting nothing changes
-  const SY = STYLE && STYLE.buildings && window.EPOCH_SYMBOLS ? window.EPOCH_SYMBOLS.make(STYLE.buildings) : window.SKETCH_SYMBOLS, BUILDING_FOOT = 0.45;
+  // Todo B78: STYLE.buildings "modern-a", "modern-b", "modern-c" or "modern-era" draws the modern buildings of the map 2020
+  // (maps/shared_scripts/modern-symbols.js); with STYLE.buildingsParam (values of the address parameter ?buildings= with
+  // their value of STYLE.buildings) the address may choose another variant. A map without the key has no parameter.
+  const BUILDINGS_STYLE = (() => {
+    const own = STYLE && STYLE.buildings, allowed = STYLE && STYLE.buildingsParam;
+    if (!allowed) return own;
+    let q = null;
+    try { q = new URLSearchParams(location.search).get("buildings"); } catch (e) { /* default */ }
+    return q && Object.prototype.hasOwnProperty.call(allowed, q) ? allowed[q] : own;
+  })();
+  const SY = !BUILDINGS_STYLE ? window.SKETCH_SYMBOLS
+    : /^modern-/.test(BUILDINGS_STYLE) ? (window.MODERN_SYMBOLS ? window.MODERN_SYMBOLS.make(BUILDINGS_STYLE.slice(7)) : window.SKETCH_SYMBOLS)
+    : window.EPOCH_SYMBOLS ? window.EPOCH_SYMBOLS.make(BUILDINGS_STYLE) : window.SKETCH_SYMBOLS, BUILDING_FOOT = 0.45;
   // Scale of the symbols at magnification 1 in the test window (as in place-elements.js): the question mark has at least
   // SY.QM_MIN screen pixels there, so that it is readable at magnification 1
   const SYM_REF = (L.elementLayout && L.elementLayout.constants && L.elementLayout.constants.K0) || 0.643;
   const stageOf = (level) => clamp(level || 4, 1, 4);
   const isConjecture = (n) => n.kind === "gipfel" || n.kind === "bedingt";
-  const partsOf = (n, level) => (n.kind === "trugbild" ? SY.unroofed(SY.BUILDINGS.B[stageOf(level)]) : SY.BUILDINGS.B[stageOf(level)]);
+  // Todo B78 (map 2020, STYLE.buildings "modern-era"): style of a building or city after the year of its theorem (medieval
+  // before 1700, classical until 1899, modern from 1900); symbols without forYear draw every element alike
+  const symOf = (n) => (SY.forYear ? SY.forYear(yearOf(n)) : SY);
+  const partsOf = (n, level) => { const Y = symOf(n); return n.kind === "trugbild" ? Y.unroofed(Y.BUILDINGS.B[stageOf(level)]) : Y.BUILDINGS.B[stageOf(level)]; };
   // Box of a building in units of the symbol (foot at y = foot), with the ground lines; the question mark of a conjecture
   // and its light halo are added (baseline 0.12 s above the top, cap height about 0.75 of the font size)
   function buildingBox(n, parts, s, foot) {
     const b = { x0: Math.min(...parts.map((p) => p.x)) * s - 1, x1: Math.max(...parts.map((p) => p.x + p.w)) * s + SY.D * s + 1,
-      y0: foot - SY.topOf(s, parts) - 1, y1: foot + 4.5 };
+      y0: foot - symOf(n).topOf(s, parts) - 1, y1: foot + 4.5 };
     if (isConjecture(n)) {
-      const fs = Math.max(0.8 * s, SY.QM_MIN / SYM_REF), base = foot - SY.topOf(s, parts) - 0.12 * s;
+      const fs = Math.max(0.8 * s, SY.QM_MIN / SYM_REF), base = foot - symOf(n).topOf(s, parts) - 0.12 * s;
       b.y0 = Math.min(b.y0, base - 0.8 * fs); b.x0 = Math.min(b.x0, 0.05 * s - 0.36 * fs); b.x1 = Math.max(b.x1, 0.05 * s + 0.36 * fs);
     }
     return b;
@@ -654,9 +772,9 @@
   // in CITY_SIZES of the settings, map-core.js); the box is measured once per city in the hidden measuring group
   const citySize = (s) => CORE.citySize(s, CFG.CITY_SIZES);
   const citySeed = (n) => (T.hash(n.key) % 997) + 1;
-  function cityBox(s, size, seed) {
+  function cityBox(s, size, seed, Y) {
     const g = el("g", {}, measureG);
-    SY.city(g, s, size, seed, false);
+    (Y || SY).city(g, s, size, seed, false);
     const r = g.getBBox(); g.remove();
     return { x0: r.x - 0.5, x1: r.x + r.width + 0.5, y0: r.y - 0.5, y1: r.y + r.height + 0.5 };
   }
@@ -754,7 +872,8 @@
   }
   // Water strip for the rows of the bridges in the legend
   function legendWater(g) {
-    el("rect", { x: -23, y: -16, width: 46, height: 32, fill: "#f1e7cc" }, g); el("rect", { x: -12, y: -16, width: 24, height: 32, fill: SEA }, g);
+    // todo B78: a map with its own water colours (STYLE.sea) shows the land of the strip in its own land colour
+    el("rect", { x: -23, y: -16, width: 46, height: 32, fill: (STYLE && STYLE.sea && STYLE.land) || "#f1e7cc" }, g); el("rect", { x: -12, y: -16, width: 24, height: 32, fill: SEA }, g);
     el("path", { d: "M-12,-16V16M12,-16V16", stroke: BANK, "stroke-width": 1, fill: "none" }, g);
   }
   function drawFlag(e) {
@@ -777,9 +896,9 @@
       // element for selection and the name
       tip = { x: 0, y: -s }; box = { x0: -s, x1: s, y0: -s, y1: s };
     } else if (n.kind === "gebaeude") {   // theory: city (plan step 4.5); its name appears only in the hover box
-      const size = citySize(s), seed = citySeed(n), cb = cityBox(s, size, seed);
+      const size = citySize(s), seed = citySeed(n), cb = cityBox(s, size, seed, symOf(n));
       el("rect", { x: cb.x0, y: cb.y0, width: cb.x1 - cb.x0, height: cb.y1 - cb.y0, fill: "transparent", stroke: "none" }, g);   // click area
-      SY.city(g, s, size, seed, false);
+      symOf(n).city(g, s, size, seed, false);
       g.setAttribute("data-symbol", "city"); g.setAttribute("data-size", size);
       tip = { x: 0, y: cb.y0 }; box = cb;
     } else if (n.kind === "kueste") {   // programme: dashed outline (the key "kueste" is kept from the model)
@@ -789,11 +908,11 @@
       tip = { x: 0, y: -s * 0.9 }; box = { x0: -s * 1.8, x1: s * 1.8, y0: -s * 0.9, y1: s * 0.8 };
     } else {   // theorem, open conjecture, refuted conjecture: building of the stage of its level (plan step 4.5)
       const parts = partsOf(n, e.level), bg = el("g", { transform: `translate(0 ${f(BUILDING_FOOT * s)})` }, g);
-      if (isConjecture(n)) SY.conjecture(bg, s, parts, SYM_REF); else SY.building(bg, s, parts);
+      if (isConjecture(n)) symOf(n).conjecture(bg, s, parts, SYM_REF); else symOf(n).building(bg, s, parts);
       box = buildingBox(n, parts, s, BUILDING_FOOT * s);
-      e.body0 = isConjecture(n) ? buildingBox({ kind: "berg" }, parts, s, BUILDING_FOOT * s) : box;   // todo B73: without the question mark
+      e.body0 = isConjecture(n) ? buildingBox(Object.assign({}, n, { kind: "berg" }), parts, s, BUILDING_FOOT * s) : box;   // todo B73: without the question mark
       g.setAttribute("data-symbol", isConjecture(n) ? "conjecture" : n.kind === "trugbild" ? "ruin" : "building");
-      g.setAttribute("data-stage", stageOf(e.level));
+      g.setAttribute("data-stage", stageOf(e.level)); if (SY.forYear) g.setAttribute("data-era", SY.eraOf(yearOf(n)));
       tip = { x: 0, y: box.y0 + 1 };
     }
     e.tip = tip; e.box0 = box;
@@ -894,7 +1013,9 @@
         // Plan step P6 of the map 1830: with the dotted borders and the border colouring of the style the rows show them
         // Plan step P9 of the map of antiquity: the dash-dot borders of the Renaissance, with the bands of the border colouring
         // Plan step P9 of the map of antiquity, follow-up: the red borders of the medieval style
-        REDLINE ? [(g) => { stroke(g, { d: "M-20,0H20", stroke: REDLINE_RED, "stroke-width": 3.2, opacity: 0.95, "stroke-linecap": "butt" });
+        // Todo B78: the borders of style 5 (STYLE.borders "octilinear", map 2020)
+        OCTI ? [(g) => { stroke(g, Object.assign({ d: "M-20,0H20", stroke: "#ffffff", "stroke-width": 4, opacity: 0.8 }, nsk)); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.6, "stroke-dasharray": "8 3 2 3", "stroke-linecap": "butt" }); }, "Grenze", "Grenze zwischen zwei Ländern"]
+        : REDLINE ? [(g) => { stroke(g, { d: "M-20,0H20", stroke: REDLINE_RED, "stroke-width": 3.2, opacity: 0.95, "stroke-linecap": "butt" });
           stroke(g, { d: "M-20,0H20", stroke: REDLINE_INNER, "stroke-width": 0.9, opacity: 0.9, "stroke-linecap": "butt" }); }, "Grenze", "Grenze zwischen zwei Ländern"]
         : DASHDOT ? [(g) => { if (BC) { const c = Object.values(COLOR); stroke(g, { d: "M-20,-3H20", stroke: c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" });
           stroke(g, { d: "M-20,3H20", stroke: c[1] || c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" }); }
@@ -903,7 +1024,8 @@
           stroke(g, { d: "M-20,3H20", stroke: c[1] || c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" }); }
           stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.7, "stroke-dasharray": "0.1 3.6" }); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 0.5, opacity: 0.8 }); }, "Grenze", "Grenze zwischen zwei Ländern"]
         : [(g) => { stroke(g, Object.assign({ d: "M-20,0H20", stroke: "#8a3a2a", "stroke-width": 5, opacity: 0.18 }, nsk)); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.8, "stroke-dasharray": "9 3 2 3", "stroke-linecap": "butt", opacity: 0.9 }); }, "Grenze", "Grenze zwischen zwei Ländern"],
-        REDLINE ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1, "stroke-dasharray": "1 4", "stroke-linecap": "round", opacity: 0.8 }), "Provinz", "Grenze zwischen Provinzen"]
+        OCTI ? [(g) => stroke(g, { d: "M-20,0H20", stroke: "#7d7f84", "stroke-width": 0.8, opacity: 0.8 }), "Provinz", "Grenze zwischen Provinzen"]
+        : REDLINE ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1, "stroke-dasharray": "1 4", "stroke-linecap": "round", opacity: 0.8 }), "Provinz", "Grenze zwischen Provinzen"]
         : DASHDOT ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.2 3.6", "stroke-linecap": "round", opacity: 0.85 }), "Provinz", "Grenze zwischen Provinzen"]
         : DOTTED ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "0.1 3.4", opacity: 0.9 }), "Provinz", "Grenze zwischen Provinzen"]
         : [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", opacity: 0.75 }), "Provinz", "Grenze zwischen Provinzen"],
@@ -1498,14 +1620,14 @@
   function drawPaper() {
     paper.innerHTML = ""; paper.setAttribute("viewBox", `0 0 ${Wv} ${Hv}`); svg.setAttribute("viewBox", `0 0 ${Wv} ${Hv}`);
     T.filter(el("defs", {}, paper), Wv, Hv);
-    if (STYLE && STYLE.paper === "laid") laidPaper(); else if (STYLE && STYLE.paper === "cream") creamPaper(); else if (STYLE && STYLE.paper === "plain") plainPaper(); else if (STYLE && STYLE.paper === "vellum") vellumPaper(); else T.paperAndFrame(paper, Wv, Hv);
+    if (STYLE && STYLE.paper === "laid") laidPaper(); else if (STYLE && STYLE.paper === "cream") creamPaper(); else if (STYLE && STYLE.paper === "plain") plainPaper(); else if (STYLE && STYLE.paper === "vellum") vellumPaper(); else if (STYLE && STYLE.paper === "rule") rulePaper(); else T.paperAndFrame(paper, Wv, Hv);
     if (STYLE && STYLE.frame === "redgold") frameRedGold();
     seaFill.setAttribute("width", Wv); seaFill.setAttribute("height", Hv);
     const c = document.getElementById("e8-clip");
     c.setAttribute("width", Math.max(0, Wv - 2 * MARGIN)); c.setAttribute("height", Math.max(0, Hv - 2 * MARGIN));
     // plan 1.5, round 2 (user, 2026-10-21): the cartouche stands top left (before: bottom right); since the addendum
     // "water" fixed in the corner of the frame (see placeCartouche), drawn once here
-    if (!cartouche.firstChild && STYLE && STYLE.cartouche) { if (STYLE.cartouche.kind === "strapwork") cartoucheStrapwork(); else if (STYLE.cartouche.kind === "atlas") cartoucheAtlas(); else if (STYLE.cartouche.kind === "initial") cartoucheInitial(); else cartouche18(); }
+    if (!cartouche.firstChild && STYLE && STYLE.cartouche) { if (STYLE.cartouche.kind === "strapwork") cartoucheStrapwork(); else if (STYLE.cartouche.kind === "atlas") cartoucheAtlas(); else if (STYLE.cartouche.kind === "initial") cartoucheInitial(); else if (STYLE.cartouche.kind === "modern") cartoucheModern(); else cartouche18(); }
     if (!cartouche.firstChild) {
       // User, 2026-10-22: two lines "Landscape of" / "Number theory and algebraic geometry", without "Draft 11 · Langlands bridge".
       // Same day: style of a copperplate frame (proposal 5 of skizzen/kartusche.html): concave corners, double rule, the first
@@ -1526,6 +1648,21 @@
       // (default 22; the title must fit the inner rule of 386 units)
       text(title, { x: 200, y: 46, "font-size": CFG.cartoucheTitleSize || 22, "font-style": "italic", "text-anchor": "middle" }, cartouche);
     }
+  }
+  // Todo B78, map 2020 (style of the 20th century, maps/stile/style-5-20th-century.js; until then in its own copy of
+  // drawing.js): no paper texture, no vignette, no checkered frame; a single thin grey rule around the map field
+  function rulePaper() {
+    el("rect", { x: 33.5, y: 33.5, width: Math.max(0, Wv - 67), height: Math.max(0, Hv - 67), fill: "none", stroke: "#9a9ca0", "stroke-width": 1, "pointer-events": "none" }, paper);
+  }
+  // Todo B78, map 2020: white box with a thin grey edge and a red bar on the left, as in the style preview of the 20th
+  // century; the title in STYLE.cartouche.font, without title case. Same box of 400 x 62 units as the cartouche of draft 12.
+  function cartoucheModern() {
+    const C = STYLE.cartouche;
+    el("rect", { width: 400, height: 62, fill: "none", stroke: "none" }, cartouche);
+    el("rect", { x: 0.5, y: 0.5, width: 399, height: 61, fill: "#ffffff", stroke: "#c9cacc", "stroke-width": 1 }, cartouche);
+    el("rect", { x: 0.5, y: 0.5, width: 6, height: 61, fill: RED }, cartouche);
+    text(U(CFG.cartoucheTitle[0]), { x: 22, y: 21, "font-size": 12.5, "font-family": C.font, fill: "#55585e" }, cartouche);
+    text(U(CFG.cartoucheTitle[1]), { x: 22, y: 47, "font-size": CFG.cartoucheTitleSize || 21, "font-weight": 600, "font-family": C.font, fill: INK }, cartouche);
   }
   // Plan step P6 of the map 1830, style of the 18th century (maps/stile/style-3-18th-century.js): white laid paper (fine
   // horizontal lines of the mould, faint fibres) and a plain double rule as frame, without the checkered border; the
@@ -2488,7 +2625,7 @@
         return `<li>${choiceLink(k)}${cr ? `<br><i>${cr}</i>` : ""}${r && r.text ? `<details class="erl"><summary>${U("Erläuterung")}</summary>${r.text}</details>` : ""}</li>`;
       }).join("") + `</ul>`;
       const open = n.stage === "fertig" ? [] : OPEN_PARTS[n.key] || [];
-      if (open.length) h += `<h3>${U("Unbewiesene Teile")}</h3><ul class="klein">${open.map((t) => `<li>${U(t)}</li>`).join("")}</ul><div class="klein"><i>${U("Die Liste der unbewiesenen Teile steht vorläufig in der Seite von Entwurf 12, nicht im Datenmodell.")}</i></div>`;
+      if (open.length) h += `<h3>${U("Unbewiesene Teile")}</h3><ul class="klein">${open.map((t) => `<li>${U(t)}</li>`).join("")}</ul><div class="klein"><i>${U(CFG.openPartsNote || "Die Liste der unbewiesenen Teile steht vorläufig in der Seite von Entwurf 12, nicht im Datenmodell.")}</i></div>`;
       if (GEOMETRIC_NOTE[n.key]) h += `<div class="klein" style="margin-top:6px">${U(GEOMETRIC_NOTE[n.key])}</div>`;
       const B = BR.find((x) => x.n === n);
       if (B && n.state === "programm") h += `<div class="klein" style="margin-top:6px"><i>${FM("Länge des Fjords (vorläufig): {0} % der Grenze zwischen den Seiten. Der definitorische Abstand im Begriffsgraphen der arithmetischen Geometrie ({1} von {2} Schritten) ergäbe {3} %; auf Wunsch des Nutzers ist der Fjord mindestens {4} % lang.", Math.round(B.F.FL / B.F.bl * 100), B.F.df.d == null ? "?" : B.F.df.d, B.F.df.dMax == null ? "?" : B.F.df.dMax, Math.round(B.F.df.frac * 100), Math.round(FJORD_MIN * 100))}</i></div>`;
