@@ -1,6 +1,6 @@
 // Comprehensibility levels of the theorems. Copy made when maps/ was restructured (2026-10-23) from, in this order:
-//   graphs/algebraic-geometry/verstaendlichkeit.js
-//   graphs/arithmetic-geometry/verstaendlichkeit.js
+//   graphs/algebraic-geometry/data/comprehensibility.js
+//   graphs/arithmetic-geometry/data/comprehensibility.js
 // Comprehensibility of statements and definitions (window.AG_COMPR).
 //
 // The rating is about the prior knowledge a reader needs to understand what a theorem asserts or what a definition

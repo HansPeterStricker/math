@@ -4,36 +4,78 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Mathematics</title>
+<meta name="description" content="Interactive pages: a map of mathematical areas and tableaus of formulas.">
 <link rel="icon" href="scripts/favicon.svg">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
 <style>
-  :root { color-scheme: light dark; --bg: #fbf8f1; --fg: #2b2620; --link: #7a3e12; }
-  @media (prefers-color-scheme: dark) { :root { --bg: #1d1b18; --fg: #ece6da; --link: #e3a46b; } }
-  body { margin: 0; background: var(--bg); color: var(--fg); font: 17px/1.55 Georgia, "Times New Roman", serif; }
-  main { max-width: 760px; margin: 0 auto; padding: 40px 16px 80px; }
-  h1 { font-weight: normal; font-size: 2em; margin: 0 0 0.3em; }
-  h2 { font-weight: normal; font-size: 1.3em; margin: 1.6em 0 0.4em; }
-  a { color: var(--link); }
-  ul { padding-left: 1.2em; }
+  :root {
+    color-scheme: light dark;
+    --bg: #efe6d2; --paper: #faf5e8; --ink: #2e2416; --muted: #6d5c44; --rule: #b9a47e; --accent: #8a3b12;
+    --shadow: 0 1px 2px rgba(60, 40, 10, .12), 0 6px 18px rgba(60, 40, 10, .10);
+  }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #1c1814; --paper: #29231c; --ink: #efe5d0; --muted: #b5a487; --rule: #5e4f3a; --accent: #e09a5f;
+      --shadow: 0 1px 2px rgba(0, 0, 0, .4), 0 8px 22px rgba(0, 0, 0, .35); }
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 17px/1.55 Georgia, "Times New Roman", serif; }
+  main { max-width: 1120px; margin: 0 auto; padding: 56px 16px 72px; }
+  header { text-align: center; margin-bottom: 44px; }
+  h1 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: clamp(2.4rem, 7vw, 3.6rem);
+    letter-spacing: .06em; margin: 0; }
+  .rule { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--rule); margin: 10px auto 14px; }
+  .rule::before, .rule::after { content: ""; height: 1px; width: min(140px, 22vw); background: currentColor; }
+  .subtitle { font-family: "IM Fell English", Georgia, serif; font-style: italic; font-size: 1.2rem; color: var(--muted); margin: 0; }
+  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 26px; }
+  .card { display: flex; flex-direction: column; background: var(--paper); color: inherit; text-decoration: none;
+    border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow);
+    transition: transform .15s ease, box-shadow .15s ease; }
+  .card:hover, .card:focus-visible { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(60, 40, 10, .15), 0 12px 28px rgba(60, 40, 10, .18); }
+  .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .shot { aspect-ratio: 8 / 5; overflow: hidden; border-bottom: 1px solid var(--rule); background: var(--bg); }
+  .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
+  .body { padding: 16px 20px 20px; }
+  .kind { font-family: "IM Fell English SC", Georgia, serif; letter-spacing: .08em; color: var(--accent); margin: 0 0 4px; font-size: .95rem; }
+  .lang { font-family: Georgia, serif; letter-spacing: 0; font-style: italic; color: var(--muted); }
+  h2 { font-family: "IM Fell English", Georgia, serif; font-weight: normal; font-size: 1.45rem; line-height: 1.25; margin: 0 0 8px; }
+  .body p:last-child { margin: 0; color: var(--muted); font-size: .97rem; }
+  @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 </style>
 </head>
 <body>
 <main>
-<h1>Mathematics</h1>
-<p>Maps, formula tableaus and theorem graphs.</p>
-<h2>Maps</h2>
-<ul>
-<li><a href="maps/entwurf-11/index.html?lang=en">Landscape of Number Theory and Algebraic Geometry</a></li>
-</ul>
-<h2>Tableaus</h2>
-<ul>
-<li><a href="tableaus/pi/index.html?lang=en">Formeln für π</a></li>
-<li><a href="tableaus/e/index.html?lang=en">Formeln für e</a></li>
-</ul>
-<h2>Theorem graphs</h2>
-<ul>
-<li><a href="graphs/algebraic-geometry/index.html?lang=en">Sätze der algebraischen Geometrie</a></li>
-<li><a href="graphs/arithmetic-geometry/index.html?lang=en">Sätze und Vermutungen der arithmetischen Geometrie</a></li>
-</ul>
+  <header>
+    <h1>Mathematics</h1>
+    <div class="rule" aria-hidden="true">◆</div>
+    <p class="subtitle">Interactive pages: a map of mathematical areas and tableaus of formulas.</p>
+  </header>
+  <div class="cards">
+    <a class="card" href="maps/entwurf-11/index.html?lang=en">
+      <div class="shot"><img src="images/maps-entwurf-11.jpg" alt="" loading="lazy" width="960" height="600"></div>
+      <div class="body">
+        <p class="kind">Map</p>
+        <h2>Landscape of Number Theory and Algebraic Geometry</h2>
+        <p>Theorems and conjectures of number theory and algebraic geometry drawn as an old map. Click a theorem to see the results its proof rests on; right-click to see what follows from it.</p>
+      </div>
+    </a>
+    <a class="card" href="tableaus/pi/index.html">
+      <div class="shot"><img src="images/tableaus-pi.jpg" alt="" loading="lazy" width="960" height="600"></div>
+      <div class="body">
+        <p class="kind">Tableau · <span class="lang">in German</span></p>
+        <h2>Formulas for π</h2>
+        <p>Formulas for π in six columns: sums, products, continued fractions, integrals, limits and special cases, each with the idea of its proof.</p>
+      </div>
+    </a>
+    <a class="card" href="tableaus/e/index.html">
+      <div class="shot"><img src="images/tableaus-e.jpg" alt="" loading="lazy" width="960" height="600"></div>
+      <div class="body">
+        <p class="kind">Tableau · <span class="lang">in German</span></p>
+        <h2>Formulas for e</h2>
+        <p>Formulas for e, reached from four starting points: compound interest, growth, an integral and a series.</p>
+      </div>
+    </a>
+  </div>
 </main>
 </body>
 </html>

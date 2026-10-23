@@ -1,7 +1,7 @@
 // Theorems, conjectures and proofs of the theorem graphs shown on this map. Copy made when maps/ was restructured (2026-10-23) from, in this order:
-//   graphs/algebraic-geometry/daten.js
-//   graphs/algebraic-geometry/daten-gross.js
-//   graphs/arithmetic-geometry/daten.js
+//   graphs/algebraic-geometry/data/theorems.js
+//   graphs/algebraic-geometry/data/theorems-large.js
+//   graphs/arithmetic-geometry/data/theorems.js
 // Data model: central theorems of algebraic geometry and their connections through proofs.
 //
 // Same model as in the group theory example:

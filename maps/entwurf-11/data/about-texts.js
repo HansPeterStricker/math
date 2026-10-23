@@ -24,7 +24,7 @@
     },
     // Sources: GLOSSAR.md, section 2 (building, building with a question mark, ruin, city, bridge, fjord, route);
     // GLOSSAR.md, section 1 (theory, correspondence); scripts/map-page.js (counterexample of a ruin shown in its info box,
-    // plan 4.5 follow-up 3; bridge stages fertig/bauplan); graphs/arithmetic-geometry/daten.js, header comment on
+    // plan 4.5 follow-up 3; bridge stages fertig/bauplan); graphs/arithmetic-geometry/data/theorems.js, header comment on
     // `correspondence` (Galois side 11R, 11S; automorphic side 11F, 22E); city names: theories of type "grundlage" drawn
     // on the map (ag:G_KOH sheaf cohomology, ar:G_IWA Iwasawa theory).
     {
@@ -39,7 +39,7 @@
         "representations on one bank and automorphic forms on the other. A finished bridge has been proved; a construction " +
         "plan in dashed lines is only conjectured.</p>",
     },
-    // Sources: graphs/algebraic-geometry/daten.js, comment "Granularity" before window.AG; daten-gross.js, header
+    // Sources: graphs/algebraic-geometry/data/theorems.js, comment "Granularity" before window.AG; daten-gross.js, header
     // (168 nodes, same granularity); graphs/arithmetic-geometry/README.md and daten.js, header (three conjectures);
     // reports reports/2026-10-20 B41 Klassenkörpertheorie and reports/2026-10-20 B24 Langlands-Brücke (added parts);
     // sources lists in the headers of daten.js and daten-gross.js; READMEs of both folders, section "Hinweis" /
@@ -58,7 +58,7 @@
         "Hartshorne's <i>Algebraic Geometry</i> and Silverman's <i>The Arithmetic of Elliptic Curves</i>. It is a first " +
         "selection for a draft, neither complete nor balanced, and no expert has reviewed it yet.</p>",
     },
-    // Sources: header comments of graphs/algebraic-geometry/daten.js ("proofs": hyperedges, AND/OR; "Granularity":
+    // Sources: header comments of graphs/algebraic-geometry/data/theorems.js ("proofs": hyperedges, AND/OR; "Granularity":
     // only premises actually used, the rest in a foundation node or the proof idea) and daten-gross.js; GLOSSAR.md
     // (Beweis, Prämisse, Bedingter Beweis, Beweispunkt); scripts/map-page.js (shown proof: first in historical order,
     // function baseShown; hollow proof points); scripts/model.js: 398 proofs, 21 of kind "bedingt"; test-b52a.js

@@ -1,7 +1,7 @@
 // Concepts of the theorem graphs. Copy made when maps/ was restructured (2026-10-23) from, in this order:
-//   graphs/algebraic-geometry/begriffe.js
-//   graphs/algebraic-geometry/begriffe-gross.js
-//   graphs/arithmetic-geometry/begriffe.js
+//   graphs/algebraic-geometry/data/concepts.js
+//   graphs/algebraic-geometry/data/concepts-large.js
+//   graphs/arithmetic-geometry/data/concepts.js
 // Data model: concepts (definitions) of algebraic geometry and their definitional dependencies.
 //
 // Supplements daten.js (window.AG, theorems and proofs) with the concepts in which the theorems are formulated.
