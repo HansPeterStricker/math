@@ -1,9 +1,17 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
-  <!-- Start of an Apollonian packing: curvatures −3, 6, 6, 9, 9 (outer circle with radius 13) -->
-  <rect width="32" height="32" rx="6" fill="#1f2328"/>
-  <circle cx="16" cy="16" r="13" fill="none" stroke="#f5f3ee" stroke-width="1.6"/>
-  <circle cx="9.5" cy="16" r="6.5" fill="#2f8a8a"/>
-  <circle cx="22.5" cy="16" r="6.5" fill="#7b5ea7"/>
-  <circle cx="16" cy="7.33" r="4.33" fill="#b8701a"/>
-  <circle cx="16" cy="24.67" r="4.33" fill="#a32f2f"/>
+  <!-- Icon of the public site "math": a flowing, slightly italic M in a circle, in the colours of the start page -->
+  <style>
+    .disc { fill: #faf5e8; stroke: #8a3b12; }
+    .m { stroke: #2e2416; }
+    .h { stroke: #8a3b12; }
+    @media (prefers-color-scheme: dark) { .disc { fill: #29231c; stroke: #e09a5f; } .m { stroke: #efe5d0; } .h { stroke: #e09a5f; } }
+  </style>
+  <circle class="disc" cx="16" cy="16" r="14.4" stroke-width="1.6"/>
+  <g transform="translate(1.6 0) skewX(-9)" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <!-- entry flourish from the left, the two arches with a pointed valley, exit swash to the right -->
+    <path class="m" stroke-width="2.1"
+      d="M7.2 21.8 C9 21.6 9.6 16.4 10.8 12.2 C11.4 10.2 12.5 9.9 13.2 11.8 L16.2 20.4
+         L19.2 11.8 C19.9 9.9 21 10.2 21.4 12.2 C22.2 16.2 22.4 19.8 23.2 21.2 C23.8 22.2 24.8 22.2 25.6 21.4"/>
+    <path class="h" stroke-width="0.9" d="M8.4 23.6 C12.5 24.6 19.5 24.6 24.6 23.4"/>
+  </g>
 </svg>
