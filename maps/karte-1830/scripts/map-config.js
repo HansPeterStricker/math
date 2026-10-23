@@ -116,6 +116,14 @@
         "lückenhaft": "Damals als Beweis anerkannt, nach heutigem Maßstab mit einer Lücke.",
       },
       resolved: { bewiesen: "Nach 1830 bewiesen: {0}.", widerlegt: "Nach 1830 widerlegt: {0}." },
+      // user, 2026-10-23 (keys of map-page.js and map-core.js): the hover box shows below "Vermutet von …" who settled the
+      // conjecture after 1830 and when (resolvedHover with persons and year, resolvedHoverYear with the year only); the map
+      // shows a second, smaller italic line below the name (resolvedOnMap with "year, surnames"; more than two persons as
+      // the first with resolvedOnMapEtAl)
+      resolvedHover: { bewiesen: "Bewiesen von {0}", widerlegt: "Widerlegt von {0}", teilweise: "Teilweise bewiesen von {0}", unabhaengig: "Als unabhängig erwiesen von {0}" },
+      resolvedHoverYear: { bewiesen: "Bewiesen {0}", widerlegt: "Widerlegt {0}", teilweise: "Teilweise bewiesen {0}", unabhaengig: "Als unabhängig erwiesen {0}" },
+      resolvedOnMap: { bewiesen: "bewiesen {0}", widerlegt: "widerlegt {0}", teilweise: "teilweise bewiesen {0}", unabhaengig: "als unabhängig erwiesen {0}" },
+      resolvedOnMapEtAl: "{0} u. a.",
       uncertain: "Unsicher: {0}",
       tacit: "stillschweigend vorausgesetzt",
       unpublished: "unveröffentlicht",

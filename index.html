@@ -29,18 +29,27 @@
   .rule { display: flex; align-items: center; justify-content: center; gap: 12px; color: var(--rule); margin: 10px auto 14px; }
   .rule::before, .rule::after { content: ""; height: 1px; width: min(140px, 22vw); background: currentColor; }
   .subtitle { font-family: "IM Fell English", Georgia, serif; font-style: italic; font-size: 1.2rem; color: var(--muted); margin: 0; }
-  .cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(290px, 1fr)); gap: 26px; }
+  section + section { margin-top: 44px; }
+  h2.group { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 1.6rem; letter-spacing: .06em;
+    color: var(--accent); margin: 0 0 16px; padding-bottom: 6px; border-bottom: 1px solid var(--rule); }
+  .cards { display: grid; gap: 26px; }
+  .cards.n1 { grid-template-columns: minmax(0, 1fr); }
+  .cards.n2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cards.n3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  @media (max-width: 900px) { .cards.n3 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+  @media (max-width: 620px) { .cards.n2, .cards.n3 { grid-template-columns: minmax(0, 1fr); } }
   .card { display: flex; flex-direction: column; background: var(--paper); color: inherit; text-decoration: none;
     border: 1px solid var(--rule); border-radius: 6px; overflow: hidden; box-shadow: var(--shadow);
     transition: transform .15s ease, box-shadow .15s ease; }
   .card:hover, .card:focus-visible { transform: translateY(-3px); box-shadow: 0 2px 4px rgba(60, 40, 10, .15), 0 12px 28px rgba(60, 40, 10, .18); }
   .card:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
   .shot { aspect-ratio: 8 / 5; overflow: hidden; border-bottom: 1px solid var(--rule); background: var(--bg); }
+  .card .note { margin: -0.3rem 0 0.5rem; font-style: italic; color: var(--muted); }
   .shot img { width: 100%; height: 100%; object-fit: cover; object-position: top left; display: block; }
   .body { padding: 16px 20px 20px; }
   .kind { font-family: "IM Fell English SC", Georgia, serif; letter-spacing: .08em; color: var(--accent); margin: 0 0 4px; font-size: .95rem; }
   .lang { font-family: Georgia, serif; letter-spacing: 0; font-style: italic; color: var(--muted); }
-  h2 { font-family: "IM Fell English", Georgia, serif; font-weight: normal; font-size: 1.45rem; line-height: 1.25; margin: 0 0 8px; }
+  .card h3 { font-family: "IM Fell English", Georgia, serif; font-weight: normal; font-size: 1.45rem; line-height: 1.25; margin: 0 0 8px; }
   .body p:last-child { margin: 0; color: var(--muted); font-size: .97rem; }
   @media (prefers-reduced-motion: reduce) { .card { transition: none; } .card:hover { transform: none; } }
 </style>
@@ -52,20 +61,14 @@
     <div class="rule" aria-hidden="true">◆</div>
     <p class="subtitle">Interactive pages: a map of mathematical areas, tableaus of formulas and graphs of theorems.</p>
   </header>
-  <div class="cards">
-    <a class="card" href="maps/entwurf-11/index.html?lang=en">
-      <div class="shot"><img src="images/maps-entwurf-11.jpg" alt="" loading="lazy" width="960" height="600"></div>
-      <div class="body">
-        <p class="kind">Map</p>
-        <h2>Landscape of Number Theory and Algebraic Geometry</h2>
-        <p>Theorems and conjectures of number theory and algebraic geometry drawn as an old map.</p>
-      </div>
-    </a>
+  <section>
+    <h2 class="group">Maps</h2>
+    <div class="cards n3">
     <a class="card" href="maps/karte-1830/index.html">
       <div class="shot"><img src="images/maps-karte-1830.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Map</p>
-        <h2>Mathematics around 1830</h2>
+        <h3>Mathematics around 1830</h3>
         <p>The mathematics known around 1830, drawn in the style of an eighteenth-century map.</p>
       </div>
     </a>
@@ -73,15 +76,29 @@
       <div class="shot"><img src="images/maps-karte-1900.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Map</p>
-        <h2>Mathematics around 1900</h2>
+        <h3>Mathematics around 1900</h3>
         <p>The mathematics known around 1900, drawn in the style of a nineteenth-century map.</p>
       </div>
     </a>
+    <a class="card" href="maps/map-2026-number-theory-algebraic-geometry-modern/index.html">
+      <div class="shot"><img src="images/maps-map-2026-number-theory-algebraic-geometry-modern.jpg" alt="" loading="lazy" width="960" height="600"></div>
+      <div class="body">
+        <p class="kind">Map</p>
+        <h3>Mathematics around 2020</h3>
+        <p class="note">(mainly number theory and algebraic geometry)</p>
+        <p>Theorems and conjectures of number theory and algebraic geometry.</p>
+      </div>
+    </a>
+    </div>
+  </section>
+  <section>
+    <h2 class="group">Tableaus</h2>
+    <div class="cards n2">
     <a class="card" href="tableaus/pi/index.html">
       <div class="shot"><img src="images/tableaus-pi.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Tableau · <span class="lang">in German</span></p>
-        <h2>Formulas for π</h2>
+        <h3>Formulas for π</h3>
         <p>Formulas for π, grouped by sums, products, continued fractions, integrals, and limits.</p>
       </div>
     </a>
@@ -89,15 +106,20 @@
       <div class="shot"><img src="images/tableaus-e.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Tableau · <span class="lang">in German</span></p>
-        <h2>Formulas for e</h2>
+        <h3>Formulas for e</h3>
         <p>Formulas for e, grouped by sums, products, continued fractions, integrals, and limits.</p>
       </div>
     </a>
+    </div>
+  </section>
+  <section>
+    <h2 class="group">Theorem graphs</h2>
+    <div class="cards n2">
     <a class="card" href="graphs/algebraic-geometry/index.html?lang=en">
       <div class="shot"><img src="images/graphs-algebraic-geometry.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Theorem graph</p>
-        <h2>Theorems of Algebraic Geometry</h2>
+        <h3>Theorems of Algebraic Geometry</h3>
         <p>Central theorems of algebraic geometry with their proofs as a graph, ordered by logical depth; also as a graph of concepts and as a graph of concepts and theorems.</p>
       </div>
     </a>
@@ -105,11 +127,12 @@
       <div class="shot"><img src="images/graphs-arithmetic-geometry.jpg" alt="" loading="lazy" width="960" height="600"></div>
       <div class="body">
         <p class="kind">Theorem graph</p>
-        <h2>Theorems and Conjectures of Arithmetic Geometry</h2>
+        <h3>Theorems and Conjectures of Arithmetic Geometry</h3>
         <p>Proved theorems and open conjectures around the Riemann hypothesis, the Birch and Swinnerton-Dyer conjecture and the abc conjecture, with conditional proofs and their relations.</p>
       </div>
     </a>
-  </div>
+    </div>
+  </section>
 </main>
 </body>
 </html>

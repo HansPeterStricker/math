@@ -11,18 +11,18 @@
   window.K1900_ABOUT = [
     // Sources: maps/karte-1900/PLAN.html (user, 23 October 2026: deadline 1900, Hilbert's lecture; about 500 nodes; the data
     // of the map 1830 copied and extended; areas of the time after the Encyklopädie); data/theorems.js, header (state of
-    // knowledge at the end of 1900; types satz, vermutung, grundlage); counts from the data: 465 theorems (5 of them with
+    // knowledge at the end of 1900; types satz, vermutung, grundlage); counts from the data: 464 theorems (5 of them with
     // `correspondence`), 44 conjectures (22 "offen", 13 "teilweise", 9 "widerlegt"; one with `correspondence`),
-    // 10 foundations, 558 proofs; window.K1900.symbols(): 461 buildings, 35 buildings with a question mark, 9 ruins,
+    // 10 foundations, 556 proofs; window.K1900.symbols(): 460 buildings, 35 buildings with a question mark, 9 ruins,
     // 10 cities, 4 bridges.
     {
       q: "What is this map?",
       a: "<p>This map shows mathematics as it was known at the end of 1900, the year in which David Hilbert presented his " +
         "mathematical problems at the International Congress of Mathematicians in Paris. It uses the areas of that time. " +
         "Fields that did not yet exist in 1900 do not appear.</p>" +
-        "<p>The map contains 465 theorems, four of which are correspondences drawn as bridges, 35 conjectures that were " +
+        "<p>The map contains 464 theorems, four of which are correspondences drawn as bridges, 35 conjectures that were " +
         "still open in 1900, 9 conjectures that had been disproved by then, and 10 theories that the proofs of the time used " +
-        "as a whole. It records 558 proofs. It continues the map of mathematics around 1830: its data were copied and " +
+        "as a whole. It records 556 proofs. It continues the map of mathematics around 1830: its data were copied and " +
         "brought to the state of 1900, and about 150 theorems and conjectures of the years 1830 to 1900 were added.</p>",
     },
     // Sources: GLOSSAR.md, section 2 (building, building with a question mark, ruin, city, bridge, fjord); legend of the
@@ -88,7 +88,7 @@
         "although Max Dehn solved it later in 1900. Problem 23, a call for the further development of the calculus of " +
         "variations, is not a statement and has no building. What became of each problem is noted in its info box.</p>",
     },
-    // Sources: data/theorems.js, header ("proofs"; kind "bedingt"; `tacit`); counts from the data: 558 proofs, 1 of kind
+    // Sources: data/theorems.js, header ("proofs"; kind "bedingt"; `tacit`); counts from the data: 556 proofs, 1 of kind
     // "bedingt", 21 with `tacit`; GLOSSAR.md (Beweis, Prämisse, Bedingter Beweis, Beweispunkt).
     {
       q: "How were the dependencies between proofs determined?",
@@ -98,7 +98,7 @@
         "with a hollow circle.</p>" +
         "<p>Some proofs used statements that were taken for granted then and proved only later. They remain premises, " +
         "because the proof depends on them, and the info box marks them as “assumed tacitly”. This applies to 21 of the " +
-        "558 proofs. One proof is conditional: it assumes a statement that was still a conjecture in 1900.</p>",
+        "556 proofs. One proof is conditional: it assumes a statement that was still a conjecture in 1900.</p>",
     },
     // Wording of the question as in draft 12 and the map 1830.
     // Sources: scripts/model.js, header ("Weights"); data/weights.js; PLAN.html (taken over from the map 1830: the weight

@@ -8,11 +8,6 @@
 window.H1900_B = {
   nodes: [
     // ================================================================ elemgeo: elementary geometry, trigonometry
-    { id: "eg_pythagoras", type: "satz", area: "elemgeo", field: [51], msc: ["51M"], name: "Satz des Pythagoras",
-      year: -300, circa: true, person: ["Euklid"],
-      form: "equation", short: "Für jedes rechtwinklige Dreieck mit den Katheten a, b und der Hypotenuse c gilt:",
-      formula: String.raw`a^2 + b^2 = c^2`,
-      text: "Euklid, Elemente I.47, mit Umkehrung I.48; ein zweiter Beweis über ähnliche Dreiecke in VI.31. Pythagoreische Zahlentripel waren schon in Babylonien bekannt; ein Beweis des Pythagoras ist nicht überliefert." },
     { id: "eg_thales", type: "satz", area: "elemgeo", field: [51], msc: ["51M"], name: "Satz des Thales",
       year: -300, circa: true, person: ["Euklid"],
       form: "general", short: "Für jeden Punkt C auf einem Kreis mit dem Durchmesser AB gilt:",
@@ -627,12 +622,6 @@ window.H1900_B = {
 
   proofs: [
     // ---------------------------------------------------------------- elemgeo
-    { from: "eg_pythagoras", kind: "beweis", name: "Flächenvergleich (Euklid I.47)", year: -300, person: ["Euklid"],
-      premises: ["G_EUKLID"], source: "Euklid, Elemente I.47",
-      idea: "Die Quadrate über den Katheten werden über kongruente Dreiecke in die beiden Rechtecke zerlegt, in die die Höhe das Hypotenusenquadrat teilt." },
-    { from: "eg_pythagoras", kind: "beweis", name: "Ähnliche Dreiecke (Euklid VI.31)", year: -300, person: ["Euklid"],
-      premises: ["G_EUKLID"], source: "Euklid, Elemente VI.31",
-      idea: "Die Höhe zerlegt das Dreieck in zwei ihm ähnliche Dreiecke; die Flächen ähnlicher Figuren über den Seiten addieren sich." },
     { from: "eg_thales", kind: "beweis", name: "Gleichschenklige Dreiecke", year: -300, person: ["Euklid"],
       premises: ["G_EUKLID", "eg_winkelsumme"], source: "Euklid, Elemente III.31",
       idea: "Der Radius zum Punkt C zerlegt das Dreieck in zwei gleichschenklige Dreiecke; mit der Winkelsumme ist der Winkel bei C die Hälfte von zwei Rechten." },
@@ -643,13 +632,13 @@ window.H1900_B = {
       premises: ["G_EUKLID"], source: "Euklid, Elemente IV.4–5; Gauß, Zusatz zu Schumachers Übersetzung von Carnot, Geometrie der Stellung (1810)",
       idea: "Mittelsenkrechte und Winkelhalbierende sind Ortslinien gleichen Abstands. Die Höhen sind die Mittelsenkrechten des Dreiecks, dessen Seitenmitten die Ecken des gegebenen sind." },
     { from: "eg_sinus_kosinus", kind: "beweis", name: "Umkreis und Höhe", year: 1260, person: ["Nasir ad-Din at-Tusi"],
-      premises: ["G_EUKLID", "eg_pythagoras", "eg_thales"], source: "Euklid, Elemente II.12–13; at-Tusi, Abhandlung über das Vierseit (um 1260); Legendre, Éléments de géométrie, Trigonometrie",
+      premises: ["G_EUKLID", "eg_thales"], source: "Euklid, Elemente II.12–13; at-Tusi, Abhandlung über das Vierseit (um 1260); Legendre, Éléments de géométrie, Trigonometrie",
       idea: "Für den Sinussatz wird über den Umkreis ein rechtwinkliges Dreieck mit dem Durchmesser als Hypotenuse gebildet (Thales); der Kosinussatz folgt aus Pythagoras in den beiden Teildreiecken der Höhe." },
     { from: "eg_euler_gerade", kind: "beweis", name: "Berechnung der Abstände", year: 1767, person: ["Leonhard Euler"],
-      premises: ["eg_schnittpunkte", "eg_pythagoras", "G_ALGEBRA"], tacit: ["eg_schnittpunkte"], source: "Euler, Solutio facilis problematum quorundam geometricorum difficillimorum, Novi Comm. Acad. Sci. Petrop. 11 (1765/1767), E325",
+      premises: ["eg_schnittpunkte", "G_EUKLID", "G_ALGEBRA"], tacit: ["eg_schnittpunkte"], source: "Euler, Solutio facilis problematum quorundam geometricorum difficillimorum, Novi Comm. Acad. Sci. Petrop. 11 (1765/1767), E325",
       idea: "Euler drückt die Lage von Schwerpunkt, Höhenschnittpunkt, Umkreis- und Inkreismittelpunkt in den Seiten aus und berechnet ihre gegenseitigen Abstände; daraus folgt GH = 2 OG mit O, G, H auf einer Geraden." },
     { from: "eg_euler_abstand", kind: "beweis", name: "Berechnung aus den Seiten", year: 1767, person: ["Leonhard Euler"],
-      premises: ["eg_schnittpunkte", "eg_pythagoras", "G_ALGEBRA"], tacit: ["eg_schnittpunkte"], source: "Euler, E325 (1765/1767); Chapple, Miscellanea Curiosa Mathematica 4 (1746)",
+      premises: ["eg_schnittpunkte", "G_EUKLID", "G_ALGEBRA"], tacit: ["eg_schnittpunkte"], source: "Euler, E325 (1765/1767); Chapple, Miscellanea Curiosa Mathematica 4 (1746)",
       idea: "Aus denselben Abstandsformeln wie bei der Eulerschen Geraden ergibt sich d² = R² − 2Rr." },
     { from: "eg_neunpunkte", kind: "beweis", name: "Mittelpunkte gleichseitiger Hyperbeln", year: 1821, person: ["Charles-Julien Brianchon", "Jean-Victor Poncelet"],
       premises: ["eg_thales", "eg_schnittpunkte", "G_EUKLID"], source: "Brianchon, Poncelet, Recherches sur la détermination d'une hyperbole équilatère, au moyen de quatre conditions données, Annales de Gergonne 11 (1820/21)",
@@ -661,7 +650,7 @@ window.H1900_B = {
       premises: ["G_EUKLID"], source: "Ptolemäus, Almagest I.10",
       idea: "Ein Punkt auf einer Diagonale wird so gewählt, dass zwei Paare ähnlicher Dreiecke entstehen (Peripheriewinkel); die beiden Proportionen ergeben addiert die Behauptung." },
     { from: "eg_heron", kind: "beweis", name: "Inkreis und Ähnlichkeit", year: 60, person: ["Heron von Alexandria"],
-      premises: ["G_EUKLID", "eg_pythagoras"], source: "Heron, Metrica I.8; Heath, A History of Greek Mathematics II, 321–323",
+      premises: ["G_EUKLID"], source: "Heron, Metrica I.8; Heath, A History of Greek Mathematics II, 321–323",
       idea: "Die Fläche ist r·s; mit Hilfe ähnlicher Dreiecke an Inkreis und Ankreis wird r²s² als Produkt s(s−a)(s−b)(s−c) ausgedrückt." },
     { from: "eg_menelaos", kind: "beweis", name: "Parallele durch eine Ecke", year: 100, person: ["Menelaos von Alexandria"],
       premises: ["G_EUKLID"], source: "Menelaos, Sphaerica III.1 (ebener Hilfssatz); Heath, A History of Greek Mathematics II, 266–270",
@@ -726,7 +715,7 @@ window.H1900_B = {
       source: "Descartes, La Géométrie (1637), Buch I",
       idea: "Mit dem Strahlensatz (Euklid VI.12) erhält Descartes Produkt und Quotient als vierte Proportionale, mit dem Halbkreis über 1 + a die Quadratwurzel als mittlere Proportionale (VI.13). Damit konstruiert er die Wurzeln von z² = az + b². Für die Umkehrung nimmt er an, dass Geraden und Kreise nur auf Gleichungen höchstens zweiten Grades führen." },
     { from: "eg_zenodoros", kind: "beweis", name: "Vergleich über Dreiecke", year: -180, person: ["Zenodoros"],
-      premises: ["G_EUKLID", "eg_pythagoras"], source: "Theon von Alexandria, Kommentar zum Almagest I; Pappos, Collectio V; Heath, A History of Greek Mathematics II, 207–213",
+      premises: ["G_EUKLID"], source: "Theon von Alexandria, Kommentar zum Almagest I; Pappos, Collectio V; Heath, A History of Greek Mathematics II, 207–213",
       idea: "Das Vieleck wird vom Mittelpunkt aus in gleichschenklige Dreiecke zerlegt; bei gleichem Umfang wächst die Höhe dieser Dreiecke mit der Eckenzahl." },
 
     // ---------------------------------------------------------------- anageo
@@ -743,7 +732,7 @@ window.H1900_B = {
       premises: ["G_EUKLID"], source: "Apollonios, Konika VII.12, VII.31; Heath, Apollonius of Perga (1896)",
       idea: "Die Quadrate der konjugierten Halbdurchmesser werden über die Rechtecke an den Achsen (Symptome) verglichen; das Parallelogramm aus konjugierten Durchmessern ist flächengleich dem Achsenrechteck." },
     { from: "ag_brennpunkt", kind: "beweis", name: "Ortsbestimmung (Pappos)", year: 320, person: ["Pappos von Alexandria"],
-      premises: ["G_EUKLID", "eg_pythagoras"], source: "Pappos, Collectio VII, Prop. 236–238; Heath, A History of Greek Mathematics II, 119",
+      premises: ["G_EUKLID"], source: "Pappos, Collectio VII, Prop. 236–238; Heath, A History of Greek Mathematics II, 119",
       idea: "Pappos zeigt, dass der Ort der Punkte mit festem Verhältnis der Abstände zu Punkt und Gerade die Gleichung eines Kegelschnitts im Sinn der Symptome des Apollonios erfüllt." },
     { from: "ag_brennpunkt", kind: "beweis", name: "Über die Dandelinschen Kugeln", year: 1822, person: ["Germinal Pierre Dandelin"],
       premises: ["ag_dandelin", "G_EUKLID"], source: "Dandelin, Nouveaux mémoires de l'Académie de Bruxelles 2 (1822)",
@@ -833,7 +822,7 @@ window.H1900_B = {
       premises: ["fu_euler_addition", "G_EUKLID"], source: "Jacobi, Über die Anwendung der elliptischen Transcendenten auf ein bekanntes Problem der Elementargeometrie, Crelles Journal 3 (1828)",
       idea: "Für zwei Kreise wird der Berührungsschritt als Addition eines festen elliptischen Integrals geschrieben; das Additionstheorem zeigt, dass Schließung nach n Schritten nicht vom Anfangspunkt abhängt." },
     { from: "pg_potenzlinie", kind: "beweis", name: "Differenz der Potenzen", year: 1813, person: ["Louis Gaultier"],
-      premises: ["eg_pythagoras", "G_EUKLID"], source: "Gaultier, Mémoire sur les moyens généraux de construire graphiquement un cercle déterminé par trois conditions, J. École polytechnique 9, Cahier 16 (1813)",
+      premises: ["G_EUKLID"], source: "Gaultier, Mémoire sur les moyens généraux de construire graphiquement un cercle déterminé par trois conditions, J. École polytechnique 9, Cahier 16 (1813)",
       idea: "Nach Pythagoras ist der Ort gleicher Potenz bezüglich zweier Kreise eine Gerade senkrecht zur Zentralen. Ein Punkt gleicher Potenz bezüglich zweier Paare hat auch gleiche Potenz bezüglich des dritten." },
     { from: "pg_apollonios_problem", kind: "beweis", name: "Zurückführung auf einfachere Fälle (Viète)", year: 1600, person: ["François Viète"],
       premises: ["G_EUKLID"], source: "Viète, Apollonius Gallus (Paris 1600)",
@@ -1057,11 +1046,6 @@ window.H1900_B = {
 
   history: [
     // ---------------------------------------------------------------- elemgeo
-    { id: "h_eg_pyth_babylon", from: "eg_pythagoras", kind: "numerisch", year: -1800, circa: true, person: [],
-      source: "Keilschrifttafel Plimpton 322; Neugebauer, The Exact Sciences in Antiquity (1957)",
-      text: "Liste pythagoreischer Zahlentripel in Babylonien." },
-    { id: "h_eg_pyth_euklid", from: "eg_pythagoras", kind: "bewiesen", year: -300, circa: true, person: ["Euklid"],
-      source: "Euklid, Elemente I.47", text: "Ältester erhaltener Beweis." },
     { id: "h_eg_thales", from: "eg_thales", kind: "bewiesen", year: -585, circa: true, person: ["Thales von Milet"],
       source: "Diogenes Laertius I.24–25 (nach Pamphila)", text: "Spätere Überlieferung schreibt Thales den Satz zu; ein Beweis ist nicht erhalten." },
     { id: "h_eg_hoehen_gauss", from: "eg_schnittpunkte", kind: "bewiesen", year: 1810, person: ["Carl Friedrich Gauß"],

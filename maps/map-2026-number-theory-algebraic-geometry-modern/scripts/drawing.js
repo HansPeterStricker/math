@@ -1,12 +1,12 @@
-// Own copy of maps/shared_scripts/drawing.js for the frozen draft 11 (plan step N0, 22 October 2026), so that later changes
-// for draft 12 do not change draft 11. Do not change this file.
+// Own copy for the modern map (map-2026-number-theory-algebraic-geometry-modern, 23 October 2026), taken from draft 11.
+// Changed: colours of style 5 (maps/stile/style-5-20th-century.js) and a plain frame without paper texture.
 // Shared drawing functions of Terra Mathematica (from draft 2 on).
 // Older drafts contain their own copies and are not converted.
 
 window.TM = (function () {
   "use strict";
   const NS = "http://www.w3.org/2000/svg";
-  const INK = "#3a2a1c", PAPER = "#efe3c2", RED = "#9b2a1a";
+  const INK = "#2b2d30", PAPER = "#ffffff", RED = "#d4202c";
 
   function random(seed) {
     let a = seed >>> 0;
@@ -109,7 +109,7 @@ window.TM = (function () {
         <stop offset="62%" stop-color="#5a3c1e" stop-opacity="0"/>
         <stop offset="100%" stop-color="#5a3c1e" stop-opacity="0.5"/>
       </radialGradient>
-      <clipPath id="tm-rahmen"><rect x="34" y="34" width="${B - 68}" height="${H - 68}"/></clipPath>`);
+      <clipPath id="tm-rahmen"><rect x="34" y="34" width="${Math.max(0, B - 68)}" height="${Math.max(0, H - 68)}"/></clipPath>`);
   }
 
   // Mountain in the manner of old maps; light from the west, hatching on the east side
@@ -224,25 +224,9 @@ window.TM = (function () {
   }
 
   // Lay paper texture, vignette and frame over everything
+  // Modern map: no paper texture, no vignette, no chequered frame; a single thin rule around the map field
   function paperAndFrame(svg, B, H) {
-    el("rect", { width: B, height: H, filter: "url(#tm-papier)", opacity: 0.5, "pointer-events": "none",
-      style: "mix-blend-mode:multiply" }, svg);
-    el("rect", { width: B, height: H, filter: "url(#tm-fasern)", opacity: 0.25, "pointer-events": "none",
-      style: "mix-blend-mode:multiply" }, svg);
-    el("rect", { width: B, height: H, fill: "url(#tm-vignette)", "pointer-events": "none" }, svg);
-    const r = el("g", { fill: "none", stroke: INK, "pointer-events": "none" }, svg);
-    el("rect", { x: 20, y: 20, width: B - 40, height: H - 40, "stroke-width": 2.2 }, r);
-    el("rect", { x: 34, y: 34, width: B - 68, height: H - 68, "stroke-width": 1 }, r);
-    for (let x = 34, i = 0; x < B - 34; x += 52, i++) {
-      const w = Math.min(52, B - 34 - x);
-      el("rect", { x, y: 22, width: w, height: 10, fill: i % 2 ? INK : "none", "stroke-width": 0.5 }, r);
-      el("rect", { x, y: H - 32, width: w, height: 10, fill: i % 2 ? "none" : INK, "stroke-width": 0.5 }, r);
-    }
-    for (let y = 34, i = 0; y < H - 34; y += 52, i++) {
-      const hh = Math.min(52, H - 34 - y);
-      el("rect", { x: 22, y, width: 10, height: hh, fill: i % 2 ? INK : "none", "stroke-width": 0.5 }, r);
-      el("rect", { x: B - 32, y, width: 10, height: hh, fill: i % 2 ? "none" : INK, "stroke-width": 0.5 }, r);
-    }
+    el("rect", { x: 33.5, y: 33.5, width: Math.max(0, B - 67), height: Math.max(0, H - 67), fill: "none", stroke: "#9a9ca0", "stroke-width": 1, "pointer-events": "none" }, svg);
   }
 
   // Info box: shows title, text and status when an element is pointed at or tapped

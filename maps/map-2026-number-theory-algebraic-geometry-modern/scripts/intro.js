@@ -3,13 +3,13 @@
 // button "Intro"). Classic script, loaded after scripts/map-page.js; works over file:// as well.
 // Opening rules:
 //   - ?intro=1 always opens the carousel, ?intro=0 never; ?intro=auto applies the normal rule (for tests).
-//   - Normal rule: open once the map is drawn (body[data-bereit="1"]) unless localStorage["e11-intro-hidden"] === "1".
+//   - Normal rule: open once the map is drawn (body[data-bereit="1"]) unless localStorage["map-2026-modern-intro-hidden"] === "1".
 //   - Under an automated browser (navigator.webdriver) the carousel does not open by itself without intro=1 or intro=auto,
 //     so that the click tests of draft 11 are not covered by the dialog.
 // The button "Intro" in the toolbar always opens the carousel on card 1.
 (function () {
   "use strict";
-  const KEY = "e11-intro-hidden";
+  const KEY = "map-2026-modern-intro-hidden";
   const IMG = "data/intro/";
   // Texts of the cards (English only, like draft 11). Each statement was checked against the page (report of B46).
   const CARDS = [

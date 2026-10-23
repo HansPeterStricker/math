@@ -37,6 +37,9 @@
 
     const PARTS = ["H1830", "H1830_A", "H1830_B", "H1830_C", "H1830_D"];
   const CONDO = null;   // no condominium on this map
+  // User, 2026-10-23: the theorem of Menelaus is a premise of many proofs of projective geometry in the data (Ceva,
+  // Desargues, Pascal, Carnot), but was no landmark of its time; it keeps its routes and gets the smallest size
+  const SMALL = new Set(["eg_menelaos"]);
   const ROUTE_KINDS = { beweis: "route", bedingt: "grat" };
   const SOURCE = "k1830";
 
@@ -133,7 +136,8 @@
 
     nodes.forEach((n) => {
       n.history.sort((a, b) => (a.year || 0) - (b.year || 0));
-      n.users = n.usage.length;                                   // proofs with the node as a premise (state of 1830)
+      // proofs with the node as a premise (state of 1830); SMALL keeps a node at the smallest size
+      n.users = SMALL.has(n.key) ? 0 : n.usage.length;
       n.conclusions = new Set(n.usage.map((b) => b.from)).size;   // distinct conclusions (the measure of draft 12)
       const conjectured = n.history.find((h) => h.kind === "vermutet");
       n.flag = n.kind === "berg" && !!conjectured;

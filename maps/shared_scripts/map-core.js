@@ -338,6 +338,51 @@
     return { SRC, side, HV, VS, raw, hasFlag, BRIDGE_DIRECTIONS, OPEN_PARTS, FJORD_CONCEPTS, FJORD_MIN, GEOMETRIC_NOTE, PZ, missing, placement, moments, nodes, CPL, N_TREES, TREE_BOX, TREES, TK, MAX_W, pt, dist, ckey, coastCorner, defFraction, yearOf, FJ, BR, groups, FILE_FJ, FJ_BANK_A, fjordBank, fileFjord, bankHalf, placeBridges, nearCentre, sideOf, inFjord };
   }
 
+  // Names with HTML tags (user, 2026-10-23: "2<sup>2<sup>n</sup></sup> + 1" showed its tags on the map): the tags <sup>,
+  // <sub>, <i> and <b>, also nested, split a name into runs of plain text; level is the number of enclosing <sup> and
+  // <sub> (0 = baseline). The page draws each level RICH_SCALE times smaller than the one below it (map-page.js, font),
+  // the scripts count the width of a run with the same factor. Other tags stay as they are. A name without these tags is
+  // one run of level 0.
+  const RICH_SPLIT = /(<\/?(?:sup|sub|i|b)>)/i, RICH_TAG = /^<(\/?)(sup|sub|i|b)>$/i, RICH_SCALE = 0.7;
+  function richRuns(t) {
+    const runs = [], stack = [];
+    String(t).split(RICH_SPLIT).forEach((part) => {
+      if (!part) return;
+      const m = RICH_TAG.exec(part);
+      if (!m) { runs.push({ text: part, level: stack.filter((x) => x === "sup" || x === "sub").length, tags: stack.slice() }); return; }
+      if (!m[1]) stack.push(m[2].toLowerCase());
+      else if (stack.length) stack.pop();
+    });
+    return runs;
+  }
+  // Width of a name with tags from the width of plain text (plainWidth(text) at font size REF)
+  const richWidth = (t, plainWidth) => richRuns(t).reduce((w, r) => w + plainWidth(r.text) * Math.pow(RICH_SCALE, r.level), 0);
+
+  // Second line below the name of a conjecture of a historical map that was settled after the year of the map (user,
+  // 2026-10-23; only for a map whose ERA_NOTES has resolvedOnMap, patterns per kind of the field `resolved`, e.g.
+  // "bewiesen {0}" with {0} = "1896, Hadamard, de la Vallée Poussin"). Persons by surname, more than two as the first one
+  // with resolvedOnMapEtAl ("{0} u. a."). No line without year and persons. FM translates the pattern and inserts {0}.
+  // RESOLVED_LINE: font size of the line relative to the name, and the distance of its baseline from the last baseline of
+  // the name in line spacings LH (the name block grows by this many lines: page and place-elements.js add it to nl).
+  const RESOLVED_LINE = { size: 0.72, step: 0.85 };
+  // Surname: the last word, or from the first particle on ("Charles-Jean de la Vallée Poussin" -> "de la Vallée Poussin",
+  // "Ennio De Giorgi" -> "De Giorgi"); "von" is dropped as usual in English ("Ferdinand von Lindemann" -> "Lindemann"), and
+  // so is a lone lower-case "de" before the last word ("Adhémar Barré de Saint-Venant" -> "Saint-Venant")
+  const PARTICLE = /^(de|la|le|du|des|van|der|den|te|ten|di|da|del|d')$/i;
+  function surname(p) {
+    const w = String(p || "").trim().split(/\s+/).filter(Boolean);
+    for (let j = 1; j < w.length - 1; j++) if (PARTICLE.test(w[j])) return w.slice(w[j] === "de" && j === w.length - 2 ? j + 1 : j).join(" ");
+    return w.length ? w[w.length - 1] : "";
+  }
+  function resolvedLine(n, era, FM) {
+    const r = n && n.resolved, pat = r && era && era.resolvedOnMap && era.resolvedOnMap[r.kind];
+    if (!pat) return "";
+    const names = (r.person || []).map(surname).filter(Boolean);
+    const who = names.length > 2 ? FM(era.resolvedOnMapEtAl || "{0} et al.", names[0]) : names.join(", ");
+    const core = [r.year ? String(r.year) : "", who].filter(Boolean).join(", ");
+    return core ? FM(pat, core) : "";
+  }
+
   // Line breaks of mountain names; measureText(t, attrs) is the width of t at font size REF (the page measures in the
   // browser, the scripts use the widths of font-widths.json)
   function nameWrapping(measureText) {
@@ -432,5 +477,6 @@
   }
 
   return { CONST: { LIGHT, REF, P, Z_MIN, Z_MAX, Z_ZERO, N_TOTAL, MARGIN }, LIGHT, REF, P, Z_MIN, Z_MAX, Z_ZERO, N_TOTAL, MARGIN,
-    ASC, DESC, LH, WRAP, FS, CITY_SIZES, citySize, clamp, inPolygon, creditEvent, extendModel, nameWrapping, measures };
+    ASC, DESC, LH, WRAP, FS, CITY_SIZES, citySize, clamp, inPolygon, creditEvent, extendModel, nameWrapping, measures,
+    RICH_SCALE, richRuns, richWidth, RESOLVED_LINE, surname, resolvedLine };
 });

@@ -2,10 +2,89 @@
 // reference). Draft 10 was the map of draft 8 in the sea, with an irregular coast, a fjord between the two sides of the
 // Langlands correspondence and bridges over it (todo B24 b); additions of draft 10 to draft 8 are marked "draft 10".
 // Layout: data/layout.js (plan steps 1.3 to 1.5); the layout before plan step 1.2 is not offered any more.
+// Modern map (map-2026-number-theory-algebraic-geometry-modern, 23 October 2026): copy of draft 11 in the style of
+// maps/stile/style-5-20th-century.js. Changed against draft 11: colours, fonts, borders on a 45-degree grid, plain
+// frame and cartouche, buildings of scripts/building-symbols.js; the data and the layout are those of draft 11.
 (function () {
   "use strict";
   const T = window.TM, { el, text, f, INK, PAPER, RED } = T, L = window.E7_LAYOUT, K0 = L.mapData;
   const M = window.E11_MODEL.generate(window), CONDO = window.E11_MODEL.CONDO;
+  // Modern map (user, 2026-10-23: "more raster-like borders"): province outlines run only horizontally, vertically or
+  // at 45 degrees, like the routes of style 5. Every corner between two provinces is snapped to a grid of GRID map
+  // units, and between two corners one straight and one diagonal leg are inserted. Both depend only on the points (the
+  // pair is ordered first), so two neighbouring provinces get the same border. Corners at the water stay where they are.
+  (function octilinearCells() {
+    const GRID = 2 * ((L.raster && L.raster.size) || 5);
+    // corners near a city keep their place, so that the city stays inside its province (test-buildings.js)
+    const cities = Object.keys(L.placement).filter((k) => M.K[k] && M.K[k].kind === "gebaeude").map((k) => L.placement[k]);
+    const nearCity = (v) => cities.some((c) => Math.hypot(v[0] - c[0], v[1] - c[1]) < 60);
+    const snap = (v) => (nearCity(v) ? [v[0], v[1]] : [Math.round(v[0] / GRID) * GRID, Math.round(v[1] / GRID) * GRID]);
+    const bend = (A, B) => {
+      const [P, Q] = A[0] < B[0] || (A[0] === B[0] && A[1] <= B[1]) ? [A, B] : [B, A];
+      const dx = Q[0] - P[0], dy = Q[1] - P[1], ax = Math.abs(dx), ay = Math.abs(dy), d = Math.min(ax, ay);
+      if (d < 1e-6 || Math.abs(ax - ay) < 1e-6) return null;
+      // a piece within ANGLE_TOL of a raster direction stays straight: one bend less (user, 2026-10-23)
+      const ang = Math.atan2(ay, ax) * 180 / Math.PI, off45 = Math.min(ang, Math.abs(ang - 45), 90 - ang);
+      if (off45 < ANGLE_TOL) return null;
+      return ax > ay ? [Q[0] - Math.sign(dx) * d, P[1]] : [P[0], Q[1] - Math.sign(dy) * d];
+    };
+    // Fewer corners first (user, 2026-10-23: calmer, straighter borders): every run of edges towards the same neighbour is
+    // simplified with Douglas-Peucker (tolerance TOL), always in the same orientation, so that both neighbours keep the
+    // same corners; corners near a city are kept. Coast edges (neighbour null) stay as they are.
+    // second try (user, 2026-10-23: still fewer bends): tolerance 4.5 grid steps instead of 2.2
+    let TOL = 4.5 * GRID, ANGLE_TOL = 12;
+    try { const t = Number(new URLSearchParams(location.search).get("borderAngle")); if (t >= 0 && new URLSearchParams(location.search).has("borderAngle")) ANGLE_TOL = t; } catch (e) { /* default */ }
+    try { const t = Number(new URLSearchParams(location.search).get("borderTol")); if (t > 0) TOL = t * GRID; } catch (e) { /* default */ }
+    const dp = (pts) => {
+      if (pts.length <= 2) return pts;
+      const [a, b] = [pts[0], pts[pts.length - 1]], L2 = Math.hypot(b[0] - a[0], b[1] - a[1]) || 1e-9;
+      let best = -1, at = -1;
+      for (let i = 1; i < pts.length - 1; i++) {
+        const q = pts[i], dist = nearCity(q) ? Infinity : Math.abs((b[0] - a[0]) * (a[1] - q[1]) - (a[0] - q[0]) * (b[1] - a[1])) / L2;
+        if (dist > best) { best = dist; at = i; }
+      }
+      return best <= TOL ? [a, b] : dp(pts.slice(0, at + 1)).slice(0, -1).concat(dp(pts.slice(at)));
+    };
+    const less = (A, B) => A[0] < B[0] || (A[0] === B[0] && A[1] < B[1]);
+    L.provinces.forEach((p) => {
+      const z = p.cell, n = z.length;
+      if (n < 4) return;
+      // start at a corner where the neighbour changes; without one the cell has a single neighbour and stays
+      const s0 = z.findIndex((v, i) => v[2] !== z[(i - 1 + n) % n][2]);
+      if (s0 < 0) return;
+      const r = z.slice(s0).concat(z.slice(0, s0)), out = [];
+      for (let i = 0; i < n;) {
+        let j = i; while (j + 1 < n && r[j + 1][2] === r[i][2]) j++;
+        const run = r.slice(i, j + 1).concat([r[(j + 1) % n]]).map((v) => [v[0], v[1]]);   // corners of edges i..j
+        let keep;
+        if (r[i][2] === null) keep = run;
+        else { const rev = less(run[run.length - 1], run[0]); keep = dp(rev ? run.slice().reverse() : run); if (rev) keep.reverse(); }
+        keep.slice(0, -1).forEach((q) => out.push([q[0], q[1], r[i][2]]));
+        i = j + 1;
+      }
+      p.cell = out;
+    });
+    L.provinces.forEach((p) => {
+      const z = p.cell, n = z.length;
+      const pos = z.map((v, i) => (v[2] !== null && z[(i - 1 + n) % n][2] !== null ? snap(v) : [v[0], v[1]]));
+      const out = [];
+      const push = (x, y, nb) => { const q = out[out.length - 1];
+        if (q && Math.abs(q[0] - x) < 1e-6 && Math.abs(q[1] - y) < 1e-6) q[2] = nb; else out.push([x, y, nb]); };
+      z.forEach((v, i) => {
+        push(pos[i][0], pos[i][1], v[2]);
+        const m = v[2] !== null ? bend(pos[i], pos[(i + 1) % n]) : null;
+        if (m) push(m[0], m[1], v[2]);
+      });
+      const a = out[0], b = out[out.length - 1];
+      if (out.length > 1 && Math.abs(a[0] - b[0]) < 1e-6 && Math.abs(a[1] - b[1]) < 1e-6) { a[2] = a[2]; out.pop(); }
+      // a corner between two collinear pieces towards the same neighbour is no bend: drop it (both neighbours drop it)
+      for (let i = out.length - 1; i >= 0 && out.length > 3; i--) {
+        const P = out[(i - 1 + out.length) % out.length], Q = out[i], R = out[(i + 1) % out.length];
+        if (P[2] === Q[2] && Q[2] !== null && Math.abs((Q[0] - P[0]) * (R[1] - Q[1]) - (Q[1] - P[1]) * (R[0] - Q[0])) < 1e-6) out.splice(i, 1);
+      }
+      p.cell = out;
+    });
+  })();
   // Parts of the page that are not rendered (user, 2026-10-22, plan step F): with false the part is not in the DOM; the
   // code that builds it is kept and only skipped, so that setting true brings it back. Info box (todo B44): shownOnMap
   // (section "Shown on the map" with stages and proof choice), proofShownNote (the note "(shown)" after the shown proof,
@@ -39,7 +118,7 @@
   // switch "dependencies" is hidden and off, an=netz in the address is ignored, there is no legend row, and the page does
   // not load data/route-network.js; the code that draws the whole network is kept.
   const NETWORK_SHOWN = false;
-  const LIGHT = "#efe3c2", REF = 10, P = 0.45, Z_MIN = 0.02, Z_MAX = 16, Z_ZERO = 8, N_TOTAL = 30, MARGIN = 34;
+  const LIGHT = "#ffffff", REF = 10, P = 0.45, Z_MIN = 0.02, Z_MAX = 16, Z_ZERO = 8, N_TOTAL = 30, MARGIN = 34;
   const stage = document.getElementById("buehne"), svg = document.getElementById("karte"), paper = document.getElementById("papier");
   const pointer = document.getElementById("zeiger"), info = document.getElementById("info");
   const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
@@ -408,7 +487,7 @@
   // Draft 10: bridges (screen coordinates, recomputed for each frame), below the routes and the mountains
   const layerBridge = el("g", { id: "e11-bruecken" }, clipView);
   const dirSel = el("g", { id: "e8-routen-auswahl" }, clipView);
-  const layerSymbols = el("g", { id: "e8-symbole", filter: "url(#e8-hand)" }, clipView);
+  const layerSymbols = el("g", { id: "e8-symbole" }, clipView);   // modern map: crisp, without the hand-drawn filter
   // Proof points above the symbols: they lie just outside the mountain, inside its (transparent) click area
   const pointsSel = el("g", {}, clipView);
   const layerGuide = el("g", { id: "e8-fuehrung", "pointer-events": "none" }, clipView);
@@ -437,13 +516,25 @@
   // red, orange, ochre, yellow), or the colour is a grey (saturation below 0.1). Checked by tests/test-water-colours.js,
   // which also checks that neighbouring areas stay distinguishable. Until B69 k the rule held only at the water (the
   // former COAST_COLOR); 46, 58 and 81 were changed with B69 k.
-  const COLOR = { 14: "#d2b783", 11: "#cf9f98", 13: "#e6c45e", 18: "#c49dd9", 55: "#c9a5c6", 57: "#cbc58f", 32: "#dc8f9c",
-    53: "#c69ad6", 58: "#e88a5a", 81: "#cfb0dc", 52: "#c79bdb", 5: "#dccbe6", 12: "#d4b39a", 30: "#e9cb5a", 42: "#e7a56a",
-    46: "#c1a1e0", 22: "#d7a9b9", 68: "#b9b9b9", 20: "#e2cb6c" };
-  const countryColour = (c) => COLOR[c] || "#cbbf9f";
+  // Modern map: the water is light blue (hue about 188 degrees) instead of grey-green, so the violet countries 5, 18, 46,
+  // 52, 53 and 81 are turned towards magenta (hue 289 to 305), keeping the rule of at least 100 degrees from the water.
+  const COLOR = { 14: "#d2b783", 11: "#cf9f98", 13: "#e6c45e", 18: "#d89dd9", 55: "#c9a5c6", 57: "#cbc58f", 32: "#dc8f9c",
+    53: "#cb9ad6", 58: "#e88a5a", 81: "#dcb0da", 52: "#db9bd9", 5: "#e5cbe6", 12: "#d4b39a", 30: "#e9cb5a", 42: "#e7a56a",
+    46: "#d8a1e0", 22: "#d7a9b9", 68: "#b9b9b9", 20: "#e2cb6c" };
+  // Modern map: the colours of draft 11, made paler as in style 5 (palette of style-5-20th-century.js), same hues
+  const pale = (hex) => {
+    const r = parseInt(hex.slice(1, 3), 16) / 255, g = parseInt(hex.slice(3, 5), 16) / 255, b = parseInt(hex.slice(5, 7), 16) / 255;
+    const mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, dd = mx - mn;
+    let h = 0, sat = 0;
+    if (dd) { sat = dd / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / dd) % 6 : mx === g ? (b - r) / dd + 2 : (r - g) / dd + 4; h *= 60; if (h < 0) h += 360; }
+    const S2 = sat * 0.75 + 0.05, L2 = 0.82 + (l - 0.72) * 0.4, C = (1 - Math.abs(2 * L2 - 1)) * S2, X = C * (1 - Math.abs((h / 60) % 2 - 1)), m = L2 - C / 2;
+    const [r1, g1, b1] = h < 60 ? [C, X, 0] : h < 120 ? [X, C, 0] : h < 180 ? [0, C, X] : h < 240 ? [0, X, C] : h < 300 ? [X, 0, C] : [C, 0, X];
+    return "#" + [r1, g1, b1].map((v) => Math.round((v + m) * 255).toString(16).padStart(2, "0")).join("");
+  };
+  const countryColour = (c) => pale(COLOR[c] || "#cbbf9f");
   const outline = (z) => "M" + z.map((v) => f(v[0]) + "," + f(v[1])).join("L") + "Z";
   // Draft 10: sea below everything, the land within the irregular coast, the fjords cut into it
-  const SEA = "#b9cfcb", BANK = "#3f5753";
+  const SEA = "#d4e9ec", BANK = "#6a98b5";   // modern map: light blue water, blue shore lines
   seaFill.setAttribute("fill", SEA);
   defs.insertAdjacentHTML("beforeend", `<clipPath id="e11-kueste" clipPathUnits="userSpaceOnUse"><path d="${outline(coastPoly)}"/></clipPath>`);
   el("rect", { x: K0.CX - 6 * K0.RX, y: K0.CY - 6 * K0.RY, width: 12 * K0.RX, height: 12 * K0.RY, fill: SEA }, worldBottom);
@@ -476,9 +567,9 @@
       hatchLine(runs, op);
     });
   }
-  el("path", { d: outline(coastPoly), fill: "#f1e7cc", stroke: "none" }, worldBottom);
+  el("path", { d: outline(coastPoly), fill: "#f6f4ee", stroke: "none" }, worldBottom);
   const landG = el("g", { "clip-path": "url(#e11-kueste)" }, worldBottom);
-  L.provinces.forEach((p) => el("path", { d: outline(extendCell(p.cell)), fill: p.countries.length > 1 ? "#cfa98c" : countryColour(p.countries[0]), opacity: 0.5 }, landG));
+  L.provinces.forEach((p) => el("path", { d: outline(extendCell(p.cell)), fill: p.countries.length > 1 ? pale("#cfa98c") : countryColour(p.countries[0]) }, landG));
   const sameCountries = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
   const prov = [], country = [];
   L.provinces.forEach((p) => p.cell.forEach((v, i) => {
@@ -494,9 +585,10 @@
     (sameCountries(p.countries, PZ[nb].countries) ? prov : country).push(`M${f(v[0])},${f(v[1])}L${f(w[0])},${f(w[1])}`);
   }));
   const nsk = { "vector-effect": "non-scaling-stroke", fill: "none" };
-  const provLine = el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", "stroke-linecap": "round", opacity: 0.75 }, nsk), landG);
-  el("path", Object.assign({ d: country.join(""), stroke: "#8a3a2a", "stroke-width": 5, opacity: 0.18 }, nsk), landG);
-  el("path", Object.assign({ d: country.join(""), stroke: INK, "stroke-width": 1.8, "stroke-dasharray": "9 3 2 3", opacity: 0.9 }, nsk), landG);
+  // Modern map: borders as in style 5 (province: thin grey line; country: dash-dot line on a white band)
+  const provLine = el("path", Object.assign({ d: prov.join(""), stroke: "#7d7f84", "stroke-width": 0.8, opacity: 0.8, "stroke-linejoin": "miter" }, nsk), landG);
+  el("path", Object.assign({ d: country.join(""), stroke: "#ffffff", "stroke-width": 4, opacity: 0.8, "stroke-linejoin": "miter" }, nsk), landG);
+  el("path", Object.assign({ d: country.join(""), stroke: INK, "stroke-width": 1.6, "stroke-dasharray": "8 3 2 3", "stroke-linejoin": "miter" }, nsk), landG);
   // Coast: only the border of land at water (Konzept/04, 4.1); no wave signs (4.8)
   el("path", Object.assign({ d: outline(coastPoly), stroke: BANK, "stroke-width": 1.5, opacity: 0.9 }, nsk), worldBottom);
   // Fjords: water strip along the border of the two sides, open toward the sea; the banks are coast
@@ -564,7 +656,7 @@
     }
   });
 
-  // ------------------------------------------------------------ Names of countries and provinces (curved)
+  // ------------------------------------------------------------ Names of countries and provinces (straight in this map)
   // Direction: principal axis of the area (tilted at most 26°, horizontal for roundish areas); length: chord through
   // the area
   function axis(ms) {
@@ -654,7 +746,7 @@
     return { boxes, all };
   }
   const regions = [];
-  const PROVINCE_INK = "#6e4626";   // colour of the province names (todo B63)
+  const PROVINCE_INK = "#3d3f44";   // colour of the province names (todo B63)
   function regionName(o) {   // o: { text, attrs, th, x, y, len, height, fs0, fsMin, fsMax, country, says }
     const g = el("g", { class: "fname aus" }, layerNames);
     o.g = g; o.variants = [];
@@ -694,7 +786,8 @@
     Object.entries(countries).forEach(([k, ps]) => {
       const name = k === CONDO ? U("Arithmetische Geometrie") : (M.countries[k] ? M.countries[k].name : "");
       if (!name) return;
-      const a = axis(ps.map((p) => ms[p.key])), large = ps.length >= 3;
+      // Country names straight and horizontal, not curved (user, 2026-10-23, modern map): th 0 and says 0
+      const a = Object.assign(axis(ps.map((p) => ms[p.key])), { th: 0 }), large = ps.length >= 3;
       let x = a.x, y = a.y;
       if (L.countries && L.countries[k]) { x = L.countries[k].x; y = L.countries[k].y; }
       // plan 1.5: the layout file gives the anchor of every country name (field lines); older layouts only for large countries
@@ -704,7 +797,7 @@
       const fs0 = clamp(Math.sqrt(a.A) * 0.052, 13, 32);
       regionName({ cells: ps.map((p) => p.cell), text: name.toUpperCase(), attrs: { class: "sc", "letter-spacing": (large ? 0.22 : 0.08) * REF }, th: a.th,
         x: x + c * (t0 + t1) / 2, y: y + s * (t0 + t1) / 2, len: t1 - t0, height: u1 - u0, fs0, fsMin: 11, fsMax: large ? 44 : 22,
-        country: true, areaKey: k, says: 0.045, provKey: ps.length === 1 ? ps[0].key : null, opacityOf: large ? 0.6 : 0.8 });
+        country: true, areaKey: k, says: 0, provKey: ps.length === 1 ? ps[0].key : null, opacityOf: large ? 0.6 : 0.8 });
     });
     L.provinces.forEach((p) => {
       if (p.countries.length > 1) return;   // arithmetic geometry: country name suffices
@@ -716,7 +809,7 @@
       const [t0, t1] = chord([p.cell], p.text[0], p.text[1], c, s), [u0, u1] = chord([p.cell], p.text[0], p.text[1], s, -c);
       // Todo B63 (user, 2026-10-21): province names upright instead of italic, which was hard to read; a sepia colour and
       // a slight letter spacing keep them apart from the country names (small capitals, ink) and the mountain names (ink)
-      const o = { cells: [p.cell], text: P0.name, attrs: { "font-style": "normal", style: "fill:" + PROVINCE_INK, "letter-spacing": 0.04 * REF }, th: a.th, x: p.text[0] + c * (t0 + t1) / 2, y: p.text[1] + s * (t0 + t1) / 2,
+      const o = { cells: [p.cell], text: P0.name, attrs: { "font-style": "italic", "font-family": "'Fira Sans', Arial, sans-serif", "font-weight": 400, style: "fill:" + PROVINCE_INK, "letter-spacing": 0.02 * REF }, th: a.th, x: p.text[0] + c * (t0 + t1) / 2, y: p.text[1] + s * (t0 + t1) / 2,
         len: t1 - t0, height: u1 - u0, fs0: 13.5, fsMin: 10.5, fsMax: 19, country: false, areaKey: p.key, says: 0, opacityOf: 0.92 };
       regionName(o);
     });
@@ -846,14 +939,17 @@
   const SYM_REF = (L.elementLayout && L.elementLayout.constants && L.elementLayout.constants.K0) || 0.643;
   const stageOf = (level) => clamp(level || 4, 1, 4);
   const isConjecture = (n) => n.kind === "gipfel" || n.kind === "bedingt";
-  const partsOf = (n, level) => (n.kind === "trugbild" ? SY.unroofed(SY.BUILDINGS.B[stageOf(level)]) : SY.BUILDINGS.B[stageOf(level)]);
+  // Style of a building or city after the year of its theorem (user, 2026-10-23): medieval before 1700, classical
+  // until 1899, modern from 1900; without ?buildings=era every symbol has the chosen variant
+  const symOf = (n) => (SY.forYear ? SY.forYear(yearOf(n)) : SY);
+  const partsOf = (n, level) => { const Y = symOf(n); return n.kind === "trugbild" ? Y.unroofed(Y.BUILDINGS.B[stageOf(level)]) : Y.BUILDINGS.B[stageOf(level)]; };
   // Box of a building in units of the symbol (foot at y = foot), with the ground lines; the question mark of a conjecture
   // and its light halo are added (baseline 0.12 s above the top, cap height about 0.75 of the font size)
   function buildingBox(n, parts, s, foot) {
     const b = { x0: Math.min(...parts.map((p) => p.x)) * s - 1, x1: Math.max(...parts.map((p) => p.x + p.w)) * s + SY.D * s + 1,
-      y0: foot - SY.topOf(s, parts) - 1, y1: foot + 4.5 };
+      y0: foot - symOf(n).topOf(s, parts) - 1, y1: foot + 4.5 };
     if (isConjecture(n)) {
-      const fs = Math.max(0.8 * s, SY.QM_MIN / SYM_REF), base = foot - SY.topOf(s, parts) - 0.12 * s;
+      const fs = Math.max(0.8 * s, SY.QM_MIN / SYM_REF), base = foot - symOf(n).topOf(s, parts) - 0.12 * s;
       b.y0 = Math.min(b.y0, base - 0.8 * fs); b.x0 = Math.min(b.x0, 0.05 * s - 0.36 * fs); b.x1 = Math.max(b.x1, 0.05 * s + 0.36 * fs);
     }
     return b;
@@ -862,9 +958,9 @@
   // once per city in the hidden measuring group
   const citySize = (s) => (s >= 31 ? "gross" : s >= 28 ? "mittel" : "klein");
   const citySeed = (n) => (T.hash(n.key) % 997) + 1;
-  function cityBox(s, size, seed) {
+  function cityBox(s, size, seed, Y) {
     const g = el("g", {}, measureG);
-    SY.city(g, s, size, seed, false);
+    (Y || SY).city(g, s, size, seed, false);
     const r = g.getBBox(); g.remove();
     return { x0: r.x - 0.5, x1: r.x + r.width + 0.5, y0: r.y - 0.5, y1: r.y + r.height + 0.5 };
   }
@@ -962,7 +1058,7 @@
   }
   // Water strip for the rows of the bridges in the legend
   function legendWater(g) {
-    el("rect", { x: -23, y: -16, width: 46, height: 32, fill: "#f1e7cc" }, g); el("rect", { x: -12, y: -16, width: 24, height: 32, fill: SEA }, g);
+    el("rect", { x: -23, y: -16, width: 46, height: 32, fill: "#f6f4ee" }, g); el("rect", { x: -12, y: -16, width: 24, height: 32, fill: SEA }, g);
     el("path", { d: "M-12,-16V16M12,-16V16", stroke: BANK, "stroke-width": 1, fill: "none" }, g);
   }
   function drawFlag(e) {
@@ -985,9 +1081,9 @@
       // element for selection and the name
       tip = { x: 0, y: -s }; box = { x0: -s, x1: s, y0: -s, y1: s };
     } else if (n.kind === "gebaeude") {   // theory: city (plan step 4.5); its name appears only in the hover box
-      const size = citySize(s), seed = citySeed(n), cb = cityBox(s, size, seed);
+      const size = citySize(s), seed = citySeed(n), cb = cityBox(s, size, seed, symOf(n));
       el("rect", { x: cb.x0, y: cb.y0, width: cb.x1 - cb.x0, height: cb.y1 - cb.y0, fill: "transparent", stroke: "none" }, g);   // click area
-      SY.city(g, s, size, seed, false);
+      symOf(n).city(g, s, size, seed, false);
       g.setAttribute("data-symbol", "city"); g.setAttribute("data-size", size);
       tip = { x: 0, y: cb.y0 }; box = cb;
     } else if (n.kind === "kueste") {   // programme: dashed outline (the key "kueste" is kept from the model)
@@ -997,11 +1093,11 @@
       tip = { x: 0, y: -s * 0.9 }; box = { x0: -s * 1.8, x1: s * 1.8, y0: -s * 0.9, y1: s * 0.8 };
     } else {   // theorem, open conjecture, refuted conjecture: building of the stage of its level (plan step 4.5)
       const parts = partsOf(n, e.level), bg = el("g", { transform: `translate(0 ${f(BUILDING_FOOT * s)})` }, g);
-      if (isConjecture(n)) SY.conjecture(bg, s, parts, SYM_REF); else SY.building(bg, s, parts);
+      if (isConjecture(n)) symOf(n).conjecture(bg, s, parts, SYM_REF); else symOf(n).building(bg, s, parts);
       box = buildingBox(n, parts, s, BUILDING_FOOT * s);
-      e.body0 = isConjecture(n) ? buildingBox({ kind: "berg" }, parts, s, BUILDING_FOOT * s) : box;   // todo B73: without the question mark
+      e.body0 = isConjecture(n) ? buildingBox(Object.assign({}, n, { kind: "berg" }), parts, s, BUILDING_FOOT * s) : box;   // todo B73: without the question mark
       g.setAttribute("data-symbol", isConjecture(n) ? "conjecture" : n.kind === "trugbild" ? "ruin" : "building");
-      g.setAttribute("data-stage", stageOf(e.level));
+      g.setAttribute("data-stage", stageOf(e.level)); if (SY.forYear) g.setAttribute("data-era", SY.eraOf(yearOf(n)));
       tip = { x: 0, y: box.y0 + 1 };
     }
     e.tip = tip; e.box0 = box;
@@ -1091,8 +1187,8 @@
       ["Gebiete", [
         // Plan 4.5, follow-up 3 (user, 2026-10-22, todo B68): the rows "Land" (main area of the MSC) and "Weißer Fleck"
         // (no data) are left out; the subarea border without the note on the three-character MSC classes
-        [(g) => { stroke(g, Object.assign({ d: "M-20,0H20", stroke: "#8a3a2a", "stroke-width": 5, opacity: 0.18 }, nsk)); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.8, "stroke-dasharray": "9 3 2 3", "stroke-linecap": "butt", opacity: 0.9 }); }, "Grenze", "Grenze zwischen zwei Ländern"],
-        [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", opacity: 0.75 }), "Provinz", "Grenze zwischen Provinzen"],
+        [(g) => { stroke(g, Object.assign({ d: "M-20,0H20", stroke: "#ffffff", "stroke-width": 4, opacity: 0.8 }, nsk)); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.6, "stroke-dasharray": "8 3 2 3", "stroke-linecap": "butt" }); }, "Grenze", "Grenze zwischen zwei Ländern"],
+        [(g) => stroke(g, { d: "M-20,0H20", stroke: "#7d7f84", "stroke-width": 0.8, opacity: 0.8 }), "Provinz", "Grenze zwischen Provinzen"],
       ]],
       ["Sätze und Vermutungen", [
         // Plan step 4.5 (user, 2026-10-22): building, building with a question mark, ruin, programme, city, bridges
@@ -1695,17 +1791,12 @@
       // line between two ornamental rules, the title in large italic. The first rect is the box of the cartouche
       // (test-cartouche.js); it is not painted.
       el("rect", { width: 400, height: 62, fill: "none", stroke: "none" }, cartouche);
-      const r = 10;
-      el("path", { d: `M${r},0H${400 - r}A${r},${r} 0 0 0 400,${r}V${62 - r}A${r},${r} 0 0 0 ${400 - r},62H${r}A${r},${r} 0 0 0 0,${62 - r}V${r}A${r},${r} 0 0 0 ${r},0Z`,
-        fill: "#faf5e8", stroke: INK, "stroke-width": 1.3 }, cartouche);
-      el("rect", { x: 7, y: 5, width: 386, height: 52, fill: "none", stroke: INK, "stroke-width": 0.5 }, cartouche);
-      el("path", { d: "M112,16.5H158M242,16.5H288", stroke: INK, "stroke-width": 0.6 }, cartouche);
-      [[109, 16.5], [291, 16.5], [7, 31], [393, 31]].forEach(([x, y]) =>
-        el("path", { d: `M${x - 3},${y}L${x},${y - 2.2}L${x + 3},${y}L${x},${y + 2.2}Z`, fill: INK }, cartouche));
-      text(U("Landschaft der"), { x: 200, y: 20.5, "font-size": 12.5, "font-style": "italic", "text-anchor": "middle" }, cartouche);
-      // title case for the italic title, except the conjunction
-      const title = U("Zahlentheorie und algebraische Geometrie").replace(/\b(?!and\b|und\b)\p{Ll}/gu, (c) => c.toUpperCase());
-      text(title, { x: 200, y: 46, "font-size": 22, "font-style": "italic", "text-anchor": "middle" }, cartouche);
+      // Modern map: white box with a thin grey edge and a red bar on the left, as in the style preview of the 20th century
+      el("rect", { x: 0.5, y: 0.5, width: 399, height: 61, fill: "#ffffff", stroke: "#c9cacc", "stroke-width": 1 }, cartouche);
+      el("rect", { x: 0.5, y: 0.5, width: 6, height: 61, fill: RED }, cartouche);
+      text(U("Landschaft der"), { x: 22, y: 21, "font-size": 12.5, "font-family": "'Fira Sans', Arial, sans-serif", fill: "#55585e" }, cartouche);
+      const title = U("Zahlentheorie und algebraische Geometrie");
+      text(title, { x: 22, y: 47, "font-size": 21, "font-weight": 600, "font-family": "'Fira Sans', Arial, sans-serif", fill: INK }, cartouche);
     }
   }
   // Screen box of the cartouche (plan 1.5, addendum "water", user 2026-10-21): it sits flush in the top left corner of the
@@ -3101,6 +3192,6 @@
         selectionProofs: selGroups.reduce((s, G) => s + G.items.filter((it) => it.kind !== "hollow").length, 0), flags: E.filter((e) => e.withFlag).length }) };
     document.body.dataset.bereit = "1";
   }
-  const fonts = Promise.all(['16px "IM Fell English"', 'italic 16px "IM Fell English"', '16px "IM Fell English SC"'].map((s) => document.fonts.load(s).catch(() => null)));
+  const fonts = Promise.all(['16px "Fira Sans"', 'italic 300 16px "Fira Sans"', '600 16px "Fira Sans"', '500 16px "Fira Sans Condensed"'].map((s) => document.fonts.load(s).catch(() => null)));
   Promise.race([fonts.then(() => document.fonts.ready), new Promise((r) => setTimeout(r, 2500))]).then(start);
 })();

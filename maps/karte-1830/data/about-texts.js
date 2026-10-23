@@ -11,16 +11,16 @@
   window.K1830_ABOUT = [
     // Sources: maps/karte-1830/PLAN.html (goal of the map: areas of the time, areas not yet developed in 1830 do not
     // appear); data/theorems.js, header (state of knowledge at the end of 1830; types satz, vermutung, grundlage); counts
-    // from the data: 327 theorems (3 of them with `correspondence`), 31 conjectures (21 "offen", 6 "teilweise",
-    // 4 "widerlegt"), 9 foundations, 391 proofs; window.K1830.symbols(): 324 buildings (berg), 27 buildings with a question
+    // from the data: 326 theorems (3 of them with `correspondence`), 31 conjectures (21 "offen", 6 "teilweise",
+    // 4 "widerlegt"), 9 foundations, 389 proofs; window.K1830.symbols(): 323 buildings (berg), 27 buildings with a question
     // mark (gipfel), 4 ruins (trugbild), 9 cities (gebaeude), 3 bridges.
     {
       q: "What is this map?",
       a: "<p>This map shows mathematics as it was known at the end of 1830, in the areas of that time. Fields that did not " +
         "yet exist in 1830 do not appear.</p>" +
-        "<p>The map contains 327 theorems, three of which are correspondences drawn as bridges, 27 conjectures that were " +
+        "<p>The map contains 326 theorems, three of which are correspondences drawn as bridges, 27 conjectures that were " +
         "still open in 1830, 4 conjectures that had been disproved by then, and 9 theories that the proofs of the time used " +
-        "as a whole. It records 391 proofs. A click on a building shows which other theorems its proof uses.</p>",
+        "as a whole. It records 389 proofs. A click on a building shows which other theorems its proof uses.</p>",
     },
     // Sources: GLOSSAR.md, section 2 (building, building with a question mark, ruin, city, bridge, fjord, route); legend of
     // the page; data/theorems.js, header (type grundlage: knowledge assumed in 1830 that is not split into theorems; state
@@ -76,7 +76,7 @@
         "of the original works on Wikisource; most entries have not been checked against the original works.</p>",
     },
     // Sources: data/theorems.js, header ("proofs": hyperedges as the proofs were given at the time, with year, person and
-    // source; kind "bedingt"; only proofs published by 1830; `tacit` remain premises); counts from the data: 391 proofs,
+    // source; kind "bedingt"; only proofs published by 1830; `tacit` remain premises); counts from the data: 389 proofs,
     // 3 of kind "bedingt", 17 with `tacit`; GLOSSAR.md (Beweis, Prämisse, Bedingter Beweis, Beweispunkt); the page shows
     // the earliest proof first and marks the others with a hollow circle (legend "further proof; a click shows it").
     {
@@ -87,7 +87,7 @@
         "with a hollow circle.</p>" +
         "<p>Some proofs used statements that were taken for granted then and proved only later, such as unique prime " +
         "factorization in Euler's work or the fundamental theorem of algebra before 1799. They remain premises, because " +
-        "the proof depends on them, and the info box marks them as “assumed tacitly”. This applies to 17 of the 391 " +
+        "the proof depends on them, and the info box marks them as “assumed tacitly”. This applies to 17 of the 389 " +
         "proofs. Three proofs are conditional: they assume a statement that was still a conjecture in 1830.</p>",
     },
     // Wording of the question as in draft 12 (fixed by the user for draft 12, 22 October 2026).

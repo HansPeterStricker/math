@@ -33,6 +33,14 @@
   // double rule as frame), borders "atlas" (dash-dot country borders and dashed province borders of the lithographed
   // atlases), cartouche.kind "atlas" (title block: a plain rectangle, the first line in small italic, the second in spaced
   // capitals, a double rule below; STYLE.cartouche.font).
+  // Plan step P9 of the map of antiquity, follow-up (style of the Middle Ages, maps/stile/style-1-medieval.js, after the
+  // mappae mundi of Ebstorf and Hereford), further keys and values that act only when a map sets them: paper "vellum"
+  // (vellum with a mottled tone and pores), frame "redgold" (frame of red rules with a gold band and red dots, in place of
+  // the gold ring around the disc of the style sheet), areaFill ({ opacity, brush }: opacity of the area colour and, with
+  // brush, a slightly irregular painted edge; brush is the displacement in screen px), borders "redline" (red country
+  // borders with a light inner line, dotted province borders), countryUpper (false: the country names keep their case, for
+  // Gothic letters), cartouche.kind "initial" (panel with a red rule, a red initial on gold and the title in Gothic letters,
+  // the second line in a book hand; STYLE.cartouche.gothic and .font).
   const STYLE = CFG.STYLE || null;
   // Plan step P6 of the map 1830: notes of a historical map in the hover box and the info box (setting ERA_NOTES,
   // optional; German patterns, translated with U). Only elements whose model passes the fields show them.
@@ -175,7 +183,26 @@
   })();
   const cartouche = el("g", { id: "e12-cartouche", "pointer-events": "none" }, clipOuter);
   const HALO = (STYLE && STYLE.halo) || LIGHT;   // plan step P6 of the map 1830: halo of the names from the style
-  const font = (t, a, g) => text(t, Object.assign({ "paint-order": "stroke", stroke: HALO, "stroke-linejoin": "round" }, a), g);
+  // User, 2026-10-23: a name with <sup>, <sub>, <i> or <b> (also nested, "2<sup>2<sup>n</sup></sup> + 1") is drawn with
+  // tspans: each level of super- or subscript MAP_CORE.RICH_SCALE times smaller and shifted up or down from the level
+  // below it; a name without these tags stays one plain text element (map-core.js, richRuns)
+  const RICH = /<\/?(?:sup|sub|i|b)>/i, RICH_SHIFT = { sup: "super", sub: "sub" };
+  function richText(t, a, g) {
+    const node = el("text", a, g), stack = [];
+    let cur = node;
+    String(t).split(/(<\/?(?:sup|sub|i|b)>)/i).forEach((part) => {
+      if (!part) return;
+      const m = /^<(\/?)(sup|sub|i|b)>$/i.exec(part);
+      if (!m) { cur.appendChild(document.createTextNode(part)); return; }
+      if (m[1]) { if (stack.length) cur = stack.pop(); return; }
+      const tag = m[2].toLowerCase();
+      const at = RICH_SHIFT[tag] ? { "baseline-shift": RICH_SHIFT[tag], "font-size": Math.round(CORE.RICH_SCALE * 100) + "%" } : tag === "i" ? { "font-style": "italic" } : { "font-weight": "bold" };
+      stack.push(cur); cur = el("tspan", at, cur);
+    });
+    return node;
+  }
+  const textOrRich = (t, a, g) => (RICH.test(String(t)) ? richText(t, a, g) : text(t, a, g));
+  const font = (t, a, g) => textOrRich(t, Object.assign({ "paint-order": "stroke", stroke: HALO, "stroke-linejoin": "round" }, a), g);
 
   // Countries and provinces (areas in world coordinates)
   // Colours of the countries (setting COLOR of the map, with the rule against bluish and greenish colours); a province
@@ -223,7 +250,18 @@
   // country sits in a band inside its borders (below)
   const BC = STYLE && STYLE.borderColouring;
   const provinceColour = (p) => (p.countries.length > 1 ? CFG.CONDO_COLOR : countryColour(p.countries[0]));
-  L.provinces.forEach((p) => el("path", { d: outline(extendCell(p.cell)), fill: provinceColour(p), opacity: BC ? BC.wash : 0.5 }, landG));
+  // Plan step P9 of the map of antiquity, follow-up: STYLE.areaFill sets the opacity of the area colour and with brush draws
+  // the colours in a group with a displacement filter (edge of a brush; the displacement is set per view in drawAt)
+  const AF = STYLE && STYLE.areaFill;
+  let brushMap = null, fillG = landG;
+  if (AF && AF.brush) {
+    defs.insertAdjacentHTML("beforeend", `<filter id="e12-brush" x="-3%" y="-3%" width="106%" height="106%">
+      <feTurbulence type="fractalNoise" baseFrequency="0.05" numOctaves="2" seed="9" result="n"/>
+      <feDisplacementMap id="e12-brush-map" in="SourceGraphic" in2="n" scale="2.4" xChannelSelector="R" yChannelSelector="G"/></filter>`);
+    brushMap = document.getElementById("e12-brush-map");
+    fillG = el("g", { class: "area-brush", filter: "url(#e12-brush)" }, landG);
+  }
+  L.provinces.forEach((p) => el("path", { d: outline(extendCell(p.cell)), fill: provinceColour(p), opacity: BC ? BC.wash : AF && AF.opacity != null ? AF.opacity : 0.5 }, fillG));
   const sameCountries = (a, b) => a.length === b.length && a.every((x) => b.includes(x));
   const prov = [], country = [];
   // Plan step P6 of the map 1830: the segments of the country borders also per country (both sides), for the bands
@@ -265,13 +303,20 @@
   const DASHDOT = STYLE && STYLE.borders === "dashdot";
   // Plan step P6 of the map 1900: borders of the atlases of the 19th century (STYLE.borders "atlas")
   const ATLAS = STYLE && STYLE.borders === "atlas";
-  const provLine = ATLAS
+  // Plan step P9 of the map of antiquity, follow-up: borders of the medieval style sheet (STYLE.borders "redline")
+  const REDLINE = STYLE && STYLE.borders === "redline", REDLINE_RED = "#a3221a", REDLINE_INNER = (STYLE && STYLE.land) || PAPER;
+  const provLine = REDLINE
+    ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1, "stroke-dasharray": "1 4", "stroke-linecap": "round", opacity: 0.8 }, nsk), landG)
+    : ATLAS
     ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 0.9, "stroke-dasharray": "4 2.5", opacity: 0.75 }, nsk), landG)
     : DOTTED
     ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "0.1 3.4", "stroke-linecap": "round", opacity: 0.9 }, nsk), landG)
     : DASHDOT ? el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.2 3.6", "stroke-linecap": "round", opacity: 0.85 }, nsk), landG)
     : el("path", Object.assign({ d: prov.join(""), stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", "stroke-linecap": "round", opacity: 0.75 }, nsk), landG);
-  if (ATLAS) {
+  if (REDLINE) {
+    el("path", Object.assign({ d: country.join(""), stroke: REDLINE_RED, "stroke-width": 3.2, opacity: 0.95, "stroke-linecap": "round" }, nsk), landG);
+    el("path", Object.assign({ d: country.join(""), stroke: REDLINE_INNER, "stroke-width": 0.9, opacity: 0.9 }, nsk), landG);
+  } else if (ATLAS) {
     el("path", Object.assign({ d: country.join(""), stroke: INK, "stroke-width": 1.4, "stroke-dasharray": "7 2 1.5 2 1.5 2", opacity: 0.95 }, nsk), landG);
   } else if (DASHDOT) {
     el("path", Object.assign({ d: country.join(""), stroke: INK, "stroke-width": 1.7, "stroke-dasharray": "8 3 1.5 3", opacity: 0.95 }, nsk), landG);
@@ -397,7 +442,7 @@
     return t1 > t0 ? [t0, t1] : [0, 0];
   }
   const measureG = el("g", { opacity: 0 }, svg);
-  function measureText(t, a) { const e = text(t, Object.assign({ "font-size": REF }, a), measureG); const w = e.getComputedTextLength(); e.remove(); return w; }
+  function measureText(t, a) { const e = textOrRich(t, Object.assign({ "font-size": REF }, a), measureG); const w = e.getComputedTextLength(); e.remove(); return w; }
   let pathNo = 0;
   function arcPath(th, len, dev, off) {
     const c = Math.cos(th), s = Math.sin(th), ux = s, uy = -c, mx = -ux * off, my = -uy * off;
@@ -482,7 +527,8 @@
       const [u0, u1] = chord(ps.map((p) => p.cell), x, y, s, -c);
       const fs0 = clamp(Math.sqrt(a.A) * 0.052, 13, 32);
       // plan step P6 of the map 1830: STYLE.countryName adds attributes (e.g. the weight)
-      regionName({ cells: ps.map((p) => p.cell), text: name.toUpperCase(), attrs: Object.assign({ class: "sc", "letter-spacing": (large ? 0.22 : 0.08) * REF }, STYLE && STYLE.countryName), th: a.th,
+      // plan step P9 of the map of antiquity, follow-up: STYLE.countryUpper false keeps the case (Gothic letters)
+      regionName({ cells: ps.map((p) => p.cell), text: STYLE && STYLE.countryUpper === false ? name : name.toUpperCase(), attrs: Object.assign({ class: "sc", "letter-spacing": (large ? 0.22 : 0.08) * REF }, STYLE && STYLE.countryName), th: a.th,
         x: x + c * (t0 + t1) / 2, y: y + s * (t0 + t1) / 2, len: t1 - t0, height: u1 - u0, fs0, fsMin: 11, fsMax: large ? 44 : 22,
         country: true, areaKey: k, says: 0.045, provKey: ps.length === 1 ? ps[0].key : null, opacityOf: large ? 0.6 : 0.8 });
     });
@@ -578,7 +624,9 @@
   // houses of a city are not nodes). A counterexample has no symbol of its own (a refuted conjecture X is the theorem
   // not-X); it appears in the info box of the ruin. The foot of a building lies where the foot of the mountain lay
   // (0.45 s below the centre), so that the symbol stays at its place of plan step 1.4.
-  const SY = window.SKETCH_SYMBOLS, BUILDING_FOOT = 0.45;
+  // User, 2026-10-23: STYLE.buildings ("classicism" map 1830, "gruenderzeit" map 1900) draws the buildings of that period
+  // (maps/shared_scripts/epoch-symbols.js, same interface and footprints as line B); without the setting nothing changes
+  const SY = STYLE && STYLE.buildings && window.EPOCH_SYMBOLS ? window.EPOCH_SYMBOLS.make(STYLE.buildings) : window.SKETCH_SYMBOLS, BUILDING_FOOT = 0.45;
   // Scale of the symbols at magnification 1 in the test window (as in place-elements.js): the question mark has at least
   // SY.QM_MIN screen pixels there, so that it is readable at magnification 1
   const SYM_REF = (L.elementLayout && L.elementLayout.constants && L.elementLayout.constants.K0) || 0.643;
@@ -761,6 +809,14 @@
     const textLines = wrapName(shortName(n), attrs);
     textLines.forEach((z, i) => font(z, Object.assign({ x: 0, y: f(i * LH * REF), "font-size": REF, "text-anchor": "middle", "stroke-width": 0.3 * REF }, attrs), g));
     e.lab = g; e.fs = fs; e.lw = Math.max(...textLines.map((z) => measureText(z, attrs))); e.nl = textLines.length; e.labAt = false;
+    // User, 2026-10-23 (ERA_NOTES.resolvedOnMap): a conjecture settled after the year of the map gets a second, smaller
+    // italic line with year and persons below its name; it belongs to the name block (same threshold, part of its box)
+    const rl = CORE.resolvedLine(n, ERA, FM);
+    if (rl) {
+      const RL = CORE.RESOLVED_LINE, ra = { "font-weight": "normal", "font-style": "italic" };
+      font(rl, Object.assign({ x: 0, y: f((textLines.length - 1 + RL.step) * LH * REF), "font-size": f(RL.size * REF), "text-anchor": "middle", "stroke-width": f(0.3 * RL.size * REF), class: "nachher" }, ra), g);
+      e.lw = Math.max(e.lw, measureText(rl, ra) * RL.size); e.nl += RL.step;
+    }
     e.lead = el("line", { stroke: INK, "stroke-width": 1, opacity: 0.75, display: "none" }, layerGuide); e.leadAt = false;
     hint.set(g, { key: n.key });
     selectable.set(g, n.key);
@@ -831,14 +887,18 @@
         // (no data) are left out; the subarea border without the note on the three-character MSC classes
         // Plan step P6 of the map 1830: with the dotted borders and the border colouring of the style the rows show them
         // Plan step P9 of the map of antiquity: the dash-dot borders of the Renaissance, with the bands of the border colouring
-        DASHDOT ? [(g) => { if (BC) { const c = Object.values(COLOR); stroke(g, { d: "M-20,-3H20", stroke: c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" });
+        // Plan step P9 of the map of antiquity, follow-up: the red borders of the medieval style
+        REDLINE ? [(g) => { stroke(g, { d: "M-20,0H20", stroke: REDLINE_RED, "stroke-width": 3.2, opacity: 0.95, "stroke-linecap": "butt" });
+          stroke(g, { d: "M-20,0H20", stroke: REDLINE_INNER, "stroke-width": 0.9, opacity: 0.9, "stroke-linecap": "butt" }); }, "Grenze", "Grenze zwischen zwei Ländern"]
+        : DASHDOT ? [(g) => { if (BC) { const c = Object.values(COLOR); stroke(g, { d: "M-20,-3H20", stroke: c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" });
           stroke(g, { d: "M-20,3H20", stroke: c[1] || c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" }); }
           stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.7, "stroke-dasharray": "8 3 1.5 3", "stroke-linecap": "butt", opacity: 0.95 }); }, "Grenze", "Grenze zwischen zwei Ländern"]
         : DOTTED ? [(g) => { if (BC) { const c = Object.values(COLOR); stroke(g, { d: "M-20,-3H20", stroke: c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" });
           stroke(g, { d: "M-20,3H20", stroke: c[1] || c[0], "stroke-width": 6, opacity: BC.bandOpacity, "stroke-linecap": "butt" }); }
           stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.7, "stroke-dasharray": "0.1 3.6" }); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 0.5, opacity: 0.8 }); }, "Grenze", "Grenze zwischen zwei Ländern"]
         : [(g) => { stroke(g, Object.assign({ d: "M-20,0H20", stroke: "#8a3a2a", "stroke-width": 5, opacity: 0.18 }, nsk)); stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.8, "stroke-dasharray": "9 3 2 3", "stroke-linecap": "butt", opacity: 0.9 }); }, "Grenze", "Grenze zwischen zwei Ländern"],
-        DASHDOT ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.2 3.6", "stroke-linecap": "round", opacity: 0.85 }), "Provinz", "Grenze zwischen Provinzen"]
+        REDLINE ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1, "stroke-dasharray": "1 4", "stroke-linecap": "round", opacity: 0.8 }), "Provinz", "Grenze zwischen Provinzen"]
+        : DASHDOT ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.2 3.6", "stroke-linecap": "round", opacity: 0.85 }), "Provinz", "Grenze zwischen Provinzen"]
         : DOTTED ? [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "0.1 3.4", opacity: 0.9 }), "Provinz", "Grenze zwischen Provinzen"]
         : [(g) => stroke(g, { d: "M-20,0H20", stroke: INK, "stroke-width": 1.1, "stroke-dasharray": "1.5 3.5", opacity: 0.75 }), "Provinz", "Grenze zwischen Provinzen"],
       ]],
@@ -1432,13 +1492,14 @@
   function drawPaper() {
     paper.innerHTML = ""; paper.setAttribute("viewBox", `0 0 ${Wv} ${Hv}`); svg.setAttribute("viewBox", `0 0 ${Wv} ${Hv}`);
     T.filter(el("defs", {}, paper), Wv, Hv);
-    if (STYLE && STYLE.paper === "laid") laidPaper(); else if (STYLE && STYLE.paper === "cream") creamPaper(); else if (STYLE && STYLE.paper === "plain") plainPaper(); else T.paperAndFrame(paper, Wv, Hv);
+    if (STYLE && STYLE.paper === "laid") laidPaper(); else if (STYLE && STYLE.paper === "cream") creamPaper(); else if (STYLE && STYLE.paper === "plain") plainPaper(); else if (STYLE && STYLE.paper === "vellum") vellumPaper(); else T.paperAndFrame(paper, Wv, Hv);
+    if (STYLE && STYLE.frame === "redgold") frameRedGold();
     seaFill.setAttribute("width", Wv); seaFill.setAttribute("height", Hv);
     const c = document.getElementById("e8-clip");
     c.setAttribute("width", Math.max(0, Wv - 2 * MARGIN)); c.setAttribute("height", Math.max(0, Hv - 2 * MARGIN));
     // plan 1.5, round 2 (user, 2026-10-21): the cartouche stands top left (before: bottom right); since the addendum
     // "water" fixed in the corner of the frame (see placeCartouche), drawn once here
-    if (!cartouche.firstChild && STYLE && STYLE.cartouche) { if (STYLE.cartouche.kind === "strapwork") cartoucheStrapwork(); else if (STYLE.cartouche.kind === "atlas") cartoucheAtlas(); else cartouche18(); }
+    if (!cartouche.firstChild && STYLE && STYLE.cartouche) { if (STYLE.cartouche.kind === "strapwork") cartoucheStrapwork(); else if (STYLE.cartouche.kind === "atlas") cartoucheAtlas(); else if (STYLE.cartouche.kind === "initial") cartoucheInitial(); else cartouche18(); }
     if (!cartouche.firstChild) {
       // User, 2026-10-22: two lines "Landscape of" / "Number theory and algebraic geometry", without "Draft 11 · Langlands bridge".
       // Same day: style of a copperplate frame (proposal 5 of skizzen/kartusche.html): concave corners, double rule, the first
@@ -1560,6 +1621,63 @@
     text(U(CFG.cartoucheTitle[0]).toUpperCase(), { x: 200, y: 30.5, "font-size": 15.5, style: `font-family:${C.font}`, "font-weight": 500, "letter-spacing": 2.4, "text-anchor": "middle", fill: INK }, cartouche);
     text(U(CFG.cartoucheTitle[1]), { x: 200, y: 44, "font-size": 12, style: `font-family:${C.font}`, "font-style": "italic", "text-anchor": "middle", fill: "#5a3e24" }, cartouche);
   }
+  // Plan step P9 of the map of antiquity, follow-up, style of the Middle Ages (maps/stile/style-1-medieval.js): vellum with a
+  // mottled tone and fine pores; like the other papers the layer lies above the map with mix-blend-mode multiply
+  // (STYLE.paperOpacity { mottle, pores })
+  function vellumPaper() {
+    paper.querySelector("defs").insertAdjacentHTML("beforeend", `
+      <filter id="p9m-vellum" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="0.006" numOctaves="4" seed="21" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.45  0 0 0 0 0.32  0 0 0 0 0.12  0 0 0 1.3 -0.55"/></filter>
+      <filter id="p9m-pores" x="0" y="0" width="100%" height="100%">
+        <feTurbulence type="fractalNoise" baseFrequency="1.2" numOctaves="1" seed="4" result="n"/>
+        <feColorMatrix in="n" type="matrix" values="0 0 0 0 0.3  0 0 0 0 0.2  0 0 0 0 0.1  0 0 0 1.2 -0.6"/></filter>`);
+    const C = STYLE.paperOpacity || { mottle: 0.5, pores: 0.18 };
+    el("rect", { width: Wv, height: Hv, filter: "url(#p9m-vellum)", opacity: C.mottle, "pointer-events": "none", style: "mix-blend-mode:multiply" }, paper);
+    el("rect", { width: Wv, height: Hv, filter: "url(#p9m-pores)", opacity: C.pores, "pointer-events": "none", style: "mix-blend-mode:multiply" }, paper);
+  }
+  // Frame of the medieval style (STYLE.frame "redgold"): in place of the gold ring around the disc of the style sheet, which
+  // would need the disc, a gold band with red dots between two red rules, and a thin ink rule at the clip of the map
+  // (MARGIN). The frame has no meaning.
+  function frameRedGold() {
+    const red = "#a3221a";
+    paper.querySelector("defs").insertAdjacentHTML("beforeend", `<linearGradient id="p9m-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c063"/><stop offset=".5" stop-color="#c49a3a"/><stop offset="1" stop-color="#a77a22"/></linearGradient>`);
+    const g = el("g", { fill: "none", "pointer-events": "none" }, paper);
+    const rule = (d, attrs) => el("rect", Object.assign({ x: d, y: d, width: Math.max(0, Wv - 2 * d), height: Math.max(0, Hv - 2 * d) }, attrs), g);
+    rule(15, { stroke: "url(#p9m-gold)", "stroke-width": 13 });
+    rule(7, { stroke: red, "stroke-width": 2.4 });
+    rule(23, { stroke: red, "stroke-width": 2.4 });
+    rule(MARGIN, { stroke: INK, "stroke-width": 0.9 });
+    // red dots along the middle of the gold band, about every 24 px, one in each corner
+    const d = 15, x0 = d, y0 = d, x1 = Wv - d, y1 = Hv - d, pts = [];
+    [[x0, y0, x1, y0], [x1, y0, x1, y1], [x1, y1, x0, y1], [x0, y1, x0, y0]].forEach(([ax, ay, bx, by]) => {
+      const n = Math.max(1, Math.round(Math.hypot(bx - ax, by - ay) / 24));
+      for (let i = 0; i < n; i++) pts.push([ax + (bx - ax) * i / n, ay + (by - ay) * i / n]);
+    });
+    if (Wv > 2 * d && Hv > 2 * d) el("path", { d: pts.map(([x, y]) => `M${f(x - 2.2)},${f(y)}a2.2,2.2 0 1 0 4.4,0a2.2,2.2 0 1 0 -4.4,0Z`).join(""), fill: red, opacity: 0.85 }, g);
+  }
+  // Cartouche of the medieval style (plan step P9 of the map of antiquity, follow-up, after the style sheet): a panel with a
+  // red rule and an inner ink rule, a red initial on a gold square, the rest of the first line in Gothic letters
+  // (STYLE.cartouche.gothic), the second line in red italic book hand (STYLE.cartouche.font). The ornament has no meaning.
+  // Same box of 400 x 62 units as the cartouche of draft 12; nothing is drawn outside it.
+  function cartoucheInitial() {
+    const C = STYLE.cartouche, red = C.red || "#a3221a";
+    defs.insertAdjacentHTML("beforeend", `<linearGradient id="e12-initial-gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#e2c063"/><stop offset=".5" stop-color="#c49a3a"/><stop offset="1" stop-color="#a77a22"/></linearGradient>`);
+    el("rect", { width: 400, height: 62, fill: "none", stroke: "none" }, cartouche);
+    el("rect", { x: 1.2, y: 1.2, width: 397.6, height: 59.6, fill: C.fill || "#f2e5c4", stroke: red, "stroke-width": 2.4 }, cartouche);
+    el("rect", { x: 5.5, y: 5.5, width: 389, height: 51, fill: "none", stroke: INK, "stroke-width": 0.5 }, cartouche);
+    el("rect", { x: 10, y: 9, width: 44, height: 44, fill: "url(#e12-initial-gold)", stroke: red, "stroke-width": 1.4 }, cartouche);
+    el("rect", { x: 13, y: 12, width: 38, height: 38, fill: "none", stroke: "#2d5b9a", "stroke-width": 0.8 }, cartouche);
+    const title = U(CFG.cartoucheTitle[0]);
+    text(title.slice(0, 1), { x: 32, y: 45, "font-size": 38, style: `font-family:${C.gothic};fill:${red}`, "text-anchor": "middle" }, cartouche);
+    // the rest of the title, made smaller if it is wider than the panel
+    const rest = text(title.slice(1), { x: 60, y: 32, "font-size": 24, style: `font-family:${C.gothic};fill:${INK}` }, cartouche);
+    const w = rest.getComputedTextLength(), avail = 386 - 60;
+    if (w > avail) rest.setAttribute("font-size", f(24 * avail / w));
+    text(U(CFG.cartoucheTitle[1]), { x: 61, y: 50, "font-size": 12.5, style: `font-family:${C.font};fill:${red}`, "font-style": "italic" }, cartouche);
+  }
   // Screen box of the cartouche (plan 1.5, addendum "water", user 2026-10-21): it sits flush in the top left corner of the
   // frame (inside the clip of the frame, no gap) and stays there when the map is zoomed or moved. Its size is the size
   // of the box CART at the scale k0 of the whole map in this window, so it changes only with the window. In the whole map
@@ -1668,6 +1786,8 @@
     if (!probe) {
       const mat = `matrix(${k.toFixed(5)} 0 0 ${k.toFixed(5)} ${tx.toFixed(2)} ${ty.toFixed(2)})`;
       worldBottom.setAttribute("transform", mat); worldTop.setAttribute("transform", mat);
+      // plan step P9 of the map of antiquity, follow-up: the irregular edge of the area colours keeps its size on screen
+      if (brushMap) brushMap.setAttribute("scale", (AF.brush / k).toFixed(3));
       placeCartouche();
       document.getElementById("stufe").textContent = FM("Vergrößerung {0}×", decimal(z, 1));
     }
@@ -2301,6 +2421,16 @@
     }
     return h;
   }
+  // User, 2026-10-23: line of the hover box below "Vermutet von …" for a conjecture settled after the year of the map, only
+  // with ERA_NOTES.resolvedHover (pattern per kind with the persons and the year, "Bewiesen von {0}") and
+  // resolvedHoverYear (pattern per kind with the year only, for an entry without persons); nothing without year and persons
+  function resolvedHover(n) {
+    const r = n.resolved;
+    if (!ERA || !ERA.resolvedHover || !r || !ERA.resolvedHover[r.kind]) return "";
+    if (r.person && r.person.length) return FM(ERA.resolvedHover[r.kind], personsAnd(r));
+    const y = ERA.resolvedHoverYear && ERA.resolvedHoverYear[r.kind];
+    return r.year && y ? FM(y, yearText(r.year)) : "";
+  }
   const uncertainNote = (x) => (ERA && ERA.uncertain && x.uncertain ? `<div class="vermerk unsicher">${FM(ERA.uncertain, x.uncertain)}</div>` : "");
   // Premises of a proof with `tacit` (ids of premises or short notes): the list of the premises with the tacit ones marked
   function tacitList(b) {
@@ -2577,6 +2707,7 @@
     const hn = historicalNameLine(n); if (hn) h += `<div class="altname">${hn}</div>`;   // plan step P6 of the map 1830
     const sl = sourceLine(n); if (sl) h += `<div class="stelle">${sl}</div>`;   // plan step P9 of the map of antiquity
     const j = creditLine(n); if (j) h += `<div class="zusatz">${j}</div>`;
+    const rh = resolvedHover(n); if (rh) h += `<div class="zusatz nachher">${rh}</div>`;   // user, 2026-10-23
     const k = statement(n); if (k) h += `<div class="kurz">${k}</div>`;
     if (n.formula && window.katex) h += tex(n.formula);
     return h;
