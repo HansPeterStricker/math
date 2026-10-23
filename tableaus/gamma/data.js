@@ -1,0 +1,222 @@
+// Formulas for Euler's constant gamma, arranged by form (sum, integral, limit, special functions, number theory).
+// gamma stands alone on the left. Formulas for e^gamma (Mertens, Gronwall) are written with the logarithm.
+// Fields as in tableaus/e/daten.js: column, id, name, who, year (optional), formula (LaTeX), note (HTML prose with
+// quantifiers and conditions), definition (optional: true if the formula is in use as a definition of gamma),
+// proof: type (key of GAMMA_METHODS), premises (ids of formulas or of GAMMA_FUNCTIONS), method (how the formula follows),
+// variantProofs (instead of proof, for the definitions): proof for each starting point, "harmonic" (H_n - ln n),
+// "gamma" (-Gamma'(1)) and "zeta" (constant term of zeta at s = 1); null = no premises.
+// Every value is checked numerically by tests/check-values.js (except Gronwall's lim sup).
+
+const GAMMA_COLUMNS = [
+  { id: "sum", title: "Sum" },
+  { id: "integral", title: "Integral" },
+  { id: "limit", title: "Limit" },
+  { id: "special", title: "Special functions" },
+  { id: "numberTheory", title: "Number theory" },
+];
+
+// Proofs of the three definitions from each other. A definition that is not the starting point follows from the
+// harmonic definition; the harmonic definition follows from whichever definition is the starting point.
+const FROM_GAUSS_PRODUCT = "Logarithmic derivative of Gauss's product at x = 1: Γ′(1)/Γ(1) = lim (ln n − H<sub>n+1</sub>), and Γ(1) = 1";
+const FROM_ZETA_COMPARISON = "For s &gt; 1, ζ(s) − 1/(s − 1) = Σ<sub>n≥1</sub> (n<sup>−s</sup> − ∫<sub>n</sub><sup>n+1</sup> x<sup>−s</sup> dx). Each term lies between 0 and n<sup>−s</sup> − (n+1)<sup>−s</sup>, so the series converges uniformly for 1 ≤ s ≤ 2; at s = 1 its partial sums are H<sub>N</sub> − ln(N + 1)";
+
+const GAMMA_FORMULAS = [
+  // Sums
+  { column: "sum", id: "logSeries", name: "Euler's series of differences", who: "Leonhard Euler", year: "1734",
+    formula: String.raw`\gamma = \sum_{n=1}^{\infty}\left(\frac1n - \ln\Bigl(1+\frac1n\Bigr)\right)`,
+    note: "Each term is the gap between the area of a rectangle of height 1/n and the area under 1/x from n to n + 1. All terms are positive and smaller than 1/(2n<sup>2</sup>).",
+    proof: { type: "rewriting", premises: ["harmonicDef"], method: "The partial sums telescope: Σ<sub>n≤N</sub> (1/n − ln(1 + 1/n)) = H<sub>N</sub> − ln(N + 1)" } },
+  { column: "sum", id: "eulerZeta", name: "Euler's series of zeta values", who: "Leonhard Euler", year: "1734",
+    formula: String.raw`\begin{gathered}\gamma = \sum_{k=2}^{\infty}\frac{(-1)^k\,\zeta(k)}{k}\\ = \frac{\zeta(2)}{2}-\frac{\zeta(3)}{3}+\frac{\zeta(4)}{4}-\cdots\end{gathered}`,
+    compactFormula: String.raw`\gamma = \sum_{k=2}^{\infty}\frac{(-1)^k\,\zeta(k)}{k}`,
+    note: "The series converges slowly, because ζ(k) tends to 1. Euler used it together with the known values ζ(2) = π<sup>2</sup>/6, ζ(4) = π<sup>4</sup>/90, … to compute γ.",
+    proof: { type: "seriesTransform", premises: ["logSeries", "zetaFunction", "logTwo"], method: "Expand ln(1 + 1/n) = Σ (−1)<sup>k+1</sup>/(k n<sup>k</sup>) and exchange the order of summation. Writing ζ(k) = 1 + (ζ(k) − 1), the part with 1 is the series for 1 − ln 2 and the rest converges absolutely" } },
+  { column: "sum", id: "eulerZetaMinusOne", name: "Series of ζ(k) − 1", who: "Leonhard Euler", year: "",
+    formula: String.raw`\gamma = 1-\sum_{k=2}^{\infty}\frac{\zeta(k)-1}{k}`,
+    note: "Since ζ(k) − 1 is about 2<sup>−k</sup>, each term adds roughly one binary digit. Twenty terms already give γ to six decimal places.",
+    proof: { type: "seriesTransform", premises: ["harmonicDef", "zetaFunction"], method: "Σ<sub>k≥2</sub> (ζ(k) − 1)/k = Σ<sub>n≥2</sub> (−ln(1 − 1/n) − 1/n) by exchanging the order of an absolutely convergent double series; the partial sums up to n = N equal ln N − H<sub>N</sub> + 1" } },
+  { column: "sum", id: "vacca", name: "Vacca's series", who: "Giovanni Vacca", year: "1910",
+    formula: String.raw`\begin{gathered}\gamma = \sum_{n=1}^{\infty}\frac{(-1)^n\lfloor\log_2 n\rfloor}{n}\\ = \Bigl(\frac12-\frac13\Bigr)+2\Bigl(\frac14-\frac15+\frac16-\frac17\Bigr)\\ +\,3\Bigl(\frac18-\frac19+\cdots-\frac1{15}\Bigr)+\cdots\end{gathered}`,
+    compactFormula: String.raw`\gamma = \sum_{n=1}^{\infty}\frac{(-1)^n\lfloor\log_2 n\rfloor}{n}`,
+    note: "The weight ⌊log<sub>2</sub> n⌋ is the number of binary digits of n minus one. The series uses only rational numbers.",
+    proof: { type: "rewriting", premises: ["harmonicDef", "logTwo"], method: "⌊log<sub>2</sub> n⌋ counts the k ≥ 1 with 2<sup>k</sup> ≤ n, so the series is the sum over k of the tails Σ<sub>n≥2<sup>k</sup></sub> (−1)<sup>n</sup>/n. Each tail equals H<sub>2<sup>k</sup></sub> − H<sub>2<sup>k−1</sup></sub> + 2<sup>−k</sup> − ln 2, and the sum of the tails for k ≤ m is H<sub>2<sup>m</sup></sub> − m ln 2 − 2<sup>−m</sup>" } },
+  { column: "sum", id: "gregory", name: "Series of Gregory coefficients", who: "Ernst Schröder, Jan Cornelis Kluyver", year: "1879 / 1924",
+    formula: String.raw`\begin{gathered}\gamma = \sum_{n=1}^{\infty}\frac{|G_n|}{n}\\ = \frac12+\frac1{24}+\frac1{72}+\frac{19}{2880}+\frac{3}{800}+\cdots\end{gathered}`,
+    compactFormula: String.raw`\gamma = \sum_{n=1}^{\infty}\frac{|G_n|}{n}`,
+    note: "G<sub>n</sub> are the Gregory coefficients (see the functions). All terms are rational and positive. The series converges slowly: after n terms the error is about 1/(n ln<sup>2</sup> n).",
+    proof: { type: "seriesTransform", premises: ["unitInterval", "gregoryCoefficients"], method: "Substitute x = 1 − t in ∫<sub>0</sub><sup>1</sup> (1/(1 − x) + 1/ln x) dx; then 1/t + 1/ln(1 − t) = Σ |G<sub>n</sub>| t<sup>n−1</sup>, because the signs of G<sub>n</sub> alternate. Integrate term by term (all terms are positive)" } },
+  { column: "sum", id: "etaSeries", name: "Series of logarithms", who: "", year: "",
+    formula: String.raw`\gamma = \frac{\ln 2}{2}+\frac{1}{\ln 2}\sum_{n=2}^{\infty}\frac{(-1)^n\ln n}{n}`,
+    note: "The sum is the derivative of the alternating zeta function η(s) = 1 − 2<sup>−s</sup> + 3<sup>−s</sup> − ⋯ at s = 1, which equals γ ln 2 − (ln 2)<sup>2</sup>/2.",
+    proof: { type: "coefficients", premises: ["zetaDef", "zetaFunction"], method: "η(s) = (1 − 2<sup>1−s</sup>) ζ(s). Multiply the expansion 1 − 2<sup>1−s</sup> = (s − 1) ln 2 − (s − 1)<sup>2</sup>(ln 2)<sup>2</sup>/2 + ⋯ by ζ(s) = 1/(s − 1) + γ + O(s − 1) and compare the coefficients of s − 1; η′(1) = Σ (−1)<sup>n</sup> ln n/n by differentiating the Dirichlet series term by term" } },
+
+  // Integrals
+  { column: "integral", id: "gammaLn", name: "Mean of the logarithm", who: "", year: "",
+    formula: String.raw`\gamma = -\int_{0}^{\infty}e^{-x}\ln x\,dx`,
+    note: "If X is exponentially distributed with mean 1, the expected value of ln X is −γ. So the geometric mean of X is e<sup>−γ</sup> ≈ 0.561, although the arithmetic mean is 1.",
+    proof: { type: "differentiation", premises: ["gammaDef", "gammaIntegral"], method: "Differentiate Euler's integral under the integral sign: Γ′(1) = ∫<sub>0</sub><sup>∞</sup> e<sup>−x</sup> ln x dx" } },
+  { column: "integral", id: "lnln", name: "Double logarithm", who: "", year: "",
+    formula: String.raw`\gamma = -\int_{0}^{1}\ln\ln\frac1x\,dx`,
+    note: "The integrand is positive near 0 and tends to −∞ at x = 1; both parts have finite area.",
+    proof: { type: "integral", premises: ["gammaLn"], method: "Substitute x = e<sup>−t</sup>" } },
+  { column: "integral", id: "psiIntegral", name: "Gauss's integral", who: "Carl Friedrich Gauss", year: "1813",
+    formula: String.raw`\gamma = \int_{0}^{\infty}\left(\frac{1}{1-e^{-t}}-\frac1t\right)e^{-t}\,dt`,
+    note: "Near t = 0 the two fractions in the bracket are both about 1/t; their difference tends to 1/2.",
+    proof: { type: "integral", premises: ["harmonicDef", "frullani"], method: "1/k = ∫<sub>0</sub><sup>∞</sup> e<sup>−kt</sup> dt gives H<sub>n</sub> = ∫<sub>0</sub><sup>∞</sup> (1 − e<sup>−nt</sup>) e<sup>−t</sup>/(1 − e<sup>−t</sup>) dt. Subtract Frullani's integral for ln n; what remains besides the integral above is ∫ e<sup>−nt</sup> (1/(e<sup>t</sup> − 1) − 1/t) dt, which tends to 0 because the bracket is bounded" } },
+  { column: "integral", id: "unitInterval", name: "Integral over the unit interval", who: "", year: "",
+    formula: String.raw`\gamma = \int_{0}^{1}\left(\frac{1}{1-x}+\frac{1}{\ln x}\right)dx`,
+    note: "Both fractions become infinite at x = 1, but their sum tends to 1/2 there.",
+    proof: { type: "integral", premises: ["psiIntegral"], method: "Substitute x = e<sup>−t</sup>" } },
+  { column: "integral", id: "floorIntegral", name: "Staircase minus hyperbola", who: "", year: "",
+    formula: String.raw`\gamma = \int_{1}^{\infty}\left(\frac{1}{\lfloor x\rfloor}-\frac1x\right)dx`,
+    note: "γ is the total area between the staircase 1/⌊x⌋ and the hyperbola 1/x. Shifting the pieces of this area to the left into the unit square fills a little more than half of it.",
+    proof: { type: "comparison", premises: ["harmonicDef"], method: "∫<sub>1</sub><sup>N</sup> (1/⌊x⌋ − 1/x) dx = H<sub>N−1</sub> − ln N" } },
+  { column: "integral", id: "fracIntegral", name: "Fractional part of 1/x", who: "", year: "",
+    formula: String.raw`\gamma = 1-\int_{0}^{1}\left\{\frac1x\right\}dx`,
+    note: "{y} = y − ⌊y⌋ is the fractional part. The function {1/x} oscillates infinitely often between 0 and 1 near x = 0; its mean value on the unit interval is 1 − γ ≈ 0.423.",
+    proof: { type: "integral", premises: ["harmonicDef"], method: "Substitute x = 1/t: ∫<sub>0</sub><sup>1</sup> {1/x} dx = ∫<sub>1</sub><sup>∞</sup> {t}/t<sup>2</sup> dt. On [k, k + 1] the integrand is (t − k)/t<sup>2</sup> with integral ln((k + 1)/k) − 1/(k + 1); the sum for k &lt; N is ln N − H<sub>N</sub> + 1" } },
+  { column: "integral", id: "gumbel", name: "Mean of the Gumbel distribution", who: "Emil Julius Gumbel", year: "1935",
+    formula: String.raw`\gamma = \int_{-\infty}^{\infty}x\,e^{-x-e^{-x}}\,dx`,
+    note: "The Gumbel distribution describes the maximum of many independent random values, for instance the highest flood of a century. Its mean is γ: the maximum of n independent exponentially distributed values, minus ln n, has this distribution in the limit.",
+    proof: { type: "integral", premises: ["gammaLn"], method: "Substitute u = e<sup>−x</sup>" } },
+  { column: "integral", id: "gaussianLn", name: "Gaussian weight", who: "", year: "",
+    formula: String.raw`\gamma = -2\ln 2-\frac{4}{\sqrt\pi}\int_{0}^{\infty}e^{-x^2}\ln x\,dx`,
+    note: "Here γ, π and ln 2 appear together: the integral equals −(√π/4)(γ + 2 ln 2).",
+    proof: { type: "differentiation", premises: ["digammaHalf", "gammaIntegral", "gammaHalf"], method: "Substitute t = x<sup>2</sup> in Euler's integral, Γ(s) = 2∫<sub>0</sub><sup>∞</sup> x<sup>2s−1</sup> e<sup>−x<sup>2</sup></sup> dx, and differentiate at s = 1/2: Γ′(1/2) = 4∫<sub>0</sub><sup>∞</sup> e<sup>−x<sup>2</sup></sup> ln x dx. Finally Γ′(1/2) = Γ(1/2) ψ(1/2) with Γ(1/2) = √π" } },
+
+  // Limits
+  { column: "limit", id: "harmonicDef", name: "Harmonic numbers minus logarithm", who: "Leonhard Euler", year: "1734",
+    formula: String.raw`\begin{gathered}\gamma = \lim_{n\to\infty}\bigl(H_n-\ln n\bigr)\\ H_n = 1+\frac12+\frac13+\cdots+\frac1n\end{gathered}`,
+    compactFormula: String.raw`\gamma = \lim_{n\to\infty}\bigl(H_n-\ln n\bigr)`,
+    note: "H<sub>n</sub> is the n-th harmonic number. For every n ≥ 1, H<sub>n</sub> − ln n − γ lies between 0 and 1/(2n). Euler computed γ ≈ 0.577218 in 1734; Mascheroni gave 32 decimals in 1790, of which only the first 19 are correct. It is still unknown whether γ is irrational.",
+    definition: true,
+    variantProofs: {
+      harmonic: null,
+      gamma: { type: "differentiation", premises: ["gammaDef", "gaussProduct"], method: FROM_GAUSS_PRODUCT },
+      zeta: { type: "comparison", premises: ["zetaDef", "zetaFunction"], method: FROM_ZETA_COMPARISON },
+    } },
+  { column: "limit", id: "deTemple", name: "Logarithm at n + ½", who: "Duane W. DeTemple", year: "1993",
+    formula: String.raw`\gamma = \lim_{n\to\infty}\left(H_n-\ln\Bigl(n+\frac12\Bigr)\right)`,
+    note: "A small shift makes the convergence much faster: the error is about 1/(24n<sup>2</sup>) instead of 1/(2n).",
+    proof: { type: "rewriting", premises: ["harmonicDef"], method: "ln(n + 1/2) − ln n = ln(1 + 1/(2n)) tends to 0" } },
+  { column: "limit", id: "sondowLimit", name: "Powers of n against powers of s", who: "", year: "",
+    formula: String.raw`\gamma = \lim_{s\to1^+}\sum_{n=1}^{\infty}\left(\frac{1}{n^s}-\frac{1}{s^n}\right)`,
+    note: "Both series diverge at s = 1; the limit is taken over real s &gt; 1. The formula compares the zeta series with a geometric series term by term.",
+    proof: { type: "rewriting", premises: ["zetaDef"], method: "Σ<sub>n≥1</sub> s<sup>−n</sup> = 1/(s − 1) for s &gt; 1 (geometric series)" } },
+  { column: "limit", id: "coupon", name: "Coupon collector", who: "", year: "",
+    formula: String.raw`\gamma = \lim_{n\to\infty}\left(\frac{C_n}{n}-\ln n\right)`,
+    note: "C<sub>n</sub> is the expected number of draws (with replacement) needed to see each of n equally likely coupons at least once. A collection of 100 stickers needs on average about 519 purchases, of which γ · 100 ≈ 58 are due to γ.",
+    proof: { type: "probability", premises: ["harmonicDef"], method: "After k different coupons, the waiting time for a new one is geometric with mean n/(n − k); adding up gives C<sub>n</sub> = n H<sub>n</sub>" } },
+
+  // Special functions
+  { column: "special", id: "gammaDef", name: "Derivative of the gamma function", who: "", year: "",
+    formula: String.raw`\gamma = -\Gamma'(1) = -\psi(1)`,
+    note: "ψ = Γ′/Γ is the digamma function. The gamma function has slope −γ at x = 1; its minimum on the positive axis lies a little to the right, at x ≈ 1.4616.",
+    definition: true,
+    variantProofs: {
+      harmonic: { type: "differentiation", premises: ["harmonicDef", "gaussProduct"], method: FROM_GAUSS_PRODUCT },
+      gamma: null,
+      zeta: { type: "differentiation", premises: ["harmonicDef", "gaussProduct"], method: FROM_GAUSS_PRODUCT },
+    } },
+  { column: "special", id: "zetaDef", name: "Constant term of ζ at s = 1", who: "", year: "",
+    formula: String.raw`\gamma = \lim_{s\to1}\left(\zeta(s)-\frac{1}{s-1}\right)`,
+    note: "In other words, the Laurent series of the zeta function at its pole is ζ(s) = 1/(s − 1) + γ + O(s − 1). The further coefficients are the Stieltjes constants (Stieltjes 1885).",
+    definition: true,
+    variantProofs: {
+      harmonic: { type: "comparison", premises: ["harmonicDef", "zetaFunction"], method: FROM_ZETA_COMPARISON },
+      gamma: { type: "comparison", premises: ["harmonicDef", "zetaFunction"], method: FROM_ZETA_COMPARISON },
+      zeta: null,
+    } },
+  { column: "special", id: "digammaSeries", name: "Series of the digamma function", who: "", year: "",
+    formula: String.raw`\gamma = \sum_{n=0}^{\infty}\left(\frac{1}{n+1}-\frac{1}{n+x}\right)-\psi(x)`,
+    note: "This holds for every x &gt; 0. For x = 1 the series vanishes and the formula is γ = −ψ(1); for natural numbers x it gives ψ(x) = H<sub>x−1</sub> − γ.",
+    proof: { type: "differentiation", premises: ["gaussProduct", "harmonicDef"], method: "Logarithmic derivative of Gauss's product: ψ(x) = lim (ln n − Σ<sub>k=0</sub><sup>n</sup> 1/(x + k)). Write Σ<sub>k=0</sub><sup>n</sup> 1/(x + k) = H<sub>n+1</sub> + Σ<sub>k=0</sub><sup>n</sup> (1/(x + k) − 1/(k + 1)) and let n → ∞" } },
+  { column: "special", id: "digammaHalf", name: "Digamma at ½", who: "", year: "",
+    formula: String.raw`\gamma = -\psi\Bigl(\frac12\Bigr)-2\ln 2`,
+    note: "Together with Γ(1/2) = √π this gives the derivative Γ′(1/2) = −√π (γ + 2 ln 2).",
+    proof: { type: "evaluation", premises: ["digammaSeries", "logTwo"], method: "Set x = 1/2: Σ<sub>n≥0</sub> (1/(n + 1) − 2/(2n + 1)) = −2(1 − 1/2 + 1/3 − 1/4 + ⋯) = −2 ln 2" } },
+  { column: "special", id: "lnGammaTaylor", name: "Taylor series of ln Γ", who: "", year: "",
+    formula: String.raw`\begin{gathered}\gamma = \frac1x\sum_{k=2}^{\infty}\frac{(-1)^k\zeta(k)}{k}\,x^k\\ -\,\frac{\ln\Gamma(1+x)}{x}\end{gathered}`,
+    compactFormula: String.raw`\gamma = \frac1x\Bigl(\sum_{k\ge2}\frac{(-1)^k\zeta(k)}{k}x^k-\ln\Gamma(1+x)\Bigr)`,
+    note: "This holds for 0 &lt; |x| &lt; 1. For x = 1/2 it connects γ with π, since Γ(3/2) = √π/2. As x tends to 1 it becomes Euler's series of zeta values, because Γ(2) = 1.",
+    proof: { type: "seriesTransform", premises: ["digammaSeries", "zetaFunction"], method: "By the series of ψ, ψ(1 + x) = −γ + Σ<sub>n≥1</sub> (1/n − 1/(n + x)). Expand 1/(n + x) as a geometric series in x/n and sum over n: ψ(1 + x) = −γ + Σ<sub>k≥2</sub> (−1)<sup>k</sup> ζ(k) x<sup>k−1</sup>. Integrate from 0 to x, using ln Γ(1) = 0" } },
+
+  // Number theory
+  { column: "numberTheory", id: "divisor", name: "Average number of divisors", who: "Peter Gustav Lejeune Dirichlet", year: "1849",
+    formula: String.raw`\gamma = \lim_{x\to\infty}\frac12\left(\frac{D(x)}{x}-\ln x+1\right)`,
+    note: "D(x) = d(1) + d(2) + ⋯ + d(⌊x⌋) is the total number of divisors of the numbers up to x, so that D(x) = x ln x + (2γ − 1)x + O(√x). How small the error term can be made is Dirichlet's divisor problem, which is still open.",
+    proof: { type: "counting", premises: ["harmonicDef"], method: "D(x) counts the lattice points (a, b) with ab ≤ x. Dirichlet's hyperbola method gives D(x) = 2Σ<sub>k≤√x</sub> ⌊x/k⌋ − ⌊√x⌋<sup>2</sup>; insert H<sub>m</sub> = ln m + γ + O(1/m)" } },
+  { column: "numberTheory", id: "fractional", name: "Mean of the remainders", who: "Charles de la Vallée Poussin", year: "1898",
+    formula: String.raw`\gamma = 1-\lim_{n\to\infty}\frac1n\sum_{k=1}^{n}\left\{\frac nk\right\}`,
+    note: "{n/k} is the remainder of n divided by k, measured as a fraction of k. One might expect these fractions to be ½ on average. In fact their mean tends to 1 − γ ≈ 0.423.",
+    proof: { type: "rewriting", premises: ["harmonicDef", "divisor"], method: "Σ<sub>k≤n</sub> ⌊n/k⌋ = D(n), so (1/n) Σ<sub>k≤n</sub> {n/k} = H<sub>n</sub> − D(n)/n" } },
+  { column: "numberTheory", id: "mertens", name: "Mertens' product", who: "Franz Mertens", year: "1874",
+    formula: String.raw`\gamma = -\lim_{x\to\infty}\ln\Bigl(\ln x\prod_{p\le x}\Bigl(1-\frac1p\Bigr)\Bigr)`,
+    note: "The product runs over the primes p up to x. It is the proportion of numbers that have no prime factor up to x; Mertens' theorem says that it is about e<sup>−γ</sup>/ln x ≈ 0.5615/ln x.",
+    proof: { type: "theory", premises: ["mertensSecond", "eulerProduct", "zetaFunction", "gammaLn"], method: "Compare ln ζ(s) = −Σ<sub>p</sub> ln(1 − p<sup>−s</sup>) with Σ<sub>p</sub> p<sup>−s</sup> as s → 1, using partial summation with Mertens' second theorem; the constant arises as ∫<sub>0</sub><sup>∞</sup> e<sup>−u</sup> ln u du = −γ (Hardy and Wright, Theorem 429)" } },
+  { column: "numberTheory", id: "gronwall", name: "Largest sums of divisors", who: "Thomas Hakon Grönwall", year: "1913",
+    formula: String.raw`\gamma = \ln\,\limsup_{n\to\infty}\frac{\sigma(n)}{n\ln\ln n}`,
+    note: "σ(n) is the sum of all divisors of n. Robin showed in 1984 that the Riemann hypothesis is equivalent to σ(n) &lt; e<sup>γ</sup> n ln ln n for all n &gt; 5040.",
+    proof: { type: "theory", premises: ["mertens"], method: "σ(n)/n &lt; Π<sub>p|n</sub> p/(p − 1). If n has r prime factors, this is at most the product over the first r primes, and the r-th prime is at most about ln n; Mertens' product gives the upper bound e<sup>γ</sup> ln ln n (1 + o(1)). For the lower bound take n = Π<sub>p≤x</sub> p<sup>a</sup> with a large" } },
+];
+
+// Functions and theorems that serve as premises; none of them contains gamma.
+const GAMMA_FUNCTIONS = [
+  { id: "gammaIntegral", name: "Euler's integral",
+    formula: String.raw`\Gamma(x) = \int_{0}^{\infty}t^{x-1}e^{-t}\,dt`,
+    note: "For x &gt; 0. It satisfies Γ(x + 1) = x Γ(x) and Γ(n + 1) = n!. The integral may be differentiated under the integral sign with respect to x." },
+  { id: "gaussProduct", name: "Gauss's product",
+    formula: String.raw`\Gamma(x) = \lim_{n\to\infty}\frac{n!\,n^x}{x(x+1)\cdots(x+n)}`,
+    note: "For x &gt; 0. Taking logarithms and differentiating term by term is allowed, because the convergence is locally uniform.",
+    proof: { type: "integral", premises: ["gammaIntegral"], method: "∫<sub>0</sub><sup>n</sup> t<sup>x−1</sup>(1 − t/n)<sup>n</sup> dt = n! n<sup>x</sup>/(x(x + 1)⋯(x + n)) by repeated integration by parts; as n → ∞, (1 − t/n)<sup>n</sup> increases to e<sup>−t</sup>" } },
+  { id: "gammaHalf", name: "Gamma at ½",
+    formula: String.raw`\Gamma\Bigl(\frac12\Bigr) = \sqrt\pi`,
+    note: "Substituting t = x<sup>2</sup> turns Euler's integral into the Gaussian integral ∫ e<sup>−x<sup>2</sup></sup> dx over the real line." },
+  { id: "zetaFunction", name: "Riemann zeta function",
+    formula: String.raw`\zeta(s) = \sum_{n=1}^{\infty}\frac{1}{n^s}`,
+    note: "For s &gt; 1. ζ extends to a meromorphic function with a single simple pole at s = 1 with residue 1. The alternating series η(s) = Σ (−1)<sup>n−1</sup> n<sup>−s</sup> converges for s &gt; 0 and equals (1 − 2<sup>1−s</sup>) ζ(s)." },
+  { id: "eulerProduct", name: "Euler product",
+    formula: String.raw`\zeta(s) = \prod_{p}\frac{1}{1-p^{-s}}`,
+    note: "For s &gt; 1; the product runs over all primes. It expresses unique factorization into primes." },
+  { id: "mertensSecond", name: "Mertens' second theorem",
+    formula: String.raw`\sum_{p\le x}\frac1p = \ln\ln x + M + O\Bigl(\frac{1}{\ln x}\Bigr)`,
+    note: "Proved by Mertens in 1874 without the prime number theorem. The constant M ≈ 0.2615 is the Meissel–Mertens constant; its relation to γ is a consequence of Mertens' product." },
+  { id: "logTwo", name: "Alternating harmonic series",
+    formula: String.raw`\ln 2 = 1-\frac12+\frac13-\frac14+\cdots`,
+    note: "The partial sum up to 1/(2N) equals H<sub>2N</sub> − H<sub>N</sub>." },
+  { id: "frullani", name: "Frullani's integral",
+    formula: String.raw`\ln x = \int_{0}^{\infty}\frac{e^{-t}-e^{-xt}}{t}\,dt`,
+    note: "For x &gt; 0. Differentiating the right-hand side with respect to x gives 1/x, and both sides vanish at x = 1." },
+  { id: "gregoryCoefficients", name: "Gregory coefficients",
+    formula: String.raw`\frac{z}{\ln(1+z)} = 1+\sum_{n=1}^{\infty}G_n z^n = 1+\frac z2-\frac{z^2}{12}+\frac{z^3}{24}-\cdots`,
+    note: "For |z| &lt; 1. The coefficients G<sub>n</sub> are rational and alternate in sign. James Gregory used them in 1670 for numerical integration." },
+];
+
+// Kinds of proof steps (Glossar: Methode), shown in the tooltips of the graph.
+const GAMMA_METHODS = [
+  { id: "evaluation", short: "E", name: "Evaluating a function identity at a point" },
+  { id: "coefficients", short: "K", name: "Comparing coefficients of two expansions of the same function" },
+  { id: "rewriting", short: "R", name: "Algebraic rewriting of a series or a limit" },
+  { id: "seriesTransform", short: "T", name: "Expanding into a series and exchanging the order of summation" },
+  { id: "comparison", short: "V", name: "Comparing a sum with an integral" },
+  { id: "integral", short: "I", name: "Computing or transforming an integral" },
+  { id: "differentiation", short: "D", name: "Differentiating a function identity" },
+  { id: "probability", short: "W", name: "Expected value of a random quantity" },
+  { id: "counting", short: "Z", name: "Counting lattice points" },
+  { id: "theory", short: "Th", name: "Deeper theory (analytic number theory)" },
+];
+
+// Labels of the shared code (tableaus/shared_scripts/), which defaults to German.
+const GAMMA_UI = {
+  proofIdea: "Proof idea",
+  follows: "Follows from: ",
+  start: "Starting point of the derivations; assumes nothing.",
+  definition: "Definition",
+  and: " and ",
+  proofOf: (name, premises) => `Proof of “${name}” from ${premises}`,
+  kindOfMethod: "Kind of method",
+  method: "Method",
+};
+
+// Data of the page for the shared code in tableaus/shared_scripts/formula-tableau.js and tableaus/shared_scripts/formula-graph.js.
+const TABLEAU = { columns: GAMMA_COLUMNS, formulas: GAMMA_FORMULAS, functions: GAMMA_FUNCTIONS, methods: GAMMA_METHODS, ui: GAMMA_UI };

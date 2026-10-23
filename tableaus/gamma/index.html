@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulas for γ</title>
+<link rel="icon" href="../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../scripts/site-icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared_scripts/formula-tableau.css">
+</head>
+<body>
+<main>
+  <h1>Formulas for Euler's constant γ</h1>
+  <nav class="reiter">
+    <button type="button" data-panel="formeln">Formula cards</button>
+    <button type="button" data-panel="funktionen">Functions</button>
+    <button type="button" data-panel="graph">Graph</button>
+    <button type="button" data-panel="erlaeuterung">Explanations</button>
+    <span class="ausgang">Starting point:
+      <button type="button" data-ausgang="harmonic" data-variant="harmonic" title="Definition: γ = lim (H_n − ln n)">Harmonic numbers</button>
+      <button type="button" data-ausgang="gamma" data-variant="gamma" title="Definition: γ = −Γ′(1)">Gamma function</button>
+      <button type="button" data-ausgang="zeta" data-variant="zeta" title="Definition: γ = lim (ζ(s) − 1/(s − 1)) as s → 1">Zeta function</button>
+    </span>
+  </nav>
+  <section class="panel" id="panel-funktionen" hidden><div id="funktionen"></div></section>
+  <section class="panel" id="panel-formeln" hidden><div id="tableau"></div></section>
+  <section class="panel" id="panel-graph" hidden>
+    <div class="graph-rahmen">
+      <div class="graph-flaeche" id="graph"></div>
+      <div class="legende">
+        <span><i style="border:2px solid var(--akzent)"></i>Definition</span>
+        <span><i style="background:#efe8da;border-color:var(--leise)"></i>Function</span>
+        <span>Drag: move, mouse wheel: zoom</span>
+        <span><button type="button" data-zoom="in" title="Zoom in">+</button>
+          <button type="button" data-zoom="out" title="Zoom out">−</button>
+          <button type="button" data-zoom="1">100 %</button>
+          <button type="button" data-zoom="fit">Show all</button></span>
+      </div>
+    </div>
+  </section>
+  <section class="panel erlaeuterung" id="panel-erlaeuterung" hidden>
+    <h2>The tableau</h2>
+    <p>Euler's constant γ = 0.5772156649… is the limit of 1 + 1/2 + ⋯ + 1/n − ln n. It is less famous than π and e,
+      but it appears in as many different places: in sums and integrals, in the gamma and zeta functions, in
+      probability and in the distribution of divisors and primes. Unlike π and e, it is not even known whether γ is
+      irrational.</p>
+    <p>The formulas are arranged by form: sum, integral and limit. Formulas that are statements about the gamma, digamma
+      or zeta function stand under special functions, formulas about divisors and primes under number theory. γ
+      stands alone on the left. Formulas that really give e<sup>γ</sup> are written with the logarithm. Formulas that
+      serve as a definition of γ are marked.</p>
+    <h2>Derivations</h2>
+    <p>Under “Proof idea” (click to open) each card names what it follows from: its premises, the kind of method and
+      the method. Often a premise is a theorem about one of the functions in the tab “Functions”. All derivations start
+      from a definition of γ. The buttons at the top right choose which one: harmonic numbers (γ = lim (H<sub>n</sub> −
+      ln n)), gamma function (γ = −Γ′(1)) or zeta function (γ is the constant term of ζ(s) at s = 1). The other two
+      definitions are then theorems.</p>
+    <p>Every formula except Grönwall's lim sup has been checked numerically (<code>tests/check-values.js</code>).</p>
+    <h2>The graph</h2>
+    <p>Statements without premises are the chosen definition of γ and the functions whose foundations do not contain γ;
+      they stand one column before the first statement that uses them. The columns are ordered by the length of the
+      longest chain of derivations. An arrow leads from a premise to the statement that follows from it. Hovering over an
+      arrow shows the whole proof: premises, kind of method and method. A click on a node opens its card. The graph can
+      be moved by dragging and zoomed with the mouse wheel.</p>
+    <p>Compare the formulas for <a href="../pi/index.html">π</a> and <a href="../e/index.html">e</a> (in German).</p>
+  </section>
+</main>
+<script src="data.js"></script>
+<script src="../shared_scripts/formula-graph.js"></script>
+<script src="../shared_scripts/formula-tableau.js"></script>
+</body>
+</html>

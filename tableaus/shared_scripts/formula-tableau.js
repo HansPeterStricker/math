@@ -3,9 +3,12 @@
 // data), functions whose theorems serve as premises, the graph of derivations (formula-graph.js) and explanations.
 // Links between cards follow the proofs. The derivations start from one of several definitions; the buttons with
 // data-ausgang (address key) and data-variant (key in variantProofs) choose it, the first button is the default.
-// Panel and starting point are kept in the address (#ansicht=...&ausgang=...).
+// Panel and starting point are kept in the address (#ansicht=...&ausgang=...). TABLEAU.ui (optional) replaces the
+// German labels, for instance on the English page for gamma.
 (function () {
   const { columns: COLUMNS, formulas: FORMULAS, functions: FUNCTIONS, methods: METHODS } = TABLEAU;
+  const UI = Object.assign({ proofIdea: "Beweisidee", follows: "Folgt aus: ", start: "Ausgangspunkt der Herleitungen, setzt nichts voraus.",
+    definition: "Definition" }, TABLEAU.ui);
   const byId = new Map([...FORMULAS, ...FUNCTIONS].map(x => [x.id, x]));
   const METHOD = new Map(METHODS.map(m => [m.id, m]));
   const PANELS = ["formeln", "funktionen", "graph", "erlaeuterung"];
@@ -115,15 +118,15 @@
     const proof = proofOf(f);
     if (proof) {
       const box = el("details", "folgt");
-      box.appendChild(el("summary", "", "Beweisidee"));
-      const from = el("p", "", "Folgt aus: ");
+      box.appendChild(el("summary", "", UI.proofIdea));
+      const from = el("p", "", UI.follows);
       appendLinks(from, proof.premises);
       const m = METHOD.get(proof.type);
       from.appendChild(el("span", "methode", ` – <span class="art" title="${m.name}">${m.short}</span> ${proof.method}`));
       box.appendChild(from);
       card.appendChild(box);
     } else if (f.variantProofs) {
-      card.appendChild(el("p", "folgt", "Ausgangspunkt der Herleitungen, setzt nichts voraus."));
+      card.appendChild(el("p", "folgt", UI.start));
     }
   }
 
@@ -152,7 +155,7 @@
         card.id = f.id;
         const title = el("h3");
         title.textContent = f.name;
-        if (f.definition) title.appendChild(el("span", "abzeichen", "Definition"));
+        if (f.definition) title.appendChild(el("span", "abzeichen", UI.definition));
         card.appendChild(title);
         const meta = [f.who, f.year].filter(Boolean).join(", ");
         if (meta) {

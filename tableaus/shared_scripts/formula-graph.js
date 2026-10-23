@@ -108,15 +108,17 @@ const FormulaGraph = (function () {
     });
   }
 
-  // Tooltip of an arrow: the whole proof of its target.
+  // Tooltip of an arrow: the whole proof of its target. TABLEAU.ui (optional) replaces the German labels.
   function tooltip(e) {
+    const ui = Object.assign({ and: " und ", proofOf: (name, premises) => `Beweis von „${name}“ aus ${premises}`,
+      kindOfMethod: "Art der Methode", method: "Methode" }, TABLEAU.ui);
     const plain = html => html.replace(/<sup>/g, "^").replace(/<[^>]+>/g, "").replace(/&lt;/g, "<").replace(/&gt;/g, ">");
-    const premises = e.to.proof.premises.map(id => e.all.get(id).name).join(" und ");
+    const premises = e.to.proof.premises.map(id => e.all.get(id).name).join(ui.and);
     return [
       `${e.from.name} → ${e.to.name}`,
-      `Beweis von „${e.to.name}“ aus ${premises}`,
-      `Art der Methode: ${e.type.name}`,
-      `Methode: ${plain(e.method)}`,
+      ui.proofOf(e.to.name, premises),
+      `${ui.kindOfMethod}: ${e.type.name}`,
+      `${ui.method}: ${plain(e.method)}`,
     ].join("\n");
   }
 
