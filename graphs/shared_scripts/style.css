@@ -1,0 +1,112 @@
+/* Shared styling of the three views (theorems, concepts, concepts and theorems) */
+:root { --grund: #f5f2ea; --tinte: #26221d; --leise: #6d655a; --linie: #b9ad9a; --vorfahr: #b5541f; --nachfahr: #2f6f8f; }
+body { margin: 0; background: var(--grund); color: var(--tinte); font-family: "Source Serif 4", "Cambria Math", "STIX Two Math", Georgia, serif; line-height: 1.45; }
+header { padding: 22px 16px 6px; max-width: 1200px; margin: 0 auto; }
+h1 { font-weight: 600; font-size: 28px; margin: 0 0 6px; }
+p { max-width: 80ch; margin: 6px 0; }
+.klein { color: var(--leise); font-size: 15px; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 420px; gap: 0; }
+@media (max-width: 1100px) { .layout { grid-template-columns: 1fr; } }
+.graph { overflow: auto; border-top: 1px solid var(--linie); border-bottom: 1px solid var(--linie); background: #fbfaf6; }
+aside { border-left: 1px solid var(--linie); padding: 16px 18px; max-height: 88vh; overflow: auto; position: sticky; top: 0; }
+aside h2 { font-size: 21px; font-weight: 600; margin: 0 0 4px; }
+aside h3 { font-size: 15px; font-weight: 600; margin: 16px 0 4px; color: var(--leise); text-transform: uppercase; letter-spacing: .06em; }
+.formel { background: #fff; border: 1px solid #e3dccf; padding: 10px 12px; margin: 8px 0; overflow-x: auto; }
+.formel-umbruch { display: block; text-align: center; line-height: 1.9; }
+.beweis { margin: 8px 0 12px; padding-left: 10px; border-left: 3px solid var(--linie); }
+.beweis b { font-weight: 600; }
+.chip { display: inline-block; border: 1px solid var(--linie); border-radius: 3px; padding: 0 6px; margin: 2px 3px 2px 0; font-size: 14px; cursor: pointer; background: #fff; color: inherit; text-decoration: none; }
+.chip:hover { border-color: var(--tinte); }
+a.chip::after { content: " ↗"; color: var(--leise); font-size: 12px; }
+svg text { font-family: "Source Serif 4", "Cambria Math", "STIX Two Math", "Segoe UI Symbol", Georgia, serif; }
+.knoten { cursor: pointer; }
+.knoten rect { stroke: #6d655a; stroke-width: 1; }
+.knoten.aktiv rect { stroke: #000; stroke-width: 2.5; }
+.knoten.blass, .punkt.blass { opacity: .2; }
+.kante.blass { opacity: .06; }
+.kante { fill: none; stroke-width: 1.6; }
+.kante.ziel { stroke: #4a4237; }
+.kante.rueck { stroke-dasharray: 6 4; stroke-width: 1.8; stroke-opacity: .75; }
+.kante.vorfahr { stroke: var(--vorfahr); stroke-width: 2.6; opacity: 1; }
+.kante.nachfahr { stroke: var(--nachfahr); stroke-width: 2.6; opacity: 1; }
+.legende { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 14px; margin: 8px 0; }
+.legende span i { display: inline-block; width: 12px; height: 12px; margin-right: 5px; vertical-align: -1px; border: 1px solid #6d655a; }
+ol.rang { padding-left: 22px; margin: 4px 0; }
+.hervor { border-left: 4px solid; background: #fff; padding: 8px 12px; margin: 8px 0; }
+.trenner { flex-basis: 100%; height: 0; }
+/* Main fields (MSC): colour patterns as frames, because the fields are drawn as border or ring */
+.legende i.ring, .ring { display: inline-block; width: 8px; height: 8px; margin-right: 5px; vertical-align: -1px; background: none; border: 3px solid; border-radius: 2px; }
+.legende .titel { color: var(--leise); }
+.filter { margin-left: 8px; }
+body.nur-besondere .knoten:not(.besonders) { opacity: .25; }
+
+/* Navigation between the views */
+nav.ansichten { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; font-size: 15px; }
+nav.ansichten a { color: var(--tinte); text-decoration: none; border: 1px solid var(--linie); border-radius: 3px; padding: 2px 10px; background: #fff; }
+nav.ansichten a:hover { border-color: var(--tinte); }
+nav.ansichten a.aktiv { background: var(--tinte); border-color: var(--tinte); color: #fff; }
+
+/* Tables of the evaluation */
+table.auswertung { border-collapse: collapse; font-size: 14px; width: 100%; margin: 4px 0 8px; }
+table.auswertung td, table.auswertung th { padding: 3px 4px; border-bottom: 1px solid #e3dccf; vertical-align: top; text-align: left; }
+table.auswertung th { font-weight: 600; color: var(--leise); }
+table.auswertung td.zahl, table.auswertung th.zahl { text-align: right; white-space: nowrap; }
+.punktfarbe { display: inline-block; width: 10px; height: 10px; border: 1px solid #6d655a; margin-right: 2px; vertical-align: 0; }
+
+/* Conjectures and further edge kinds (switch “with conjectures”; as in ../Beispiel Arithmetische Geometrie/zusatz.css) */
+.knoten.vermutung rect.kasten { stroke: var(--rand, #6d655a); stroke-width: 1.8; stroke-dasharray: 6 3; fill-opacity: .5; }
+.knoten.vermutung.aktiv rect.kasten { stroke: #000; stroke-width: 2.6; }
+.kante.bedingt { stroke-dasharray: 7 4; stroke-width: 1.9; stroke-opacity: .9; }
+.kante.zielB:not(.vorfahr):not(.nachfahr) { stroke: #b0306a; }
+.kante.bez { stroke-linecap: round; }
+.kante.teilresultat { stroke-dasharray: 2 4; stroke-width: 2.4; }
+.kante.formulierung { stroke-dasharray: 1 4; stroke-width: 1.6; }
+.kante.aequivalent { stroke-width: 2.2; }
+.kante.analogie { stroke-dasharray: 9 3 2 3; stroke-width: 1.4; }
+.kante.analogie:not(.blass):not(.nachfahr):not(.vorfahr) { opacity: .8; }
+body.ohne-bedingt .kante.bedingt, body.ohne-bedingt .kante.zielB { display: none; }
+body.ohne-teilresultat .kante.teilresultat, body.ohne-aequivalent .kante.aequivalent,
+body.ohne-analogie .kante.analogie, body.ohne-formulierung .kante.formulierung { display: none; }
+.legende label { white-space: nowrap; }
+.legende i.vkasten { border: 1.5px dashed #6d655a; border-radius: 3px; }
+.chip.vchip { border-style: dashed; }
+.beweis.bedingt { border-left-color: #b0306a; border-left-style: dashed; }
+.marke { color: #b0306a; font-size: 14px; }
+.umschalter { font-weight: 600; }
+
+/* AI proofs (switch “AI proofs”; colour GL.AI_COLOR in graph.js). The dash pattern is in the style attribute of the edge. */
+.kante.ki { stroke-width: 2.1; }
+.kante.zielKI:not(.vorfahr):not(.nachfahr) { stroke: #9333ea; }
+.gkante.ki { stroke-width: 1.6; opacity: .85; }
+.gkante.zielKI:not(.vorfahr):not(.nachfahr) { stroke: #9333ea; opacity: .85; }
+.gkante.ki.blass { opacity: .04; }
+.kimarke { pointer-events: none; }
+.beweis.ki { border-left-color: #9333ea; }
+.kiwarn { color: #7e22ce; font-size: 14px; }
+table.kitabelle th { width: 34%; }
+table.kitabelle a { word-break: break-all; }
+.legende label.ki, .umschalter.ki { border-color: #9333ea; }
+
+/* Counterexamples and the relations “widerlegt” and “deutung” (graph.js, GL.gb…) */
+.knoten.gegenbeispiel rect.gbrand { pointer-events: none; }
+.knoten.gegenbeispiel.aktiv rect.gbrand { stroke: #000; stroke-width: 2.6; }
+.kante.widerlegt { stroke-dasharray: 8 3 2 3; stroke-width: 2.2; }
+.kante.deutung { stroke-dasharray: 4 3; stroke-width: 1.8; }
+.gkante.widerlegt { stroke-dasharray: 8 3 2 3; stroke-width: 2; }
+.gkante.deutung { stroke-dasharray: 4 3; }
+.gk path.raute { stroke: #9b1c1c; stroke-width: 1.8; }
+.gk.aktiv path.raute { stroke: #000; stroke-width: 3.5; }
+.gk.vor path.raute { stroke: var(--vorfahr); stroke-width: 3; }
+.gk.nach path.raute { stroke: var(--nachfahr); stroke-width: 3; }
+.chip.gbchip { border-color: #9b1c1c; }
+body.ohne-widerlegt .kante.widerlegt, body.ohne-deutung .kante.deutung,
+body.ohne-widerlegt .gkante.widerlegt, body.ohne-deutung .gkante.deutung { display: none; }
+
+/* Short statement above the formula and hover box over a node (todos B26, B44); same three lines as in the map */
+#panel .kurz { margin: 6px 0 2px; }
+#gl-zeiger { position: fixed; pointer-events: none; display: none; z-index: 20; max-width: 380px; background: #fffdf7;
+  border: 1px solid #b9ae98; box-shadow: 0 2px 8px rgba(0,0,0,.25); padding: 4px 9px 5px; font-size: 14px; line-height: 1.3; }
+#gl-zeiger .titel { font-weight: 600; }
+#gl-zeiger .zusatz { font-size: 12.5px; font-style: italic; color: #6d655a; margin-top: 2px; }
+#gl-zeiger .kurz { font-size: 13.5px; margin-top: 3px; }
+#gl-zeiger .formel-umbruch { display: block; text-align: center; margin: 4px 0 1px; line-height: 1.8; }

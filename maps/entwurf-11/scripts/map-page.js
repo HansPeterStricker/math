@@ -2154,7 +2154,7 @@
     klassifikation: "Klassifikationssatz" };
   Object.keys(FLAGS).forEach((a) => (FLAGS[a] = U(FLAGS[a])));
   const AG_PATH = "../../graphs/algebraic-geometry/", AR_PATH = "../../graphs/arithmetic-geometry/";
-  const LARGE_PATH = "../../playground/Gro%C3%9Fe%20S%C3%A4tze%20und%20Vermutungen/index.html", GALLERY_PATH = "../../playground/Mathematical%20Wonder/index.html";
+  const LARGE_PATH = "", GALLERY_PATH = "";
 
   // ------------------------------------------------------------ Proof order and stages (todos B21 and B30)
   // Proofs of a theorem in historical order: the year of a proof is the earliest year of a history event that names
