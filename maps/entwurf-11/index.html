@@ -1,0 +1,497 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Zahlentheorie und algebraische Geometrie</title>
+<link href="https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=IM+Fell+English+SC&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<style>
+  :root { --holz: #2e241c; --tinte: #3a2a1c; --pergament: #f4e8c8; --hinweis: #d8c79f; --verweis: #f0dca8; --rot: #9b2a1a; }
+  html, body { margin: 0; background: var(--holz); }
+  body { font-family: "IM Fell English", Georgia, serif; color: var(--tinte); display: flex; flex-direction: column;
+    align-items: center; padding: 16px; box-sizing: border-box; }
+  /* Toolbar in the style of the map (todos B47, B69 i): parchment buttons with ink, group titles in small capitals,
+     groups separated by a thin brown rule, check boxes in the brown of the frame */
+  .leiste { width: 100%; max-width: 1880px; display: flex; gap: 8px 0; align-items: center; flex-wrap: wrap;
+    color: var(--hinweis); font-size: 15px; margin-bottom: 10px; }
+  .leiste button, .leiste select { font-family: inherit; font-size: 15px; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; border-radius: 2px; padding: 2px 12px 3px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .leiste button:hover { background: #e6d3a3; }
+  .leiste button:active { box-shadow: inset 0 1px 2px rgba(0,0,0,.3); }
+  .leiste button:focus-visible, .leiste input:focus-visible { outline: 2px solid var(--verweis); outline-offset: 1px; }
+  .leiste button.rund { min-width: 30px; padding: 2px 6px 3px; font-size: 17px; line-height: 1.05; }
+  .leiste label { cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+  .leiste label:hover { color: var(--verweis); }
+  .leiste input[type="checkbox"] { accent-color: #8a5a2b; width: 15px; height: 15px; margin: 0; cursor: pointer; }
+  .leiste .gruppe { display: flex; gap: 6px 12px; align-items: center; padding: 0 16px; border-left: 1px solid #6b5236; }
+  .leiste .gruppe:first-child { padding-left: 0; border-left: none; }
+  .leiste .gruppe-titel { font-family: "IM Fell English SC", Georgia, serif; color: var(--verweis); font-size: 16px; }
+  #stufe { min-width: 5.5em; font-variant-numeric: tabular-nums; }
+  /* Search field with suggestions (todo B35) */
+  .suche { position: relative; }
+  #suche { font-family: inherit; font-size: 15px; width: 16em; max-width: 70vw; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; border-radius: 2px; padding: 3px 8px; box-sizing: border-box; box-shadow: inset 0 1px 2px rgba(0,0,0,.2); }
+  #vorschlaege { position: absolute; left: 0; top: calc(100% + 2px); z-index: 7; width: 26em; max-width: calc(100vw - 32px);
+    max-height: 60vh; overflow-y: auto; margin: 0; padding: 2px 0; list-style: none; background: var(--pergament);
+    border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45); color: var(--tinte); }
+  #vorschlaege li { padding: 3px 10px 4px; cursor: pointer; line-height: 1.25; }
+  #vorschlaege li.aktiv { background: #e6d3a3; }
+  #vorschlaege li.leer { cursor: default; font-style: italic; color: #5a4632; }
+  #vorschlaege li.kopf { cursor: default; font-variant: small-caps; letter-spacing: 0.04em; font-size: 13px; color: #5a4632; border-bottom: 1px solid #c9b48a; padding-top: 6px; }
+  #vorschlaege .vort { font-size: 13px; font-style: italic; color: #5a4632; }
+  .kartenreihe { position: relative; width: 100%; max-width: 1880px; display: flex; gap: 12px; height: calc(100vh - 96px); min-height: 440px; }
+  #legende-seite { flex: none; width: 340px; overflow-y: auto; background: var(--pergament); border: 1px solid #6b5236;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); padding: 8px 12px 12px; box-sizing: border-box; font-size: 14px; line-height: 1.25; }
+  #legende-seite h2 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 21px; margin: 0 0 2px; text-align: center; }
+  #legende-seite h3 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 15px; margin: 10px 0 4px;
+    border-top: 1px solid #c9b48a; padding-top: 5px; }
+  #legende-seite .eintrag { display: flex; gap: 8px; align-items: center; margin: 3px 0; }
+  #legende-seite svg { flex: none; width: 46px; height: 32px; }
+  #legende-seite .bed { font-size: 14px; }
+  #legende-seite .bed::first-letter { text-transform: uppercase; }
+  #buehne { position: relative; flex: 1; min-width: 0; height: 100%;
+    box-shadow: 0 10px 40px rgba(0,0,0,.6); background: #f1e7cc; overflow: hidden; touch-action: none; user-select: none;
+    -webkit-user-select: none; cursor: grab; }
+  #buehne.zieht, #buehne.zieht * { cursor: grabbing !important; }
+  #karte, #papier { position: absolute; left: 0; top: 0; width: 100%; height: 100%; display: block; }
+  #papier { pointer-events: none; mix-blend-mode: multiply; will-change: transform; }
+  .karte-e8 text { font-family: "IM Fell English", Georgia, serif; fill: #3a2a1c; }
+  .karte-e8 .sc { font-family: "IM Fell English SC", "IM Fell English", Georgia, serif; }
+  .karte-e8 .element, .karte-e8 .bname { cursor: pointer; }
+  /* Todo B32: a symbol is either shown or not; only the change is soft in time. The fade-in runs whenever the group
+     goes from display:none to shown; the fade-out is a transition, after which the code sets display:none. */
+  #e8-symbole > .element { transition: opacity .25s; animation: e8-ein .25s ease-out; }
+  #e8-symbole > .element.aus { opacity: 0; pointer-events: none; }
+  @keyframes e8-ein { from { opacity: 0; } to { opacity: 1; } }
+  .karte-e8 .bname { transition: opacity .18s; }
+  .karte-e8 .bname.aus { opacity: 0; pointer-events: none; }
+  .karte-e8 .fname { pointer-events: none; transition: opacity .25s; }
+  .karte-e8 .fname.aus { opacity: 0 !important; }
+  /* Todo B40: the visible names of countries and provinces react to the pointer (box with a short description);
+     mountains lie above them and keep priority */
+  .karte-e8 .fname:not(.aus) text { pointer-events: visiblePainted; }
+  #e8-symbole path, #e8-symbole line, #e8-symbole ellipse, #e8-symbole circle { vector-effect: non-scaling-stroke; }
+  #karte.bewegt #e8-symbole { filter: none; }
+  #zeiger { position: fixed; pointer-events: none; background: var(--pergament); border: 1px solid #6b5236;
+    padding: 4px 9px 5px; font-size: 14.5px; line-height: 1.3; display: none; max-width: 380px; box-shadow: 0 2px 8px rgba(0,0,0,.4); z-index: 5; }
+  #zeiger .titel { font-weight: bold; }
+  #zeiger .titel .msc { font-weight: normal; }
+  /* Todo B60: country above the name of a province, a little smaller */
+  /* Todos B69 a, b: the country (area) above a province or a theory, in italics */
+  #zeiger .land { font-size: 12.5px; font-style: italic; color: #5a4632; margin-bottom: 1px; }
+  #zeiger .zusatz { font-size: 13px; font-style: italic; color: #5a4632; margin-top: 2px; }
+  #zeiger .kurz { font-size: 13.5px; margin-top: 3px; }
+  #zeiger .formel-umbruch { display: block; text-align: center; margin: 4px 0 1px; line-height: 1.8; font-size: 13.5px; }
+  /* The full card of a theorem covers the legend, not the map (user's decision, 20 October 2026) */
+  #info { position: absolute; right: 0; top: 0; width: 340px; max-height: 100%;
+    overflow: auto; background: var(--pergament); border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45);
+    padding: 12px 16px; font-size: 15.5px; line-height: 1.38; display: none; box-sizing: border-box; z-index: 4; }
+  #info h2 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 22px; margin: 0 26px 4px 0; }
+  #info h3 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 17px; margin: 12px 0 4px;
+    border-top: 1px solid #c9b48a; padding-top: 6px; }
+  #info .art { font-style: italic; color: #6b4a2e; }
+  #info .klein { font-size: 14px; color: #5a4632; }
+  #info .zu { position: absolute; right: 10px; top: 6px; font-size: 22px; cursor: pointer; background: none; border: none;
+    color: var(--tinte); font-family: inherit; }
+  #info a { color: #7a2a14; cursor: pointer; }
+  #info .wahl { color: #7a2a14; text-decoration: underline; cursor: pointer; }
+  #info ul { margin: 2px 0; padding-left: 18px; }
+  /* Stepping through the proofs (todo B30) */
+  #info .beweiswahl { display: flex; align-items: center; gap: 6px; flex-wrap: wrap; margin: 6px 0 2px; font-size: 14.5px; }
+  #info .beweiswahl button { font-family: inherit; font-size: 17px; line-height: 1; background: var(--pergament); color: var(--tinte);
+    border: 1px solid #6b5236; padding: 1px 8px 3px; cursor: pointer; }
+  #info .beweiswahl .bw-stand { min-width: 7.5em; text-align: center; font-variant-numeric: tabular-nums; }
+  #info .beweiswahl label { margin-left: 6px; cursor: pointer; }
+  #info .bw-farbe { display: inline-block; width: 18px; height: 4px; margin: 0 6px 3px 0; vertical-align: middle; }
+  #info li { margin-bottom: 4px; }
+  #info .formel-umbruch { display: block; text-align: center; margin: 6px 0; line-height: 1.9; overflow-x: auto; overflow-y: hidden; }
+  /* Info box after todo B44: line 2 as in the hover box, statement, explanation, collapsed parts, long lists */
+  #info .zeile2 { font-size: 14px; font-style: italic; color: #5a4632; margin: -2px 0 2px; }
+  #info .kurz { margin-top: 6px; }
+  #info .erlaeuterung { font-size: 14.5px; margin-top: 6px; }
+  /* Card of a clicked dove (user, 2026-10-22): the two ends and the text of the analogy, next to the click */
+  .taube-karte { position: fixed; z-index: 6; width: 340px; max-width: calc(100vw - 16px); max-height: calc(100vh - 16px); overflow-y: auto;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 4px 18px rgba(0,0,0,.45);
+    padding: 10px 16px 12px; font-size: 15.5px; line-height: 1.38; box-sizing: border-box; }
+  .taube-karte[hidden] { display: none; }
+  .taube-karte .art { font-family: "IM Fell English SC", Georgia, serif; font-size: 19px; color: #2f5566; margin: 0 26px 4px 0; }
+  .taube-karte .enden { margin-bottom: 6px; }
+  .taube-karte .erlaeuterung { font-size: 14.5px; }
+  .taube-karte .zu { position: absolute; right: 8px; top: 4px; font-size: 22px; cursor: pointer; background: none; border: none;
+    color: var(--tinte); font-family: inherit; padding: 0 4px; }
+  #info h4 { font-weight: normal; font-style: italic; font-size: 14.5px; margin: 6px 0 1px; }
+  #info details summary { cursor: pointer; color: #7a2a14; }
+  #info details.idee, #info details.erl { margin: 1px 0 2px; }
+  #info details.idee[open], #info details.erl[open] { color: #3a2a1c; }
+  #info details.einordnung { margin-top: 12px; border-top: 1px solid #c9b48a; padding-top: 6px; }
+  #info details.einordnung > summary { font-family: "IM Fell English SC", Georgia, serif; font-size: 17px; color: var(--tinte); }
+  #info .beweisliste > li.hervor { background: #f6d36b66; outline: 1px solid #c9a23a; outline-offset: 2px; }
+  #info .alle-zeigen { font-family: inherit; font-size: 13.5px; background: none; border: none; padding: 0; color: #7a2a14; text-decoration: underline; cursor: pointer; }
+  /* Info box of a correspondence (bridge, draft 10): dictionary as a table */
+  #info table.woerterbuch { border-collapse: collapse; width: 100%; font-size: 13.5px; margin: 4px 0; }
+  #info table.woerterbuch th { font-weight: normal; font-style: italic; text-align: left; border-bottom: 1px solid #c9b48a; padding: 2px 4px; }
+  #info table.woerterbuch td { vertical-align: top; padding: 3px 4px; border-bottom: 1px dotted #d8c79f; }
+  .unten { color: var(--hinweis); max-width: 1100px; width: 100%; line-height: 1.45; font-size: 16px; margin-top: 18px; }
+  .unten h2 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; color: var(--verweis); font-size: 21px; margin: 20px 0 6px; }
+  .unten a { color: var(--verweis); cursor: pointer; }
+  .unten h3 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; color: var(--verweis); font-size: 17px; margin: 14px 0 4px; }
+  .unten ul { margin: 0 0 6px; padding-left: 22px; }
+  .unten li { margin-bottom: 3px; }
+  /* Todo B46: introduction (scripts/intro.js), a dialog over the darkened map; button "Intro" at the right end of the toolbar */
+  .leiste .intro-gruppe { margin-left: auto; }
+  html.intro-offen, html.intro-offen body { overflow: hidden; }
+  .intro-hinter { position: fixed; inset: 0; z-index: 20; background: rgba(20, 14, 8, .62); display: flex; align-items: center;
+    justify-content: center; padding: 16px; box-sizing: border-box; }
+  .intro-hinter[hidden] { display: none; }
+  .intro-dialog { position: relative; width: 100%; max-width: 760px; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 10px 40px rgba(0,0,0,.6); box-sizing: border-box; }
+  .intro-inhalt { overflow-y: auto; min-height: 0; flex: 1 1 auto; }
+  /* The dark image has a light frame, so that it stands apart from the darkened map (user, 2026-10-22) */
+  .intro-karte img { display: block; width: calc(100% - 24px); height: auto; aspect-ratio: 2 / 1; margin: 12px 12px 0; box-sizing: border-box;
+    background: var(--holz); border: 4px solid var(--verweis); outline: 1px solid #6b5236; }
+  /* Card 4: two square images of the same size side by side, each with its caption above (user, 2026-10-22) */
+  .intro-paar { display: flex; gap: 12px; margin: 12px 12px 0; }
+  .intro-paar figure { flex: 1 1 0; min-width: 0; margin: 0; }
+  .intro-paar figcaption { font-family: "IM Fell English SC", Georgia, serif; font-size: 18px; text-align: center; margin-bottom: 4px; }
+  .intro-karte .intro-paar img { width: 100%; aspect-ratio: 1 / 1; margin: 0; }
+  .intro-karte h2 { font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 24px; margin: 12px 22px 4px; }
+  .intro-karte p { margin: 0 22px 8px; font-size: 16.5px; line-height: 1.42; }
+  .intro-fuss { flex: none; display: grid; grid-template-columns: 1fr auto; gap: 6px 12px; align-items: center; padding: 8px 22px 14px;
+    border-top: 1px solid #c9b48a; }
+  .intro-punkte { grid-column: 1 / -1; display: flex; justify-content: center; gap: 4px; }
+  .intro-punkt { width: 22px; height: 22px; padding: 0; border: none; background: none; cursor: pointer; position: relative; }
+  .intro-punkt::after { content: ""; position: absolute; left: 6px; top: 6px; width: 10px; height: 10px; border-radius: 50%;
+    border: 1px solid #6b5236; box-sizing: border-box; background: transparent; }
+  .intro-punkt.aktiv::after { background: #6b5236; }
+  .intro-merken { font-size: 15px; display: inline-flex; align-items: center; gap: 6px; cursor: pointer; }
+  .intro-merken input { accent-color: #8a5a2b; width: 15px; height: 15px; margin: 0; }
+  .intro-hinweis { font-size: 13px; font-style: italic; color: #5a4632; }
+  .intro-knoepfe { display: flex; gap: 8px; }
+  .intro-dialog button.intro-zurueck, .intro-dialog button.intro-weiter { font-family: inherit; font-size: 16px; background: var(--pergament);
+    color: var(--tinte); border: 1px solid #6b5236; border-radius: 2px; padding: 3px 14px 4px; cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,.35); }
+  .intro-dialog button.intro-weiter { background: #6b5236; color: var(--pergament); }
+  .intro-dialog button:disabled { opacity: .45; cursor: default; }
+  .intro-dialog button:focus-visible, .intro-dialog input:focus-visible { outline: 2px solid var(--rot); outline-offset: 2px; }
+  .intro-zu { position: absolute; right: 6px; top: 4px; z-index: 1; width: 34px; height: 34px; font-size: 26px; line-height: 1; cursor: pointer;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; border-radius: 50%; font-family: inherit; padding: 0 0 3px; }
+  @media (max-width: 639px) {
+    .intro-hinter { padding: 0; }
+    .intro-dialog { max-width: none; height: 100%; border: none; }
+    .intro-karte img { width: calc(100% - 16px); margin: 8px 8px 0; border-width: 3px; }
+    .intro-paar { margin: 8px 8px 0; gap: 8px; }
+    .intro-karte h2 { font-size: 21px; margin: 10px 14px 4px; }
+    .intro-karte p { margin: 0 14px 8px; font-size: 15.5px; }
+    .intro-fuss { padding: 6px 14px 12px; }
+    .intro-merken { font-size: 14px; }
+  }
+  /* Todo B74: background information (scripts/about.js, texts in data/about-texts.js), a dialog like the introduction with a list of questions;
+     a click on a question opens its answer. Button "About" right of "Intro" */
+  html.about-offen, html.about-offen body { overflow: hidden; }
+  .about-hinter { position: fixed; inset: 0; z-index: 20; background: rgba(20, 14, 8, .62); display: flex; align-items: center;
+    justify-content: center; padding: 16px; box-sizing: border-box; }
+  .about-hinter[hidden] { display: none; }
+  .about-dialog { position: relative; width: 100%; max-width: 760px; max-height: 100%; display: flex; flex-direction: column;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; box-shadow: 0 10px 40px rgba(0,0,0,.6); box-sizing: border-box; }
+  .about-dialog h2 { flex: none; font-family: "IM Fell English SC", Georgia, serif; font-weight: normal; font-size: 26px; margin: 14px 56px 8px 22px; }
+  .about-inhalt { overflow-y: auto; min-height: 0; flex: 1 1 auto; padding: 0 22px 16px; border-top: 1px solid #c9b48a; }
+  .about-frage { border-bottom: 1px solid #c9b48a; }
+  .about-frage summary { font-family: "IM Fell English SC", Georgia, serif; font-size: 19px; padding: 9px 0 8px; cursor: pointer; }
+  .about-frage[open] summary { color: #6b3a1a; }
+  .about-antwort p { margin: 0 0 8px; font-size: 16px; line-height: 1.45; }
+  .about-antwort { padding: 0 0 6px 18px; }
+  .about-antwort a { color: var(--rot); }
+  .about-dialog summary:focus-visible, .about-dialog button:focus-visible, .about-dialog a:focus-visible { outline: 2px solid var(--rot); outline-offset: 2px; }
+  .about-zu { position: absolute; right: 6px; top: 4px; z-index: 1; width: 34px; height: 34px; font-size: 26px; line-height: 1; cursor: pointer;
+    background: var(--pergament); color: var(--tinte); border: 1px solid #6b5236; border-radius: 50%; font-family: inherit; padding: 0 0 3px; }
+  @media (max-width: 639px) {
+    .about-hinter { padding: 0; }
+    .about-dialog { max-width: none; height: 100%; border: none; }
+    .about-dialog h2 { font-size: 22px; margin: 10px 50px 6px 14px; }
+    .about-inhalt { padding: 0 14px 12px; }
+    .about-frage summary { font-size: 17px; }
+    .about-antwort { padding-left: 10px; }
+    .about-antwort p { font-size: 15.5px; }
+  }
+</style>
+</head>
+<body>
+<div class="leiste">
+  <span class="gruppe"><button class="rund" id="plus" title="Vergrößern" data-t-title="e11-plus">+</button><button class="rund" id="minus" title="Verkleinern" data-t-title="e11-minus">−</button>
+  <button id="ganz" data-t="e11-ganz">Zurücksetzen</button><span id="stufe" hidden></span></span>
+  <!-- Parts that are not rendered (user, 2026-10-22): each <template data-show="…"> is inserted by scripts/map-page.js only
+       when the setting of the same name in SHOW is on. Plan step 3.2 (todo B69 d): "Show only" -->
+  <template data-show="showOnly"><label><span data-t="e11-filter">Nur zeigen</span>
+    <select id="filter">
+      <option value="" data-t="e11-n-alle">alle Sätze</option>
+      <option value="einfach" data-t="e11-n-einfach">einfach zu verstehen</option>
+      <option value="gross" data-t="e11-n-gross">große Sätze und Vermutungen</option>
+    </select></label></template>
+  <template data-show="importance"><label><span data-t="e11-mass">Bedeutung nach</span>
+    <select id="mass">
+      <option value="nutzer" data-t="e11-m-nutzer">direkten Nutzern</option>
+      <option value="folgen" data-t="e11-m-folgen">allen folgenden Sätzen</option>
+    </select></label></template>
+  <template data-show="flags"><label><span data-t="e11-fahnen">Fahnen zeigen:</span>
+    <select id="fahne">
+      <option value="" data-t="e11-f-keine">keine</option>
+      <option value="grundlegend" data-t="e11-f-grundlegend">besonders wichtig</option>
+      <option value="staunen" data-t="e11-f-staunen">erstaunlich</option>
+      <option value="zusammenhang" data-t="e11-f-zusammenhang">schön</option>
+      <option value="verstehen" data-t="e11-f-verstehen">erst nach dem Verstehen erstaunlich</option>
+      <option value="einfach" data-t="e11-f-einfach">einfach zu verstehen</option>
+      <option value="klassifikation" data-t="e11-f-klassifikation">Klassifikationssätze</option>
+    </select></label></template>
+  <span class="gruppe"><span class="gruppe-titel" data-t="e11-zeigen">Beschriftung für</span>
+    <label><input type="checkbox" id="an-laender" checked> <span data-t="e11-an-laender">Gebiete</span></label>
+    <label title="Namen der Teilgebiete; die Grenzen bleiben immer sichtbar" data-t-title="e11-an-provinzen-titel"><input type="checkbox" id="an-provinzen" checked> <span data-t="e11-an-provinzen">Teilgebiete</span></label>
+    <label><input type="checkbox" id="an-berge" checked> <span data-t="e11-an-berge">Sätze</span></label></span>
+  <span class="gruppe"><span class="gruppe-titel" data-t="e11-zeigen-symbole">Alle zeigen</span>
+    <label title="Alle Sätze und Vermutungen als Symbol, auf jeder Vergrößerung; die Namen folgen weiter den Detailstufen" data-t-title="e11-an-alle-titel"><input type="checkbox" id="an-alle"> <span data-t="e11-an-alle">Sätze</span></label>
+    <template data-show="dependencies"><label title="Das ganze Wegenetz: alle Routen der gezeigten Beweise, gebündelt, als Übersicht" data-t-title="e11-an-netz-titel"><input type="checkbox" id="an-netz"> <span data-t="e11-an-netz">Abhängigkeiten</span></label></template>
+    <label title="Alle Analogien, jede mit einer Taube" data-t-title="e11-an-analogien-titel"><input type="checkbox" id="an-analogien"> <span data-t="e11-an-analogien">Analogien</span></label>
+    <template data-show="definitions"><label><input type="checkbox" id="an-baeume"> <span data-t="e11-an-baeume">Definitionen</span></label></template></span>
+  <span class="gruppe suche"><input id="suche" type="search" autocomplete="off" spellcheck="false" role="combobox" aria-autocomplete="list"
+    aria-expanded="false" aria-controls="vorschlaege" placeholder="Satz suchen …"><ul id="vorschlaege" role="listbox" hidden></ul></span>
+  <!-- Todo B46: opens the introduction (scripts/intro.js) on card 1 -->
+  <span class="gruppe intro-gruppe"><button id="intro-oeffnen" type="button" title="Introduction">Intro</button>
+    <!-- Todo B74: opens the background information (scripts/about.js) -->
+    <button id="about-oeffnen" type="button" title="Background information">About</button></span>
+  <span data-t="e11-hinweis" hidden>Ziehen verschiebt, Mausrad oder zwei Finger vergrößern. Ein Klick auf ein Gebäude zeigt seine unmittelbaren Voraussetzungen, ein Rechtsklick (langes Drücken) seine unmittelbaren Folgerungen; ein zweiter Klick derselben Art beendet die Auswahl.</span>
+</div>
+<div class="kartenreihe">
+<div id="buehne">
+  <svg id="karte" class="karte-e8" xmlns="http://www.w3.org/2000/svg" role="img"
+       aria-label="Karte der Zahlentheorie und der algebraischen Geometrie im Meer, mit dem Langlands-Fjord und der Brücke im Bau"></svg>
+  <svg id="papier" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"></svg>
+</div>
+<aside id="legende-seite" aria-label="Legende"></aside>
+<div id="info"></div>
+</div>
+<div id="zeiger"></div>
+<div class="unten">
+  <!-- Release notes: add an entry for every visible change of draft 11, newest first, in English only (plan step 1.5).
+       Todo B69 h (user, 2026-10-22): the section is not rendered (setting SHOW.whatsNew in scripts/map-page.js); new entries
+       are still added. -->
+  <template data-show="whatsNew"><section id="whats-new">
+  <h2>What's new</h2>
+  <h3>22 October 2026, 14:00</h3>
+  <ul>
+    <li>Background information (todo B74): the new button “About” right of “Intro” opens a list of questions about the map (what it shows, what the symbols mean, how the theorems were chosen, how the dependencies and the sizes were determined, how the areas were arranged, how the texts were written, how reliable the content is, what is missing and who made it). A click on a question opens its answer; ×, Esc or a click beside the dialog closes it. ?about=1 in the address opens it.</li>
+  </ul>
+  <h3>22 October 2026, 12:45</h3>
+  <ul>
+    <li>Introduction (todo B46): on the first visit a carousel of seven cards opens over the map (a map of mathematics; buildings, ruins, cities and bridges; zoom and pan; premises and consequences; more than one proof; the info box; search, show all and reset). Each card has a still image and two or three sentences. “Back”, “Next”, the dots and the arrow keys page; Esc, the cross or a click beside the dialog closes it. “Don't show again” is remembered in this browser. The new button “Intro” at the right end of the toolbar opens the introduction again; ?intro=1 in the address always opens it, ?intro=0 never.</li>
+  </ul>
+  <h3>22 October 2026, 11:45</h3>
+  <ul>
+    <li>A click on a theorem shows the immediate premises of its first proof, a right click its immediate consequences; a second click of the same kind ends the selection. There are no further stages, and a double click acts like one click.</li>
+    <li>The hover box of a subarea and of a theory names the area above it in italics.</li>
+    <li>Shorter names of three subareas: “Zeta and L-functions” (11M), “Global fields” (11R), “Local fields” (11S).</li>
+    <li>The info box shows only the head, the statement, the proofs with their ideas and the history; the shown proof is bold.</li>
+    <li>Toolbar in the style of the map, with brown check boxes; the title cartouche keeps a small gap to the frame.</li>
+    <li>This section is no longer shown below the map.</li>
+  </ul>
+  <h3>22 October 2026, 11:30</h3>
+  <ul>
+    <li>The group “Show” of the toolbar is now “Show all” with two switches: “theorems” (formerly “all theorems”) and “analogies”, which shows every analogy with its dove, together with the symbols at both ends. Both are off by default and kept in the address.</li>
+    <li>Selecting the construction plan of the Langlands correspondences no longer highlights all bridges of the fjord; the info box still lists them as partial results.</li>
+    <li>The choice “Show only” is hidden.</li>
+  </ul>
+  <h3>22 October 2026, 10:45</h3>
+  <ul>
+    <li>The Langlands fjord now reaches up to the subarea “Zeta and L-functions: analytic theory” (11M), the common foundation of both sides: the correspondences preserve the L-function. The Galois side (11R, 11S) and the automorphic side (11F, 22E) no longer share a land border; 11M borders both at the inner end of the fjord. Shape and mouth of the fjord are unchanged.</li>
+    <li>Layout recomputed: 11R holds only the east bank and has moved into the former place of 11M, so 11P, 20F, 52C and 42A have shifted a little. New neighbours include 11M–11F, 11M–12F, 11R–20D, 11R–20F and 11R–52C; 11R no longer borders 11F, 22E and 12F.</li>
+  </ul>
+  <h3>22 October 2026, 10:15</h3>
+  <ul>
+    <li>A ruin stands for the negation of the disproved conjecture. The proofs of the six counterexamples are now drawn as proofs of their ruins: selecting a ruin shows the routes from the premises of the proof to the ruin, with proof points, stages and consequences as for any theorem. The info box lists each such proof with its counterexample.</li>
+    <li>Trees and definitions are deferred for now: the switch “definitions” and the legend rows for tree and forest are gone, and no trees are drawn, also with an old address that switched them on.</li>
+    <li>The dashed outline of a research programme is no longer drawn and has no legend row (todo B66). The construction plan of the Langlands correspondences stays.</li>
+    <li>The construction plan is now called “Langlands correspondences” (plural): it stands for a family of correspondences whose proved cases are bridges of their own. Its info box says that this family forms the core of the Langlands programme.</li>
+    <li>Legend (todo B68): “Conjectured correspondence(s)” instead of “Construction plan: correspondence, conjectured”; the border between subareas without the note on the MSC classes; the rows “Main area of the MSC” and “No data” are gone; “Used in proof” follows the two proof points.</li>
+  </ul>
+  <h3>22 October 2026, 09:45</h3>
+  <ul>
+    <li>The construction plan of the Langlands correspondence no longer lies over the mouth of the fjord, where one of its ends reached into the open sea. It now stands further up the fjord, with both ends on land and clear of the coast; it is still the outermost bridge. The other bridges have moved inward only as far as needed so that no two bridges touch at the magnification from which both are shown. The areas and subareas are unchanged; a few theorems and theories near the fjord have moved slightly.</li>
+    <li>The banks of the fjord are irregular lines with small bays and headlands, independent of each other, so the width of the fjord varies; the coast has a finer irregularity as well. Both are drawing only and have no meaning of their own. Each bridge ends at the drawn banks.</li>
+  </ul>
+  <h3>22 October 2026, 02:15</h3>
+  <ul>
+    <li>The arches of the bridges are left out for now: at the fjord the south faces of the closely spaced bridges touched each other. Every bridge is drawn with its deck, ramps and wing walls only, as before; deck filled in the colour of the buildings, parapets and names as in the previous entry.</li>
+    <li>The symbols of the buildings and cities come from a copy of their own (maps/shared_scripts/building-symbols.js), so that further changes to the sketches no longer change the map.</li>
+  </ul>
+  <h3>22 October 2026, 02:00</h3>
+  <ul>
+    <li>New switch “all theorems” under “Show”: when it is on, every theorem and conjecture is drawn as its symbol (building, building with a question mark, ruin) at every magnification, also in the whole map. Their names still follow the levels of detail. Off by default; its state is kept in the address like that of the other switches.</li>
+    <li>The toolbar reads “Show only”, “Show labels for” (areas, subareas, theorems) and “Show” (all theorems, definitions), without colons and with the names of the switches in lower case. The switch “subareas” hides only the names of the subareas; their borders stay visible (todo B64).</li>
+    <li>The hover box names the kind after the name: “(area)”, “(subarea)” or “(theory)”. Legend and info box say area and subarea instead of country and province.</li>
+    <li>The search also finds a name when the search word begins a part of a word after a hyphen (“Riemann” finds “Quasi-Riemann theorem”); the list of suggestions shows up to 20 entries.</li>
+    <li>The page title is “Number Theory and Algebraic Geometry”.</li>
+  </ul>
+  <h3>22 October 2026, 01:45</h3>
+  <ul>
+    <li>Buildings instead of mountains (plan step 4.5). A theorem is a building seen obliquely from the front, with a hipped roof and thin lines; its stage of importance shows in storeys, annex, side and rear wings (four stages). An open conjecture, in every state except “disproved” and “programme”, is a building of the same stages with a question mark above it. A disproved conjecture is a ruin: the building stands, only its roof has broken off.</li>
+    <li>A theory is a city instead of a hill range: small houses staggered in depth with one or two towers. The houses of a city are not theorems of their own. A city has no name on the map; its name appears in the hover box. The switch “Hill ranges” is gone, and the switch “Mountains” is now called “Theorems”.</li>
+    <li>A counterexample no longer has a symbol of its own (no cairn). It is listed with its year and statement under “Counterexamples” in the info box of the disproved conjecture.</li>
+    <li>Bridges are drawn after the approved sketch: a straight deck filled in the colour of the buildings, the far wing walls parallel to the near ones, a double parapet and blunt cutwaters on large bridges. From magnification 2 on the south face with semicircular arches and piers with a flat foot is shown as well. Every bridge keeps its name on the deck.</li>
+    <li>The places of the elements are those of plan step 1.4. Where the new symbols would overlap, a city would leave its province or two single buildings would stand closer than one building width, 35 elements were moved to the nearest suitable place (place-elements.js with the boxes of the new symbols, only these elements).</li>
+    <li>The legend shows building, building with a question mark, ruin, dashed outline, city, bridge and construction plan; mountain, cloud cap, hill range and cairn are gone.</li>
+  </ul>
+  <h3>22 October 2026, 01:15</h3>
+  <ul>
+    <li>The box of a province now appears over the whole free ground of the province, not only over its name: wherever the pointer is not over a mountain, tree, bridge, hill range or another name. Over sea and fjord there is no box. The box shows the country at the top in a smaller type (both countries for the condominium of arithmetic geometry), then the name of the province, then its short description. The MSC codes are no longer shown in the box, also not for country names.</li>
+    <li>The switch “Definitions” is now off by default: the trees and forests appear only after switching it on. Its state is kept in the address like that of the other switches.</li>
+    <li>The 14 names of the forests are approved; the hover box of a forest no longer says that its name is provisional.</li>
+  </ul>
+  <h3>22 October 2026, 01:00</h3>
+  <ul>
+    <li>Concepts (definitions) appear as trees (plan step 2.2), at the places computed together with the mountains in plan step 1.4. A tree is a round crown on a short trunk in pen and ink; its size grows with the number of theorems and conjectures whose statement uses the concept. The 28 largest trees are visible in the whole map, the others appear when zooming in; the names of the trees appear from magnification 2 on where there is room.</li>
+    <li>Forests (at least five concepts of one province that are connected by their definitions) have a soft green ground and a name in green italics. The 14 names are provisional and not yet approved.</li>
+    <li>Hovering over a tree shows its name, its province and forest and its definition in one sentence; clicking it opens the info box with the definition, the concepts it is defined with, the concepts defined with it and the theorems and conjectures whose statement uses it.</li>
+    <li>New switch “Definitions” in the toolbar (on by default, kept in the address) shows or hides the trees, the forests and their names. The legend has two new rows, tree and forest, under “Concepts”.</li>
+  </ul>
+  <h3>22 October 2026, 00:30</h3>
+  <ul>
+    <li>Draft 11 starts as a copy of draft 10 (22 October 2026). Draft 10 stays unchanged as a reference; all further changes are made here. The entries below are those of draft 10. The layout before plan step 1.2 (address parameter lage=alt) is no longer offered.</li>
+  </ul>
+  <h3>22 October 2026, 00:00</h3>
+  <ul>
+    <li>Province names are set upright instead of italic, which was hard to read, in a sepia brown with slight letter spacing, so that they stay distinct from the country names (small capitals) and the names of the mountains (dark ink).</li>
+    <li>When a theorem is selected and its proof chain is shown (also stage by stage and with the consequences on right click), only the names of the countries and provinces from which an element of the shown chain comes remain, and only the names of the hill ranges in the chain. All other names of countries, provinces and hill ranges are hidden while the selection lasts.</li>
+    <li>The names of the hill ranges are hidden by default. The new switch “Hill ranges” under “Labels” shows them; it is kept in the address like the other switches. The names of the hill ranges in a selected chain are always shown.</li>
+  </ul>
+  <h3>21 October 2026, 23:45</h3>
+  <ul>
+    <li>Coast hatching as on old maps: four fine lines run parallel to the coast and to both banks of the fjord, paler and further apart with the distance from the land, so that the sea and the fjord read clearly as water. The hatching has no meaning of its own and needs no line in the legend; there are still no wave signs.</li>
+    <li>Countries that border the sea or the fjord no longer have bluish or greenish colours: their hue differs by at least 100 degrees from the hue of the water (or they are grey). New colours for commutative algebra (13, yellow), category theory and homological algebra (18, violet), group theory (20, yellow), functions of a complex variable (30, yellow), several complex variables (32, rose), harmonic analysis (42, orange), convex and discrete geometry (52, violet) and differential geometry (53, violet). Every changed country differs clearly in colour from its neighbours.</li>
+    <li>The title cartouche sits flush in the top left corner of the map frame and stays there, at the same size, when the map is zoomed or moved. In the whole map it covers no land and no name.</li>
+  </ul>
+  <h3>21 October 2026, 21:45</h3>
+  <ul>
+    <li>Final layout of plan step 1.5, chosen by hand: the countries and provinces are again those of 21 October, 19:30 (run 8 of the optimisation), which has shorter routes than the layout of 20:15. The fjord mouth lies at 19 degrees from the bottom of the map; its banks belong to 11R and 11F. The improvements of 20:15 remain: construction plan over the mouth of the fjord, narrower light band around the bridges, title cartouche in map coordinates.</li>
+    <li>Countries that now border each other again: 11G/14G–12, 11G/14G–13, 11G/14G–57, 11–30, 12–53, 12–58, 22–30, 22–46, 30–53, 32–54, 53–58, 58–81. Countries that no longer border each other: 11G/14G–22, 11–14, 14–22, 14–30, 18–54, 18–58, 20–42, 32–58. Provinces: 73 new and 72 lost neighbourhoods.</li>
+  </ul>
+  <h3>21 October 2026, 20:15</h3>
+  <ul>
+    <li>New layout of the countries and provinces (plan step 1.5, round 3): of 40 runs of the optimisation, the run is chosen not only by its objective but also by the number of routes longer than 535 px and the share of neighbouring provinces without a connecting proof. The fjord mouth lies at 21 degrees from the bottom of the map; its banks belong to 11R and 11F.</li>
+    <li>The construction plan of the general Langlands correspondence lies over the mouth of the fjord, with its ends on the banks, instead of across the land further south.</li>
+    <li>The light band around the decks of the bridges is narrower, so that more of the fjord shows as water.</li>
+    <li>The title cartouche is drawn in map coordinates: it shrinks and grows with the map and keeps clear of land and names in every window.</li>
+    <li>Countries that now border each other: 11G/14G–22, 11–14, 14–22, 14–30, 18–54, 18–58, 20–42, 32–58. Countries that no longer border each other: 11G/14G–12, 11G/14G–13, 11G/14G–57, 11–30, 12–53, 12–58, 22–30, 22–46, 30–53, 32–54, 53–58, 58–81. Provinces: 72 new and 73 lost neighbourhoods.</li>
+  </ul>
+  <h3>21 October 2026, 19:30</h3>
+  <ul>
+    <li>The title cartouche stands top left instead of bottom right. Land, the fjord, the bridges and the names keep clear of it.</li>
+    <li>The Langlands fjord is twice as wide at the mouth (about 106 px instead of 56 px) and narrows inward. Its mouth lies at 19 degrees from the bottom of the map. The main province of each side lies on its bank: algebraic number theory (11R) and discontinuous groups and automorphic forms (11F). Topological groups, Lie groups (22E) borders 11F but no longer the fjord.</li>
+    <li>The bridges stand along the whole fjord, the most general at the mouth and the narrowest at the inner end.</li>
+    <li>Names stand closer to their symbols: the map tries more places directly at the symbol before places further away.</li>
+    <li>Shorter name: “Finite generation of invariant rings”.</li>
+    <li>Countries that now border each other: 11G/14G–12, 11G/14G–57, 11–68, 12–22, 12–30, 12–46, 12–53, 12–58, 12–81, 13–5, 14–54, 14–58, 14–81, 22–46, 30–46, 30–53, 32–54, 42–52. Countries that no longer border each other: 11G/14G–42, 11G/14G–5, 11–14, 11–46, 12–54, 12–68, 20–30, 32–58, 32–81, 46–52, 53–81, 54–68. Provinces: 84 new and 80 lost neighbourhoods.</li>
+  </ul>
+  <h3>21 October 2026, 17:45</h3>
+  <ul>
+    <li>New layout as the default (plan step 1.5): countries and provinces are arranged on a raster so that the routes of the shown proofs are short (plan steps 1.2 and 1.3), mountains, hill ranges and trees in their provinces with even spacing and room for the names (plan step 1.4). The sum of the route lengths is 7 % smaller than before; 15 instead of 17 routes are longer than 800 px. The previous layout remains available with <code>?lage=alt</code> in the address.</li>
+    <li>The Langlands fjord follows a common rule: depth from the definitional distance of its two sides, inner end at their common foundations, a bend after 60 % of its length. Its mouth lies on the south coast at 16 degrees from the bottom of the map. The map draws the fjord exactly as the layout computes it, so it is narrower than before (about 56 px at the mouth instead of 110 px), and the bridges are shorter. Banks: algebraic number theory (11R) and topological groups, Lie groups (22E).</li>
+    <li>The country names have positions and sizes computed for the new areas.</li>
+    <li>Smaller symbols for hill ranges and large mountains: already since the entry of 16:15.</li>
+    <li>The map is shown in English only; the switch DE | EN is gone.</li>
+    <li>New provinces on the map: 13F, 18E, 18F, 20F, 30B, 30F, 54A (and country 54).</li>
+    <li>Countries that now border each other: 11G/14G–13, 11G/14G–42, 11G/14G–5, 11–12, 11–13, 11–5, 11–52, 12–14, 12–54, 12–68, 14–57, 20–30, 20–52, 22–30, 32–58, 32–81, 46–52, 53–58, 53–81, 54–68, 55–57. Countries that no longer border each other: 11G/14G–81, 11–68, 11–81, 12–13, 12–5, 12–57, 13–18, 13–55, 13–57, 14–42, 14–58, 14–81, 18–32, 18–52, 18–57, 20–46, 20–68, 22–58, 22–81, 32–52, 52–57, 5–52, 5–57.</li>
+    <li>Provinces that now border each other (111): 05E–11F, 05E–11G/14G, 11A–11Y, 11A–46E, 11A–52C, 11B–11N, 11B–46E, 11B–52B, 11B–52C, 11C–11D, 11D–11G/14G, 11D–11J, 11D–11S, 11D–13F, 11E–11F, 11E–11S, 11E–42A, 11E–46E, 11F–11G/14G, 11F–11M, 11F–11N, 11F–11P, 11F–42A, 11G/14G–11S, 11G/14G–13A, 11G/14G–13F, 11G/14G–14A, 11G/14G–42A, 11J–11S, 11M–11P, 11M–11R, 11M–30B, 11N–11P, 11N–20D, 11N–20F, 11N–46E, 11N–52A, 11N–52B, 11R–12E, 11R–12F, 11R–14H, 11R–30B, 11R–30F, 11S–11Y, 11S–42A, 12E–14E, 12E–14H, 12E–54A, 12F–54A, 12F–68Q, 13A–13C, 13A–13F, 13A–14A, 13B–13E, 13B–13N, 13B–14A, 13C–13D, 13C–13J, 13D–13J, 13F–13J, 13H–13N, 13H–14B, 13H–14L, 14A–14D, 14A–14M, 14A–14N, 14B–57R, 14C–14F, 14C–14H, 14C–14J, 14C–14N, 14D–14F, 14D–55N, 14D–57R, 14E–14H, 14E–14J, 14E–53C, 14F–14K, 14F–18A, 14F–18F, 14F–18G, 14F–32Q, 14F–55N, 14H–14N, 14J–32C, 14J–53C, 14K–18A, 14K–55N, 14K–57R, 14L–57R, 18A–18F, 18E–18F, 18E–18G, 18F–18G, 20D–20F, 20D–30D, 20F–52A, 22E–30B, 22E–30D, 22E–30F, 30B–30D, 30B–30F, 32C–81T, 32Q–58A, 32Q–81T, 46E–52C, 52B–52C, 53C–58A, 53C–81T, 54A–68Q, 55N–57R. Provinces that no longer border each other (99): 05E–12E, 05E–12F, 05E–52B, 05E–57R, 11A–11B, 11A–11C, 11A–11N, 11B–11C, 11B–11G/14G, 11B–11S, 11B–14K, 11C–11E, 11C–11G/14G, 11C–11P, 11D–11E, 11D–11N, 11D–11Y, 11D–20D, 11D–46E, 11E–11J, 11E–11P, 11E–11Y, 11F–11Y, 11F–20D, 11F–68Q, 11G/14G–11P, 11G/14G–14J, 11G/14G–14K, 11G/14G–81T, 11J–11P, 11J–11R, 11J–11Y, 11M–11S, 11M–14E, 11M–14K, 11M–42A, 11N–11S, 11R–11Y, 11R–81T, 11S–14K, 11Y–20D, 12E–13J, 12F–13B, 12F–13C, 12F–13J, 12F–57R, 13A–13D, 13A–13H, 13A–55N, 13B–13J, 13C–13H, 13C–13N, 13C–14A, 13C–18A, 13C–57R, 13D–13H, 13D–14C, 13D–55N, 13E–13N, 13E–14C, 13E–14D, 13N–14D, 14A–14F, 14A–18A, 14A–18G, 14A–32C, 14B–14F, 14B–14J, 14C–55N, 14D–14L, 14E–14K, 14E–14M, 14E–42A, 14F–14H, 14F–53C, 14H–14J, 14H–58A, 14H–81T, 14J–14L, 14J–14N, 14K–14M, 14K–14N, 14L–14M, 14L–14N, 18A–18G, 18A–52A, 18A–52B, 18A–57R, 18G–32C, 18G–32Q, 18G–52A, 18G–52C, 20D–46E, 20D–68Q, 22E–58A, 22E–81T, 32Q–52C, 52A–52C, 52B–57R.</li>
+  </ul>
+  <h3>21 October 2026, 16:15</h3>
+  <ul>
+    <li>Hill ranges and large mountains are smaller. Hill ranges of level 1 have size 32 instead of 48, of level 2 size 30 instead of 40, of level 3 size 28 instead of 32; level 4 stays at 26. A mountain of a size above 13 (levels 1 and 2) grows above this limit with only 0.4 of the former slope; the largest mountain now has size 19 instead of 28. The order of the sizes is kept.</li>
+  </ul>
+  <h3>21 October 2026, 09:30</h3>
+  <ul>
+    <li>The box shown when hovering over a theorem lists all proofs in historical order in its second line: “Proved by X (year), Y (year), …”. For a conjecture it says “Conjectured by …”. The same line is in the info box. The search suggestions still show only the first originator.</li>
+    <li>Every proof point, filled or hollow, shows on hover the name of the proof, the persons and the year, and its role. If persons and year are not recorded, it says “Persons and year not recorded”.</li>
+  </ul>
+  <h3>21 October 2026, 01:30</h3>
+  <ul>
+    <li>A counterexample is a cairn (four flat stones stacked), no longer a dragon. An analogy is shown by a dove in the middle of a broken line, no longer by a sailing boat.</li>
+  </ul>
+  <h3>21 October 2026, 00:45</h3>
+  <ul>
+    <li>Right click on a mountain (consequences): a consequence of stage d is drawn only with the routes from the selected theorem and from consequences of the stages 1 to d − 1. Routes from other premises of the same proof that are themselves consequences of the same stage no longer appear (example: the Artin reciprocity law).</li>
+  </ul>
+  <h3>21 October 2026, 00:15</h3>
+  <ul>
+    <li>Legend: the rows “Sea”, “Fjord”, “Conditional land”, “Ridge” and “Colour of the route” are gone. The finished bridge is called “Proved correspondence”; the row “Route” now only says “Proof”.</li>
+    <li>A conjecture that is proved assuming another conjecture is drawn like any open conjecture (mountain with a cloud cap), without hatched ground. The info box still shows the state “conditionally proved”.</li>
+    <li>A conditional proof is drawn like every other proof (red line with chevrons, arrowhead and red proof point); the double line is gone. The info box still says “conditional” for it.</li>
+  </ul>
+  <h3>21 October 2026, 00:15</h3>
+  <ul>
+    <li>The theory “Algebraic geometry” is dissolved: no drawn proof assumes it as a whole any more. Instead there are new hill ranges for individual theories.</li>
+    <li>The quadratic reciprocity law is a theorem of its own with two proofs: the proof with Gauss's lemma and the proof as a late special case of Artin reciprocity. The theorem “Weil II” is new as well.</li>
+  </ul>
+  <h3>20 October 2026, 21:00</h3>
+  <ul>
+    <li>The name of a hill range now stands uniformly half on its symbol: centred horizontally, with the middle of the text on the foot line of the hills. The upper half of the name lies on the lower part of the symbol, the lower half below it. If this place is taken, the name only moves sideways in small steps at the same height; only if that fails too does it stand at one of the earlier places. The names of the hill ranges are therefore placed directly after the mountains of level 1.</li></ul>
+  <h3>20 October 2026, 20:45</h3>
+  <ul>
+    <li>The width of a bridge again follows its importance, with the same measure as the size of the mountains (data, editorial rating). The deck is 11 to 20 pixels wide, so that the names stay readable; Artin reciprocity and the modularity theorem are the widest. The construction plan of the general Langlands correspondence is somewhat wider than the widest finished bridge. The order by generality and the names on the deck remain.</li>
+  </ul>
+  <h3>20 October 2026, 20:45</h3>
+  <ul>
+    <li>The name of a hill range now preferably stands on the lower part of its own symbol instead of next to it. Proof points and other symbols stay free.</li>
+    <li>The names of the most important mountains (level 1, then level 2) are placed before the province names. A province name moves or is left out before the name of such a mountain is left out. If such a name finds no room next to its symbol, it stands further away and is joined to it by a leader line; at the edge of the map it moves sideways into the image. If a name of level 1 still finds no room, the name of a neighbouring mountain of level 1 moves away, provided both then have room. All names of level 1 are now visible on the whole map, including Fermat's Last Theorem and Faltings's theorem.</li></ul>
+  <h3>20 October 2026, 20:30</h3>
+  <ul>
+    <li>The bridges are now ordered by generality, no longer by year: correspondences that bridge little stand inside, where the fjord is narrow (Artin reciprocity for GL<sub>1</sub> innermost); more general ones stand further out, where the fjord is wide. The general Langlands correspondence (construction plan) stands at the mouth. Every bridge reaches from bank to bank, so a more general bridge is longer.</li>
+    <li>Order from inside to outside: Artin reciprocity, Langlands–Tunnell theorem, modularity theorem, Galois representations attached to modular forms, Serre's conjecture, potential automorphy of symmetric powers, Galois representations attached to self-dual automorphic representations, Galois representations over CM fields, local Langlands correspondence for GL<sub>n</sub>, Langlands correspondence for GL<sub>n</sub> over function fields, geometrization of the local correspondence, Langlands parameters after V. Lafforgue, general Langlands correspondence.</li>
+    <li>New bridges instead of mountains: potential automorphy of symmetric powers and Galois representations attached to self-dual automorphic representations.</li>
+    <li>The name of a bridge stands on its deck, no longer beside it. All bridges have the same width; only the construction plan of the general Langlands correspondence is somewhat wider. When a bridge appears still depends on its importance.</li>
+  </ul>
+  <h3>20 October 2026, 20:15</h3>
+  <ul>
+    <li>Every correspondence is now a bridge of its own and no longer a mountain. Finished bridges cross the Langlands fjord for Artin reciprocity, the modularity theorem, Serre's conjecture (Khare–Wintenberger), the local Langlands correspondence for GL<sub>n</sub> and the Langlands correspondence for GL<sub>n</sub> over function fields, and for the constructions in one direction with preserved L-function: Galois representations attached to modular forms (Eichler–Shimura, Deligne), the Langlands–Tunnell theorem, Galois representations over CM fields, Langlands parameters after V. Lafforgue and the geometrization of the local correspondence (Fargues–Scholze). Their mountains are gone.</li>
+    <li>The bridges stand near the broad end of the fjord, in historical order from the sea inward. Like mountains they appear according to their importance: in the overview only the most important ones, the others when zooming in. The width of a bridge grows with its importance. Names of bridges are horizontal.</li>
+    <li>The general Langlands correspondence is a construction plan (a bridge drawn with dashed lines, without a deck) over the same fjord, behind the finished bridges. The Langlands programme in addition has its dashed outline around the whole fjord region.</li>
+    <li>Routes from the premises of a correspondence end in the middle of its bridge; routes to the theorems that use it start there. Clicking a bridge opens its info box with the two sides, the proved direction, the preserved quantity and, where meaningful, a dictionary.</li>
+    <li>The fjord is deeper: it now cuts in along 80 % of the border between 11R and 11F (provisional; the measure from the concept graph gives about a third).</li>
+    <li>Legend: rows for the bridge and the construction plan instead of the bridge under construction with arches.</li>
+  </ul>
+  <h3>20 October 2026, 20:00</h3>
+  <ul>
+    <li>First version of draft 10, based on draft 8: the map lies in the sea. The coast is irregular and is only the border between land and water.</li>
+    <li>A fjord cuts from the southern coast along the border between the Galois side (province 11R) and the automorphic side (province 11F) into the country of number theory. At its inner end the land is connected. For now the length of the fjord follows the definitional distance between “Galois representation” and “automorphic representation” in the concept graph of arithmetic geometry.</li>
+    <li>The Langlands correspondence crosses the fjord as a bridge under construction. Every arch is a proved partial result; in the middle the arches for the unproved parts are missing. Zooming in shows the names of the arches. Clicking an arch selects the mountain of the partial result.</li>
+    <li>Clicking the bridge shows in the info box the two sides, the preserved quantity (the L-function), the dictionary and the list of arches with years and persons. Routes to the correspondence end in the middle of the bridge.</li>
+    <li>The partial results remain mountains. They stand as close to the bridgehead of their side as their province allows.</li>
+    <li>The dashed outline of the Langlands correspondence is gone; the bridge replaces it.</li>
+    <li>New layout: 11F and 11R now border each other at the coast. New province borders compared with draft 8: 11D–11Y, 11D–20D, 11E–11J, 11E–11Y, 11F–11R, 11F–68Q. Removed province borders: 11D–11F, 11E–11F, 11F–11J, 11F–11P, 11F–46E, 11R–68Q, 11Y–68Q. All countries keep their neighbours.</li>
+    <li>Legend: new rows for the bridge under construction, the sea and the fjord.</li>
+  </ul>
+  </section></template>
+  <p><a href="../../index.html">Overview of the drafts</a></p>
+</div>
+
+<script src="data/theorems.js"></script>
+<script src="data/concepts.js"></script>
+<script src="data/comprehensibility.js"></script>
+<script src="data/area-texts.js"></script>
+<script src="data/translations.js"></script>
+<!-- Plan step 1.5: draft 11 (like draft 10) is shown in English only, without the switch DE | EN -->
+<script>window.LANG_FIXED = "en";</script>
+<script src="scripts/language.js"></script>
+<script src="scripts/drawing.js"></script>
+<script src="scripts/building-symbols.js"></script>
+<script src="scripts/model.js"></script>
+<script src="data/weights.js"></script>
+<script src="scripts/size-score.js"></script>
+<!-- Layout of plan steps 1.3 to 1.5 (run 8). Draft 11 does not offer the layout before plan step 1.2 (?lage=alt of draft 10). -->
+<script src="data/layout.js"></script>
+<!-- Plan step 3.2: the route network (data/route-network.js) is deferred by the user, 2026-10-22, and not loaded -->
+<script src="scripts/map-page.js"></script>
+<!-- Todo B46: introduction as a carousel of seven cards; images in intro/ (tests/shot-intro.js) -->
+<script src="scripts/intro.js"></script>
+<!-- Todo B74: background information; texts in data/about-texts.js -->
+<script src="data/about-texts.js"></script>
+<script src="scripts/about.js"></script>
+</body>
+</html>

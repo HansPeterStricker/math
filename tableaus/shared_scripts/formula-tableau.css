@@ -1,0 +1,68 @@
+/* Shared styles of the formula tableaus (Beispiel Pi, Beispiel e). */
+  :root { --grund: #f5f2ea; --tinte: #26221d; --leise: #6d655a; --linie: #c9bfae; --karte: #fffdf8; --akzent: #b5541f; }
+  body { margin: 0; background: var(--grund); color: var(--tinte); font-family: "Source Serif 4", "Cambria Math", Georgia, serif;
+    line-height: 1.45; font-size: 16px; }
+  main { max-width: 1900px; margin: 0 auto; padding: 12px 16px 10px; }
+  h1 { font-size: 26px; font-weight: 600; margin: 0; }
+  .erlaeuterung { max-width: 860px; font-size: 15.5px; }
+  .erlaeuterung h2 { font-size: 19px; font-weight: 600; margin: 18px 0 6px; }
+  .erlaeuterung p { margin: 0 0 10px; }
+  #tableau { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  @media (max-width: 1300px) { #tableau { grid-template-columns: repeat(3, minmax(0, 1fr)); } }
+  @media (max-width: 800px) { #tableau { grid-template-columns: minmax(0, 1fr); } }
+  .spalte h2 { font-size: 21px; font-weight: 600; margin: 0 0 10px; padding-bottom: 4px; border-bottom: 2px solid var(--akzent); }
+  .karte { background: var(--karte); border: 1px solid var(--linie); padding: 10px 12px; margin-bottom: 12px; }
+  .karte h3 { font-size: 16px; font-weight: 600; margin: 0; }
+  .wer { color: var(--leise); font-size: 13px; }
+  .formel { overflow-x: auto; overflow-y: hidden; font-size: 14px; }
+  .formel .katex-display { margin: 10px 0; }
+  .notiz { font-size: 13.5px; margin: 4px 0 0; color: #3d372f; }
+  .folgt { font-size: 13px; margin: 6px 0 0; padding-top: 5px; border-top: 1px dotted var(--linie); color: var(--leise); }
+  .folgt .methode { color: #3d372f; }
+  details.folgt summary { cursor: pointer; color: var(--akzent); }
+  details.folgt p { margin: 4px 0 0; }
+  a { color: var(--akzent); }
+  .abzeichen { display: inline-block; margin-left: 6px; padding: 0 6px; font-size: 11.5px; font-weight: 400; vertical-align: 2px;
+    border: 1px solid var(--akzent); border-radius: 3px; background: var(--akzent); color: #fff; }
+  #funktionen { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; align-items: start; }
+  @media (max-width: 800px) { #funktionen { grid-template-columns: minmax(0, 1fr); } }
+  .funktion { background: #f9f6ef; }
+  .hervor { animation: hervor 2.4s ease-out; }
+  @keyframes hervor { from { box-shadow: 0 0 0 4px var(--akzent); } to { box-shadow: 0 0 0 4px transparent; } }
+  /* Panels */
+  nav.reiter { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 12px; border-bottom: 2px solid var(--akzent); }
+  nav.reiter button { font: inherit; font-size: 15px; padding: 4px 14px; border: 1px solid var(--linie); border-bottom: none;
+    background: var(--grund); color: var(--leise); cursor: pointer; margin-bottom: -2px; }
+  nav.reiter button.aktiv { background: var(--karte); color: var(--tinte); border-color: var(--akzent); border-bottom: 2px solid var(--karte); }
+  .panel[hidden] { display: none; }
+  nav.reiter .ausgang { margin-left: auto; align-self: center; font-size: 14px; color: var(--leise); }
+  nav.reiter .ausgang button { font-size: 14px; padding: 2px 10px; margin: 0 0 0 4px; border: 1px solid var(--linie); }
+  nav.reiter .ausgang button.aktiv { border: 1px solid var(--akzent); background: var(--akzent); color: #fff; }
+  /* Graph */
+  .graph-rahmen { position: relative; overflow: hidden; height: 70vh; border: 1px solid var(--linie); background: #fbf9f3;
+    cursor: grab; touch-action: none; user-select: none; }
+  .graph-rahmen.zieht { cursor: grabbing; }
+  .legende { position: absolute; right: 10px; bottom: 10px; z-index: 2; display: flex; flex-wrap: wrap; align-items: center;
+    gap: 4px 12px; max-width: 420px; padding: 6px 10px; font-size: 12.5px; color: var(--leise); cursor: default;
+    background: rgba(255,253,248,.94); border: 1px solid var(--linie); }
+  .legende i { display: inline-block; width: 14px; height: 10px; margin-right: 4px; border: 1px solid var(--linie); }
+  .legende button { font: inherit; font-size: 13px; padding: 0 8px; border: 1px solid var(--linie); background: var(--karte);
+    color: var(--tinte); cursor: pointer; }
+  .legende button:hover { border-color: var(--akzent); }
+  .graph-flaeche { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
+  .graph-flaeche svg { position: absolute; left: 0; top: 0; }
+  .gknoten { position: absolute; box-sizing: border-box; background: var(--karte); border: 1px solid var(--linie); overflow: hidden;
+    cursor: pointer; display: flex; flex-direction: column; }
+  .gknoten.funktion { background: #efe8da; border-color: var(--leise); }
+  .gknoten.definition { border: 2px solid var(--akzent); }
+  .gknoten:hover, .gknoten.markiert { box-shadow: 0 0 0 3px rgba(181,84,31,.35); }
+  .gname { font-size: 12px; font-weight: 600; line-height: 1.2; padding: 3px 6px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .gformel { flex: 1; position: relative; overflow: hidden; }
+  .gformel > span { position: absolute; left: 50%; top: 50%; transform-origin: center center; white-space: nowrap; font-size: 13px; width: max-content; }
+  .gformel .katex-display { margin: 0; }
+  .gkante path { fill: none; stroke: #8f8577; stroke-width: 1.2; opacity: .75; }
+  .gkante.vonfunktion path { stroke: var(--akzent); opacity: .55; }
+  .gkante.markiert path, .gkante:hover path { stroke-width: 2.6; opacity: 1; }
+  .gkante path.treffer { stroke: transparent; stroke-width: 12; opacity: 1; pointer-events: stroke; cursor: help; }
+  .folgt .art { display: inline-block; padding: 0 5px; border: 1px solid #8f8577; border-radius: 8px; font-size: 11px;
+    font-weight: 600; color: #3d372f; }

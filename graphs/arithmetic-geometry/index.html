@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Sätze und Vermutungen der arithmetischen Geometrie</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../algebraic-geometry/stil.css">
+<link rel="stylesheet" href="zusatz.css">
+</head>
+<body>
+<header>
+  <nav class="ansichten"><a href="index.html" class="aktiv" data-t="ari-nav-saetze">Sätze und Vermutungen</a><a href="begriffe.html" data-t="ari-nav-begriffe">Begriffe</a><a href="bipartit.html" data-t="ari-nav-bipartit">Begriffe und Sätze</a><a href="../algebraic-geometry/index.html" class="fremd" data-t="ari-nav-ag">Algebraische Geometrie</a></nav>
+  <h1 data-t="ari-h1">Sätze und Vermutungen der arithmetischen Geometrie</h1>
+  <p data-t="ari-p1">Der Graph verbindet bewiesene Sätze und offene Vermutungen rund um die Riemannsche Vermutung, die Vermutung von
+    Birch und Swinnerton-Dyer und die abc-Vermutung. Jeder Kasten mit durchgezogenem Rand ist ein Satz, jeder Kasten
+    mit gestricheltem Rand eine Vermutung; unten links steht ihr Stand. Jeder kleine Punkt ist ein Beweis: Die Linien
+    hinein sind seine Voraussetzungen, die alle gemeinsam gebraucht werden; hat ein Satz mehrere Punkte, gibt es mehrere
+    Beweise.</p>
+  <p data-t="ari-p2">Die Spalten links ordnen Grundlagen und Sätze nach logischer Tiefe. Sie wird nur über gewöhnliche Beweise berechnet:
+    1 plus die größte Tiefe der Voraussetzungen, beim kürzesten Beweis. Vermutungen haben keine logische Tiefe. Sie stehen
+    deshalb in eigenen Spalten rechts von der senkrechten Trennlinie. Die erste dieser Spalten enthält Vermutungen, die
+    aus keiner anderen Vermutung bedingt folgen. Folgt eine Vermutung bedingt aus einer anderen, steht sie eine Spalte
+    weiter rechts. Bewiesen gleichwertige Umformulierungen stehen eine Spalte rechts neben der Vermutung, der sie
+    gleichwertig sind. Bedingte Beweise, die zu einem schon bewiesenen Satz zurückführen, sind gestrichelte Bögen nach
+    links.</p>
+  <p data-t="ari-p3">Zeigt man mit der Maus auf einen Knoten, treten seine direkten Verbindungen hervor: braun, was er braucht, blau,
+    wofür er gebraucht wird. Ein Klick zeigt Formel, Beweise und Beziehungen und markiert alle Vorgänger und Nachfolger.
+    Der Umschalter „mit Vermutungen“ in der Legende blendet Vermutungen, bedingte Beweise und alle Beziehungen aus; dann
+    bleibt ein reiner Satzgraph wie im Beispiel Algebraische Geometrie (Adresse <code>#vermutungen=0</code>).</p>
+  <p data-t="ari-p4">Der Umschalter „KI-Beweise“ (Adresse <code>#ki=1</code>, Standard aus) zeigt zusätzlich eine kleine Auswahl von
+    Beweisen, die nach Angabe der Beteiligten ganz oder wesentlich von einem Sprachmodell stammen. Sie sind violett, tragen
+    am Beweispunkt die Marke „KI“, und ihr Strichmuster zeigt den Prüfstand. Die meisten sind nur beansprucht und nicht
+    von Fachleuten geprüft. Sie zählen deshalb nicht zur logischen Tiefe, und ihre Aussagen stehen als Vermutungen mit dem
+    Stand „beansprucht“ in eigenen Spalten direkt rechts der Trennlinie; die Stände der übrigen Vermutungen bleiben
+    unverändert. Weil die Ziele dieser Beweise Vermutungen sind, schaltet „KI-Beweise“ die Vermutungen mit ein.</p>
+  <p data-t="ari-p5">Kästen mit Rautenmuster und rotem Rand sind Gegenbeispiele: konkrete Objekte, die eine Aussage widerlegen, etwa die
+    Kubik von Selmer für das Hasse-Prinzip bei Kurven vom Geschlecht 1. Ein Gegenbeispiel ist bewiesen und steht wie ein
+    Satz in der Spalte seiner logischen Tiefe. Ein rot gestrichelter Pfeil führt von ihm zur widerlegten Vermutung. Ein
+    blaugrün gestrichelter Pfeil („Deutung“) führt von einem Satz zu einer Aussage, deren Bedeutung er zeigt; so misst die
+    Tate-Shafarevich-Gruppe, wie stark das Hasse-Prinzip für Kurven vom Geschlecht 1 scheitert.</p>
+  <div class="legende" id="legende"></div>
+</header>
+<div class="layout">
+  <div class="graph"><svg id="graph" role="img" aria-label="Graph der Sätze und Vermutungen"></svg></div>
+  <aside id="panel"></aside>
+</div>
+
+<script src="../algebraic-geometry/daten.js"></script>
+<script src="daten.js"></script>
+<script src="begriffe.js"></script>
+<script src="verstaendlichkeit.js"></script>
+<script src="../../translations/en-alle.js"></script>
+<script src="../../translations/ui-graph.js"></script>
+<script src="../../translations/ui-ar-index.js"></script>
+<script src="../../translations/sprache.js"></script>
+<script src="../algebraic-geometry/graph.js"></script>
+<script src="ar.js"></script>
+<script src="../algebraic-geometry/verstaendlichkeit-filter.js"></script>
+<script src="index.js"></script>
+</body>
+</html>

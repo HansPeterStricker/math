@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- Start of an Apollonian packing: curvatures −3, 6, 6, 9, 9 (outer circle with radius 13) -->
+  <rect width="32" height="32" rx="6" fill="#1f2328"/>
+  <circle cx="16" cy="16" r="13" fill="none" stroke="#f5f3ee" stroke-width="1.6"/>
+  <circle cx="9.5" cy="16" r="6.5" fill="#2f8a8a"/>
+  <circle cx="22.5" cy="16" r="6.5" fill="#7b5ea7"/>
+  <circle cx="16" cy="7.33" r="4.33" fill="#b8701a"/>
+  <circle cx="16" cy="24.67" r="4.33" fill="#a32f2f"/>
+</svg>

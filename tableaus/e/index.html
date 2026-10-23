@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formeln für e</title>
+<link rel="icon" href="../../scripts/favicon.svg">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared_scripts/formula-tableau.css">
+</head>
+<body>
+<main>
+  <h1>Formeln für e</h1>
+  <nav class="reiter">
+    <button type="button" data-panel="formeln">Formelkarten</button>
+    <button type="button" data-panel="funktionen">Funktionen</button>
+    <button type="button" data-panel="graph">Graph</button>
+    <button type="button" data-panel="erlaeuterung">Erläuterungen</button>
+    <span class="ausgang">Ausgangspunkt:
+      <button type="button" data-ausgang="zinseszins" data-variant="compound" title="Definition: e = lim (1 + 1/n)^n">Zinseszins</button>
+      <button type="button" data-ausgang="wachstum" data-variant="growth" title="Definition: e = y(1) mit y′ = y, y(0) = 1">Wachstum</button>
+      <button type="button" data-ausgang="integral" data-variant="integral" title="Definition: Fläche unter 1/x von 1 bis e ist 1">Integral</button>
+      <button type="button" data-ausgang="reihe" data-variant="series" title="Definition: e = Summe der 1/n!">Reihe</button>
+    </span>
+  </nav>
+  <section class="panel" id="panel-funktionen" hidden><div id="funktionen"></div></section>
+  <section class="panel" id="panel-formeln" hidden><div id="tableau"></div></section>
+  <section class="panel" id="panel-graph" hidden>
+    <div class="graph-rahmen">
+      <div class="graph-flaeche" id="graph"></div>
+      <div class="legende">
+        <span><i style="border:2px solid var(--akzent)"></i>Definition</span>
+        <span><i style="background:#efe8da;border-color:var(--leise)"></i>Funktion</span>
+        <span>Ziehen: verschieben, Mausrad: zoomen</span>
+        <span><button type="button" data-zoom="in" title="Vergrößern">+</button>
+          <button type="button" data-zoom="out" title="Verkleinern">−</button>
+          <button type="button" data-zoom="1">100 %</button>
+          <button type="button" data-zoom="fit">Ganz zeigen</button></span>
+      </div>
+    </div>
+  </section>
+  <section class="panel erlaeuterung" id="panel-erlaeuterung" hidden>
+    <h2>Das Tableau</h2>
+    <p>Bemerkenswerte Formeln für e, geordnet nach ihrer Gestalt: Summe, Produkt, Kettenbruch, Integral und Grenzwert. Unter Grenzwert stehen Formeln der
+      Form lim a<sub>n</sub> ohne unendliche Summe und ohne unendliches Produkt. Die letzte
+      Spalte enthält Formeln, die in keine dieser Formen passen. Links steht e allein. Wenn eine Formel eigentlich 1/e
+      oder π/e liefert, ist auf beiden Seiten der Kehrwert genommen. Ausnahmen sind die Eulersche Identität und die
+      Fläche unter der Hyperbel, die e nur implizit bestimmt. Formeln, die als Definition von e dienen, sind markiert.</p>
+    <h2>Herleitungen</h2>
+    <p>Unter „Beweisidee“ (aufklappbar) nennt jede Karte, woraus sie folgt: ihre Prämissen, die Art der Methode und die Methode. Oft ist die Prämisse ein
+      Satz über eine der Funktionen im Reiter „Funktionen“. Alle Herleitungen beginnen bei einer Definition von e. Oben
+      rechts lässt sich wählen, welche: Zinseszins (e = lim (1 + 1/n)<sup>n</sup>), Wachstum (e = y(1) für die Lösung von
+      y′ = y mit y(0) = 1), Integral (die Fläche unter 1/x von 1 bis e ist 1) oder Reihe (e = ∑ 1/n!). Die übrigen drei
+      Definitionen sind dann Sätze.</p>
+    <h2>Der Graph</h2>
+    <p>Aussagen, die nichts voraussetzen, sind die gewählte Definition von e und Funktionen, deren Grundlagen e nicht
+      enthalten (Exponentialreihe, Eulersche Formel, Primzahlsatz, beim Ausgangspunkt Integral auch der Logarithmus); sie
+      stehen eine Spalte vor der ersten Aussage, die sie benutzt. Die Spalten ordnen nach der Länge der längsten
+      Herleitungskette. Ein Pfeil führt von einer Prämisse zu der Aussage, die aus ihr folgt. Fährt man über einen Pfeil,
+      erscheint der ganze Beweis: Prämissen, Art der Methode und Methode. Ein Klick auf einen Knoten öffnet seine Karte.
+      Der Graph lässt sich mit gedrückter Maustaste verschieben und mit dem Mausrad vergrößern und verkleinern.</p>
+    <p>Vergleiche die <a href="../pi/index.html">Formeln für π</a>.</p>
+  </section>
+</main>
+<script src="daten.js"></script>
+<script src="../shared_scripts/formula-graph.js"></script>
+<script src="../shared_scripts/formula-tableau.js"></script>
+</body>
+</html>
