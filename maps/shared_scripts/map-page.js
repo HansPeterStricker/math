@@ -578,8 +578,14 @@
   // without its name; off by default
   // Plan step 3.2 (todo B67): group "Show all" with theorems (alle), dependencies (netz: the whole route network) and
   // analogies (analogien), all off by default
-  const SHOWN_DEFAULT = { laender: true, provinzen: true, berge: true, alle: false, netz: false, analogien: false, baeume: false };   // trees off by default (user, 2026-10-22)
+  // User, 2026-10-23: the switch "theorems" (alle) is split into "theorems" (alle: proved theorems, kind berg) and
+  // "conjectures" (vermutungen: open, conditionally proved and refuted conjectures); both off by default. An old address
+  // with an=alle shows only the theorems. Bridges and cities are not affected by either switch, as before
+  const SHOWN_DEFAULT = { laender: true, provinzen: true, berge: true, alle: false, vermutungen: false, netz: false, analogien: false, baeume: false };   // trees off by default (user, 2026-10-22)
   const SINGLE = new Set(["berg", "gipfel", "bedingt", "trugbild"]);   // kinds drawn as a single building
+  const CONJECTURE_KINDS = new Set(["gipfel", "bedingt", "trugbild"]);
+  // whether the switches "theorems" and "conjectures" draw the symbol of e below its level of detail
+  const forcedByShowAll = (e) => (shown.alle && e.n.kind === "berg") || (shown.vermutungen && CONJECTURE_KINDS.has(e.n.kind));
   const shown = Object.assign({}, SHOWN_DEFAULT);
   // Whether the name of an element may be placed without a selection: never for a city, the others by "Theorems"
   const nameSwitch = (e) => (e.n.kind === "gebaeude" ? false : shown.berge);
@@ -1305,7 +1311,7 @@
     const ux = (bx - ax) / len, uy = (by - ay) / len;
     b.line.setAttribute("d", `M${f(ax)},${f(ay)}L${f(mx - ux * DOVE_GAP)},${f(my - uy * DOVE_GAP)}M${f(mx + ux * DOVE_GAP)},${f(my + uy * DOVE_GAP)}L${f(bx)},${f(by)}`);
   }
-  const symbolShown = (key) => { const e = EK[key]; return !!e && !e.hidden && (e.visible || (shown.alle && SINGLE.has(e.n.kind)) || ANALOGY_ENDS.has(key)); };
+  const symbolShown = (key) => { const e = EK[key]; return !!e && !e.hidden && (e.visible || forcedByShowAll(e) || ANALOGY_ENDS.has(key)); };
   function updateAnalogies(k, tx, ty) {
     layerAnalogies.setAttribute("display", shown.analogien ? "inline" : "none");
     if (!shown.analogien) { if (doveLit) { doveLit.lit.setAttribute("display", "none"); doveLit = null; doveCard.hidden = true; } return; }
@@ -1809,7 +1815,7 @@
       // Switch "all theorems": the symbol is drawn below its level of detail as well, but it gets no name and is no
       // obstacle for the names, so that the names stay as without the switch
       // Plan step 3.2: the switch "analogies" also draws the two symbols of every analogy, like the switch "theorems"
-      const forced = ((shown.alle && SINGLE.has(e.n.kind)) || (shown.analogien && ANALOGY_ENDS.has(e.key))) && !e.visible;
+      const forced = (forcedByShowAll(e) || (shown.analogien && ANALOGY_ENDS.has(e.key))) && !e.visible;
       const show = (e.visible || forced) && !e.hidden;
       if (e.visible && inImage && e.n.kind !== "bruecke") {
         const b = e.box0, upper = e.withFlag ? Math.min(b.y0, e.tip.y - 18) : b.y0, right = e.withFlag ? Math.max(b.x1, e.tip.x + 12) : b.x1;
