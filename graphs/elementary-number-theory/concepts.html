@@ -1,0 +1,65 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concepts of elementary number theory</title>
+<link rel="icon" href="../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../scripts/site-icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared_scripts/style.css">
+<link rel="stylesheet" href="../shared_scripts/concept-graph.css">
+</head>
+<body class="vollbild">
+<div class="app">
+  <aside id="side">
+    <div class="kopf">
+      <h1>Concepts of elementary number theory</h1>
+      <button id="about-open" class="klein-knopf" aria-haspopup="dialog">About this graph</button>
+      <a class="klein-knopf" href="../index.html">All graphs</a>
+    </div>
+    <div class="suche">
+      <input id="search" type="search" placeholder="Search concept …" autocomplete="off" aria-label="Search concept">
+      <ul id="search-results" role="listbox"></ul>
+    </div>
+    <div id="controls"></div>
+    <div id="legend"></div>
+  </aside>
+  <div class="graph"><svg id="graph" role="img" aria-label="Concept graph of elementary number theory"></svg></div>
+  <aside id="panel"></aside>
+</div>
+
+<div id="about" class="about" hidden>
+  <div class="about-box" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button id="about-close" class="about-zu" aria-label="Close">×</button>
+    <h2 id="about-title">About this graph</h2>
+    <p>Each point is a definition from elementary number theory (MSC 11A). An arrow from A to B means that the
+      definition of B uses A. Dashed lines mean “every B is an A”.</p>
+    <p>Each MSC class has its own sector of the circle. The distance from the centre shows the level within the area:
+      concepts from other areas (prerequisites) are on the innermost circle, and within a sector a concept lies further
+      out than the concepts its definition uses. The colour shows the MSC class; larger points are used, directly or
+      indirectly, by more definitions.</p>
+    <p>Concepts with a dashed border are defined in another area; their panel links to the graph of that area.</p>
+    <p>Indirect dependencies, “is a” relations and edges from ℕ and ℤ are hidden unless the concept is selected; the
+      switches on the left show them.</p>
+    <p>Point at a concept to see the concepts its definition uses; click it to read the definition and to mark
+      everything it depends on (brown). The switch “concepts using it” marks instead everything that depends on
+      it (blue). The panel on the right shows the definitions it builds on. Drag a concept to move it, drag the background to move the picture, use the mouse wheel to zoom.
+      The search field finds concepts by name; the concept found is ringed in yellow and the view is centred on it.</p>
+    <p class="meta">The contents were compiled with the help of a language model and have not been checked by a
+      specialist.</p>
+  </div>
+</div>
+
+<script src="data/concepts.js"></script>
+<script src="../commutative-algebra/data/concepts.js"></script>
+<script src="../set-theory/data/concepts.js"></script>
+<script src="../group-theory/data/concepts.js"></script>
+<script src="scripts/concept-page.js"></script>
+<script src="../shared_scripts/graph.js"></script>
+<script src="../shared_scripts/concept-graph.js"></script>
+</body>
+</html>
