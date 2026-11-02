@@ -1,0 +1,125 @@
+/* Shared styling of the concept graphs (concepts.html in the folders of graphs/): graph fixed in the middle of the window, narrow sidebar on the left (search, switches,
+   legend), panel on the right; explanatory text in an overlay that opens on demand. */
+body.vollbild { overflow: hidden; height: 100vh; }
+.app { display: grid; grid-template-columns: 250px minmax(0, 1fr) 380px; height: 100vh; }
+@media (max-width: 1000px) {
+  body.vollbild { overflow: auto; height: auto; }
+  .app { grid-template-columns: 1fr; height: auto; }
+  .app .graph { height: 75vh; }
+  #side, #panel { max-height: none; }
+}
+
+/* sidebar */
+#side { border-right: 1px solid var(--linie); padding: 10px 12px; overflow-y: auto; font-size: 13px; background: var(--grund); }
+#side .kopf h1 { font-size: 17px; line-height: 1.25; margin: 0 0 6px; }
+.klein-knopf, #controls button { font: inherit; font-size: 12.5px; padding: 1px 9px; border: 1px solid var(--linie); background: #fff; border-radius: 3px; cursor: pointer; }
+.klein-knopf:hover, #controls button:hover { border-color: var(--tinte); }
+
+.suche { position: relative; margin: 10px 0 8px; }
+#search { width: 100%; box-sizing: border-box; font: inherit; font-size: 13.5px; padding: 4px 8px; border: 1px solid var(--linie); border-radius: 3px; background: #fff; }
+#search-results { list-style: none; margin: 2px 0 0; padding: 0; position: absolute; left: 0; right: 0; z-index: 5; background: #fff; border: 1px solid var(--linie); border-radius: 3px; box-shadow: 0 3px 10px rgba(0, 0, 0, .12); }
+#search-results:empty { display: none; }
+#search-results li { padding: 3px 8px; cursor: pointer; display: flex; align-items: center; gap: 6px; }
+#search-results li.aktiv, #search-results li:hover { background: #f1ece2; }
+#search-results li i { width: 9px; height: 9px; border: 1px solid #6d655a; flex: none; }
+#search-results li .meta { color: var(--leise); margin-left: auto; font-size: 11.5px; }
+
+/* legend and switches: collapsible blocks */
+#legend, #controls { display: flex; flex-direction: column; gap: 6px; margin: 6px 0; }
+.block { border: 1px solid var(--linie); border-radius: 4px; padding: 4px 8px 6px; background: #fbfaf6; }
+.block > summary { cursor: pointer; list-style: revert; }
+.block-titel { font-weight: 600; color: var(--leise); font-size: 11px; text-transform: uppercase; letter-spacing: .05em; padding: 2px 0; }
+.block .eintraege { display: flex; flex-direction: column; gap: 2px; margin-top: 3px; }
+.block span i { display: inline-block; width: 10px; height: 10px; margin-right: 5px; vertical-align: -1px; border: 1px solid #6d655a; }
+.block .form { display: inline-block; vertical-align: -3px; margin-right: 5px; overflow: visible; }
+.block .meta { color: var(--leise); }
+.block .hinweis { color: var(--leise); font-size: 11.5px; line-height: 1.3; }
+#controls button { align-self: flex-start; margin-top: 3px; }
+
+/* toggle switches */
+.toggle { display: flex; align-items: center; gap: 6px; cursor: pointer; white-space: nowrap; }
+.toggle input { position: absolute; opacity: 0; pointer-events: none; }
+.toggle .regler { position: relative; width: 24px; height: 13px; border-radius: 7px; background: #cfc6b6; transition: background .15s; flex: none; }
+.toggle .regler::after { content: ""; position: absolute; left: 2px; top: 2px; width: 9px; height: 9px; border-radius: 50%; background: #fff; transition: left .15s; }
+.toggle input:checked + .regler { background: #6b8f5e; }
+.toggle input:checked + .regler::after { left: 13px; }
+.toggle input:focus-visible + .regler { outline: 2px solid var(--nachfahr); outline-offset: 1px; }
+
+/* graph */
+.app .graph { height: 100%; overflow: hidden; cursor: grab; border: 0; }
+.graph.dragging { cursor: grabbing; }
+#graph { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: none; }
+
+/* panel */
+.app #panel { max-height: 100vh; position: static; overflow-y: auto; border-left: 1px solid var(--linie); }
+
+/* overlay with the explanation */
+.about { position: fixed; inset: 0; z-index: 20; background: rgba(38, 34, 29, .35); display: flex; align-items: center; justify-content: center; padding: 16px; }
+.about[hidden] { display: none; }
+.about-box { position: relative; max-width: 620px; max-height: 85vh; overflow-y: auto; background: var(--grund); border: 1px solid var(--linie); border-radius: 6px; padding: 18px 24px; box-shadow: 0 8px 30px rgba(0, 0, 0, .25); }
+.about-box h2 { margin: 0 0 8px; font-size: 21px; }
+.about-box .meta { color: var(--leise); font-size: 14px; }
+.about-zu { position: absolute; top: 6px; right: 10px; font-size: 24px; line-height: 1; border: 0; background: none; cursor: pointer; color: var(--leise); }
+
+.ent-graph .kante { stroke: #a99e8c; stroke-width: 1.1; fill: none; }
+.ent-graph .kante.isa { stroke: #7a5aa0; stroke-dasharray: 5 4; stroke-width: 1.3; }
+.ent-graph .knoten { cursor: pointer; }
+.ent-graph .knoten .form { stroke: #4b443b; stroke-width: 1; }
+.ent-graph .knoten text { font-size: 13px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+/* edges hidden by default unless they belong to the marked concept or their switch is on */
+.ent-graph:not(.zeige-isa) .kante.isa:not(.hell),
+.ent-graph:not(.zeige-transitiv) .kante.transitiv:not(.hell),
+.ent-graph:not(.zeige-basis) .kante.basis:not(.hell) { display: none; }
+
+.ent-graph.ohne-namen .knoten:not(.hell) text { display: none; }
+
+/* hover and selection */
+.ent-graph.fokus .knoten, .ent-graph.fokus .kante { opacity: .18; }
+.ent-graph.fokus .knoten.hell, .ent-graph.fokus .kante.hell { opacity: 1; }
+.ent-graph .knoten.gewaehlt .form { stroke: var(--tinte); stroke-width: 3; }
+.ent-graph .knoten.vorfahr .form { stroke: var(--vorfahr); stroke-width: 2.4; }
+.ent-graph .knoten.nachfahr .form { stroke: var(--nachfahr); stroke-width: 2.4; }
+.ent-graph .kante.vorfahr { stroke: var(--vorfahr); stroke-width: 1.8; }
+.ent-graph .kante.nachfahr { stroke: var(--nachfahr); stroke-width: 1.8; }
+/* search hits while typing */
+.ent-graph.suchend .knoten:not(.treffer) { opacity: .2; }
+.ent-graph .knoten.treffer .form { stroke: #d4a017; stroke-width: 3; }
+
+#panel .chip { display: inline-block; margin: 2px 4px 2px 0; padding: 0 7px; border-radius: 10px; border: 1px solid var(--linie); font-size: 14px; cursor: pointer; background: #fbfaf6; }
+#panel .chip:hover { border-color: var(--tinte); }
+#panel .formel { margin: 10px 0; overflow-x: auto; }
+#panel .meta { color: var(--leise); font-size: 14px; }
+
+/* guide circles of the levels */
+.ent-graph .ring { fill: none; stroke: #d8cfbf; stroke-width: 1; stroke-dasharray: 2 5; }
+.ent-graph .ring-name { font-size: 11px; fill: #a99e8c; letter-spacing: .04em; }
+.ent-graph.fokus .ringe { opacity: .4; }
+
+/* side view in the panel: the definitions a concept builds on */
+.fokus-ansicht { display: block; margin: 4px 0 10px; }
+.fokus-ansicht .fokus-kante { fill: none; stroke: #8a7f6e; stroke-width: 1.2; }
+.fokus-ansicht .fokus-knoten { cursor: pointer; }
+.fokus-ansicht .fokus-knoten rect { stroke: #4b443b; stroke-width: .8; fill-opacity: .5; }
+.fokus-ansicht .fokus-knoten.ziel rect { stroke: var(--tinte); stroke-width: 2.4; }
+.fokus-ansicht .fokus-knoten:hover rect { stroke-width: 2; }
+.fokus-ansicht text { font-size: 11px; fill: var(--tinte); pointer-events: none; }
+.block .eintraege.zweispaltig { display: grid; grid-template-columns: 1fr 1fr; column-gap: 8px; }
+.app aside { max-height: 100vh; position: static; box-sizing: border-box; }
+.ent-graph .halo { fill: #f6d55c; fill-opacity: .45; stroke: #d4a017; stroke-width: 2.5; }
+.block .spalten { display: grid; grid-auto-flow: column; grid-template-columns: 1fr 1fr; column-gap: 8px; row-gap: 2px; margin-bottom: 3px; }
+a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; margin-left: 4px; }
+
+/* edges from hub concepts (group in group theory), hidden by default */
+.ent-graph:not(.zeige-hub) .kante.hub:not(.hell) { display: none; }
+/* sectors of the MSC classes */
+.ent-graph .sektor { fill-opacity: .09; stroke: none; }
+.ent-graph .sektor-name { font-size: 15px; fill: #6d655a; font-weight: 600; }
+.ent-graph.fokus .sektoren { opacity: .5; }
+.ent-graph .sektor-name { pointer-events: auto; cursor: default; }
+
+/* prerequisites: light fill, solid thick border in the colour of their origin (set as --herkunft on the node) */
+.ent-graph .knoten.fremd .form { fill: #fbfaf6; stroke: var(--herkunft, #8a7f6e); stroke-width: 3.2; stroke-dasharray: none; }
+/* marked prerequisites keep the colour of their origin; the border only becomes thicker (user, 2 November 2026) */
+.ent-graph .knoten.fremd.vorfahr .form, .ent-graph .knoten.fremd.nachfahr .form { stroke: var(--herkunft, #8a7f6e); stroke-width: 4; }
+.ent-graph .knoten.fremd.gewaehlt .form { stroke: var(--herkunft, #8a7f6e); stroke-width: 5; }
+.ent-graph .knoten.fremd.treffer .form { stroke: #d4a017; stroke-width: 3; }
