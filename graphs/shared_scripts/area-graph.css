@@ -1,0 +1,67 @@
+/* Styling of the graph of the areas (graphs/areas.html, shared_scripts/area-graph.js). Loaded after style.css and
+   concept-graph.css, whose sidebar, panel, switches, tooltip and column of areas it uses. */
+.app .graph { background: #fbfaf6; }
+#areas { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: none; }
+#side .einleitung { font-size: 12.5px; line-height: 1.35; color: var(--tinte); margin: 4px 0 6px; }
+#side .einleitung p { margin: 0 0 5px; }
+.knoten-tip.mehrzeilig { white-space: pre; }
+
+/* level switch */
+.stufen { display: flex; gap: 0; margin: 0 0 4px; }
+#controls .stufen button { margin: 0; align-self: auto; flex: 1; font: inherit; font-size: 13px; padding: 3px 6px; border: 1px solid var(--linie); background: #fff; cursor: pointer; }
+#controls .stufen button:first-child { border-radius: 4px 0 0 4px; }
+#controls .stufen button:last-child { border-radius: 0 4px 4px 0; border-left: 0; }
+#controls .stufen button.an { background: #6b8f5e; border-color: #6b8f5e; color: #fff; font-weight: 600; }
+.toggle i.farbe { width: 14px; height: 6px; border: 0; border-radius: 3px; margin: 0; }
+.schwelle { display: flex; align-items: center; gap: 5px; white-space: nowrap; }
+.schwelle input { width: 90px; }
+
+/* nodes and bands */
+.area-graph .band { fill-opacity: .38; stroke: none; cursor: pointer; }
+.area-graph .band:hover { fill-opacity: .8; }
+.area-graph .knoten { cursor: pointer; }
+.area-graph .knoten .form { stroke: #4b443b; stroke-width: 1; }
+.area-graph .knoten.grau .form { stroke: #9a9286; stroke-width: 2; stroke-dasharray: 4 3; }
+.area-graph .knoten.leer:not(.grau) .form { stroke-dasharray: 2 2; }
+.area-graph .knoten text { font-size: 15px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
+.area-graph.klassen .knoten text { font-size: 11.5px; stroke-width: 3px; }
+.area-graph .knoten.grau text { fill: #6d655a; font-style: italic; }
+.area-graph.ohne-namen .knoten:not(.hell) text { display: none; }
+.area-graph .sektor { fill-opacity: .08; stroke: none; }
+.area-graph .sektor-name { font-size: 17px; fill: #6d655a; font-weight: 600; }
+
+/* selection and pointing, as in the circle graphs */
+.area-graph.fokus .knoten, .area-graph.fokus .band { opacity: .14; }
+.area-graph.fokus .knoten.hell, .area-graph.fokus .band.hell { opacity: 1; }
+.area-graph.fokus .band.hell { fill-opacity: .75; }
+.area-graph.fokus .sektoren { opacity: .5; }
+.area-graph .knoten.gewaehlt .form { stroke: var(--tinte); stroke-width: 3.5; }
+.area-graph .knoten.gewaehlt text { font-weight: 600; }
+
+/* preview images (AREA_GRAPH.preview): no names */
+.area-graph.vorschau .sektor-name { display: none; }
+
+/* panel */
+#panel h3.art { display: flex; align-items: center; gap: 6px; }
+#panel h3.art i, #panel .summe i { display: inline-block; width: 16px; height: 7px; border-radius: 3px; }
+#panel .summe { display: inline-flex; align-items: center; gap: 4px; margin-right: 10px; font-size: 14px; }
+#panel .richtung { font-size: 13px; color: var(--leise); margin: 6px 0 2px; }
+#panel details.zeile { margin: 1px 0; }
+#panel details.zeile > summary { cursor: pointer; font-size: 14px; }
+#panel details.zeile.schwach > summary { opacity: .6; }
+#panel details.liste > summary { cursor: pointer; font-size: 14px; color: var(--leise); margin: 6px 0; }
+#panel ul.einzel { margin: 3px 0 8px; padding-left: 18px; font-size: 13.5px; line-height: 1.35; }
+#panel ul.einzel li { margin: 2px 0; }
+#panel ul.einzel a { color: #3d5a80; text-decoration: none; }
+#panel ul.einzel a:hover { text-decoration: underline; }
+#panel .chip i { display: inline-block; width: 8px; height: 8px; margin-right: 4px; border: 1.5px solid #6d655a; vertical-align: 0; }
+.matrix-box { overflow-x: auto; }
+table.matrix { border-collapse: collapse; font-size: 10.5px; font-family: system-ui, sans-serif; }
+table.matrix th, table.matrix td { border: 1px solid #e3dccf; padding: 0; width: 15px; height: 15px; text-align: center; }
+table.matrix td[data-from] { cursor: pointer; }
+table.matrix td[data-from]:hover { outline: 2px solid var(--tinte); }
+table.matrix td.leer { background: #eee9de; }
+table.matrix th { font-weight: 600; color: var(--leise); cursor: pointer; background: #fbfaf6; }
+table.matrix thead th { height: 34px; vertical-align: bottom; }
+table.matrix thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); padding: 2px 0; }
+table.matrix tbody th { text-align: right; padding: 0 3px; width: auto; }

@@ -387,7 +387,7 @@
   function overview() {
     const top = (side, k) => [...nodes.values()].filter((n) => n.side === side).sort((a, b) => b.partners.length - a.partners.length || a.pos - b.pos).slice(0, k);
     const foreign = leftNodes.filter((n) => !n.area).length;
-    return `<h2>Concepts and theorems of ${CFG.name}</h2>
+    return `<h2>Concepts in theorems of ${CFG.name}</h2>
       <p class="meta">${rightNodes.length} theorems, lemmas and conjectures; ${leftNodes.length} concepts (${foreign} of them from other areas); ${edges.length} lines.</p>
       <h3>Concepts in most statements</h3><p>${top("L", 8).map((n) => chip(n) + `<span class="meta">${n.partners.length}</span> `).join("")}</p>
       <h3>Statements with most concepts</h3><p>${top("R", 5).map((n) => chip(n) + `<span class="meta">${n.partners.length}</span> `).join("")}</p>

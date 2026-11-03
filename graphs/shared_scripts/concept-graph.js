@@ -1332,7 +1332,8 @@
   function focusView(id) {
     const ids = localIds(id, "back", Infinity);
     if (ids.length < 2) return "";
-    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + layered(ids, id, { mode: "back", BW: 112, BH: 34, GAP: 10, ROWH: 64, M: 6, chars: 16, font: 10, fit: true, cls: "seite", label: WORDS.buildsOn }).outerHTML;
+    // the same drawing as the fully expanded proof card (user, 3 November 2026), scaled to the panel
+    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + layered(ids, id, { ...CARD_BOX, switches: false, mode: "back", fit: true, cls: "seite", label: WORDS.buildsOn }).outerHTML;
   }
   const stepText = (id) => {
     const m = maxDepth(id, cardMode);
@@ -1420,7 +1421,28 @@
     body.innerHTML = "";
     // the places of the boxes are kept while the card belongs to the same node and mode (also when a proof is switched)
     if (cardLayoutFor !== id + "|" + cardMode) { cardLayout = new Map(); cardLayoutFor = id + "|" + cardMode; }
-    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk, keep: cardLayout.size ? cardLayout : null }));
+    // One drawing per node (user, 3 November 2026, solution A): the card is the fully expanded drawing, the same as the
+    // side view; boxes not opened yet and their edges are hidden, so no box ever moves when boxes are opened or closed.
+    // The picture is cut to the visible boxes and edges; the selected box keeps its place on the screen (below).
+    const pic = layered(cardIds ? [...cardIds] : [...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name });
+    pic.querySelectorAll(".fokus-knoten").forEach((g) => { if (!shown.has(g.dataset.id)) g.style.display = "none"; });
+    pic.querySelectorAll(".fokus-kante").forEach((p) => {
+      const a = p.dataset.from, x = p.dataset.to;
+      if (!(shown.has(a) && shown.has(x) && edgeOk(a, x))) p.style.display = "none";
+    });
+    body.appendChild(pic);
+    {
+      let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+      pic.querySelectorAll(".fokus-knoten, .fokus-kante").forEach((e) => {
+        if (e.style.display === "none") return;
+        const b = e.getBBox(), t = e.classList.contains("fokus-knoten") ? boxAt(e) : { x: 0, y: 0 };
+        x0 = Math.min(x0, b.x + t.x); y0 = Math.min(y0, b.y + t.y); x1 = Math.max(x1, b.x + t.x + b.width); y1 = Math.max(y1, b.y + t.y + b.height);
+      });
+      if (x0 < Infinity) {
+        const m = CARD_BOX.M, w = x1 - x0 + 2 * m, h = y1 - y0 + 2 * m;
+        pic.setAttribute("viewBox", `${x0 - m} ${y0 - m} ${w} ${h}`); pic.setAttribute("width", w); pic.setAttribute("height", h);
+      }
+    }
     cardLayout = new Map([...body.querySelectorAll(".fokus-knoten")].map((g) => { const p = boxAt(g); return [g.dataset.id, { r: Math.round((p.y - CARD_BOX.M) / CARD_BOX.ROWH), cx: p.x + CARD_BOX.BW / 2 }]; }));
     card.scrollLeft = keep.left; card.scrollTop = keep.top;
     // the selected box keeps its place on the screen: the card is moved back by the shift measured on the screen; where
@@ -1548,6 +1570,8 @@
       if (!box.checked && m > l) other.checked = false;
     });
     shownLevels.clear();
+    // nodes of other areas outside the circle (level 0) have no switch and stay visible (user, 3 November 2026)
+    if (OUTSIDE) shownLevels.add(0);
     levelBoxes.filter((b) => b.checked).forEach((b) => shownLevels.add(Number(b.dataset.level)));
     applyLevels();
   }));
@@ -1565,7 +1589,14 @@
     select(null);
     if (id) step(id, cardMode);
   });
-  document.getElementById("c-home").addEventListener("click", () => { view = fit(); applyView(); });
+  // "Reset view" also sets every switch of "Display" back to its default (user, 3 November 2026)
+  document.getElementById("c-home").addEventListener("click", () => {
+    document.querySelectorAll("#controls details.block input[type=checkbox]:not([data-level])").forEach((box) => {
+      const def = box.id === "c-names";
+      if (box.checked !== def) { box.checked = def; box.dispatchEvent(new Event("change")); }
+    });
+    view = fit(); applyView();
+  });
 
   // ------------------------------------------------------------ search
   // Matches the name (case and accents ignored, every typed word must occur); hits are marked in the graph while

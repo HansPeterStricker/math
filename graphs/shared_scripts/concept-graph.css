@@ -7,6 +7,7 @@ body.vollbild { overflow: hidden; height: 100vh; }
 .app.mit-gebieten { grid-template-columns: 150px 250px minmax(0, 1fr) 380px; }
 .gebiete { border-right: 1px solid var(--linie); padding: 12px 10px; overflow: auto; max-height: 100vh; box-sizing: border-box; font-size: 13px; line-height: 1.3; background: #efebe1; }
 .gebiete .alle { display: block; font-weight: 600; margin-bottom: 10px; color: var(--tinte); }
+.gebiete .alle + .alle { margin-top: -6px; }
 .gebiete .gebiet { margin: 0 0 9px; }
 .gebiete .gebiet-name { color: var(--tinte); }
 .gebiete .gebiet.hier .gebiet-name { font-weight: 600; }
