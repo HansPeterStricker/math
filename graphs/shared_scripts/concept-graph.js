@@ -579,27 +579,7 @@
 
   edges.forEach((e) => {
     e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : "") + (e.alt ? " alternativ" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
-    // edges among results or concepts of other areas have no points to join when those are drawn outside
-    if (false && OUTSIDE && e.pre && e.kind === "uses") { // former small points outside (replaced by the outer ring)
-      // arrow from outside: a small point in the colour of the origin next to the target, with the name of the result
-      const c = byId.get(e.from);
-      e.stub = el("g", { class: "stub" }, gStubs);
-      e.stub.style.setProperty("--herkunft", colorOf(c));
-      e.stubDot = el("circle", { r: 5 }, e.stub);
-      e.stubText = el("text", {}, e.stub);
-      e.stubText.textContent = plainName(c.name);
-      el("title", {}, e.stub).textContent = c.name + " — " + originName(originOf(c));
-      // a click keeps the point where it is and shows from there the arrows to all theorems using the result
-      const stubClick = (ev) => { ev.preventDefault(); ev.stopPropagation(); anchor = { id: e.from, x: e.sx, y: e.sy, ux: e.ux, uy: e.uy }; step(e.from, "fwd"); };
-      e.stub.addEventListener("click", stubClick);
-      e.stub.addEventListener("contextmenu", stubClick);
-    }
   });
-  // position of the arrows from outside around their target (index among the arrows from outside of that target)
-  const stubsOf = new Map();
-  edges.filter((e) => e.stub).forEach((e) => { if (!stubsOf.has(e.to)) stubsOf.set(e.to, []); stubsOf.get(e.to).push(e); });
-  let anchor = null; // { id, x, y, ux, uy }: clicked point of a result of another area
-  let stubSelected = null; // selected concept, for render (which runs before the selection code is set up)
   // Arrows to other areas (user, 3 November 2026): for an own concept, the concepts of other folders (loaded through
   // `sources`) whose `uses` name it with this folder's prefix (setting `prefix`). Drawn from the concept to a small
   // point outside the circle in the colour of that area; a click opens it in its own graph.
@@ -678,9 +658,9 @@
     points.forEach((p) => nodeEls.get(p.id).setAttribute("transform", `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`));
     outsOf.forEach((list, id) => {
       const a = pos.get(id), RS = rOut + 14, d0 = Math.hypot(a.x, a.y), base = d0 > 1 ? Math.atan2(a.y, a.x) : -Math.PI / 2;
-      const before = (stubsOf.get(id) || []).length, n = before + list.length;
+      const n = list.length;
       list.forEach((o, j) => {
-        const ang = base + (before + j - (n - 1) / 2) * (24 / RS), ux = Math.cos(ang), uy = Math.sin(ang), sx = RS * ux, sy = RS * uy;
+        const ang = base + (j - (n - 1) / 2) * (24 / RS), ux = Math.cos(ang), uy = Math.sin(ang), sx = RS * ux, sy = RS * uy;
         const lx = sx - a.x, ly = sy - a.y, ld = Math.hypot(lx, ly) || 1;
         o.dot.setAttribute("cx", sx.toFixed(1)); o.dot.setAttribute("cy", sy.toFixed(1));
         o.text.setAttribute("x", (sx + ux * 9).toFixed(1)); o.text.setAttribute("y", (sy + uy * 9 + 3).toFixed(1));
@@ -690,29 +670,6 @@
       });
     });
     edges.forEach((e) => {
-      if (e.stub) {
-        // outside the circle of sectors, at the angle of the target; several results of other areas used by the same
-        // theorem side by side along the circle (user, 3 November 2026)
-        const b = pos.get(e.to), list = stubsOf.get(e.to), k = list.indexOf(e), d0 = Math.hypot(b.x, b.y);
-        const RS = rOut + 14, base = d0 > 1 ? Math.atan2(b.y, b.x) : -Math.PI / 2, ang = base + (k - (list.length - 1) / 2) * (24 / RS);
-        let ux = Math.cos(ang), uy = Math.sin(ang), sx = RS * ux, sy = RS * uy;
-        e.sx = sx; e.sy = sy; e.ux = ux; e.uy = uy;
-        // the selected result of another area: all its arrows start at the point that was clicked
-        const anchored = OUTSIDE && stubSelected === e.from;
-        if (anchored) {
-          const first = edges.find((x) => x.stub && x.from === e.from);
-          const A = anchor && anchor.id === e.from ? anchor : { x: first.sx, y: first.sy, ux: first.ux, uy: first.uy };
-          sx = A.x; sy = A.y; ux = A.ux; uy = A.uy;
-          e.stub.classList.toggle("nur-linie", first !== e);
-        } else e.stub.classList.remove("nur-linie");
-        const lx = b.x - sx, ly = b.y - sy, ld = Math.hypot(lx, ly) || 1;
-        e.stubDot.setAttribute("cx", sx.toFixed(1)); e.stubDot.setAttribute("cy", sy.toFixed(1));
-        e.stubText.setAttribute("x", (sx + ux * 9).toFixed(1)); e.stubText.setAttribute("y", (sy + uy * 9 + 3).toFixed(1));
-        e.stubText.setAttribute("text-anchor", ux > 0.3 ? "start" : ux < -0.3 ? "end" : "middle");
-        e.line.setAttribute("x1", (sx + (lx / ld) * 5).toFixed(1)); e.line.setAttribute("y1", (sy + (ly / ld) * 5).toFixed(1));
-        e.line.setAttribute("x2", (b.x - (lx / ld) * (b.r + 2)).toFixed(1)); e.line.setAttribute("y2", (b.y - (ly / ld) * (b.r + 2)).toFixed(1));
-        return;
-      }
       const a = pos.get(e.from), b = pos.get(e.to);
       const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
       e.line.setAttribute("x1", (a.x + (dx / d) * a.r).toFixed(1));
@@ -888,7 +845,6 @@
     // node may have no edge at all)
     const reaches = (a, x) => { const seen = new Set([a]), st = [a]; while (st.length) for (const y of lit.get(st.pop()) || []) { if (y === x) return true; if (!seen.has(y)) { seen.add(y); st.push(y); } } return false; };
     edges.filter((e) => e.kind === "uses" && e.transitive && inSet(e.from) && inSet(e.to) && !reaches(e.from, e.to)).forEach(light);
-    edges.forEach((e) => { if (e.stub) ["hell", "vorfahr", "nachfahr"].forEach((k) => e.stub.classList.toggle(k, e.line.classList.contains(k))); });
     if (!back) (outsOf.get(id) || []).forEach((o) => o.g.classList.add("hell"));
   }
   // pointing at a node (user, 3 November 2026): after half a second only the node itself is lit, all else dimmed; its
@@ -904,8 +860,6 @@
   const chip = (id) => `<span class="chip" data-id="${id}">${byId.get(id).name}</span>`;
   function select(id) {
     selected = id && byId.has(id) ? id : null;
-    if (!selected || !anchor || anchor.id !== selected) anchor = anchor && anchor.id === selected ? anchor : null;
-    stubSelected = selected;
     if (OUTSIDE) render();
     if (found && found !== selected) markFound(null);
     // a card opened otherwise than by a click (address #id, search, panel): the node's first step is shown
@@ -1137,10 +1091,14 @@
     }
     ids.forEach((x) => { if (!dist.has(x)) dist.set(x, 1); });
     const maxD = Math.max(...dist.values());
-    const rowOf = (x) => (back ? maxD - dist.get(x) : dist.get(x));
+    // the tree grows from the top downwards in both cards (user, 3 November 2026): the selected node in the top row; on
+    // the proof card the arrows point upwards, from each premise to the node that uses it
+    const rowOf = (x) => dist.get(x);
     const rows = [...new Set(ids.map(rowOf))].sort((a, b) => a - b);
     const { BW, BH, GAP, ROWH, M, chars, font } = o;
-    const lay = GL.layers(ids, (x) => rows.indexOf(rowOf(x)), fEdges, { BH: BW, GAP_N: GAP, GAP_W: 6, MARGIN: M, HEAD: 0, ROUNDS: 40 });
+    // the layout runs from the upper row to the lower one; on the proof card that is against the direction of the edges
+    const layEdges = back ? fEdges.map((e) => ({ from: e.to, to: e.from, orig: e })) : fEdges;
+    const lay = GL.layers(ids, (x) => rows.indexOf(rowOf(x)), layEdges, { BH: BW, GAP_N: GAP, GAP_W: 6, MARGIN: M, HEAD: 0, ROUNDS: 40 });
     const wOf = (it) => (it.kind === "knoten" ? BW : 0);
     const sep = (a, b) => (wOf(a) + wOf(b)) / 2 + (a.kind === "knoten" && b.kind === "knoten" ? GAP : 10);
     // positions after Brandes and Köpf; afterwards, only as a safeguard, neighbours that are too close are pushed apart
@@ -1184,19 +1142,11 @@
     all.forEach((it) => { it.cx += M - minX; });
     let W = maxX - minX + 2 * M;
     if (o.centre) { const cx = lay.item[id].cx, half = Math.max(cx, W - cx); all.forEach((it) => { it.cx += half - cx; }); W = 2 * half; }
-    let H = rows.length * ROWH - (ROWH - BH) + 2 * M, offY = 0;
-    // at least the size of the fully expanded card, the selected node at the same place (bottom middle of the proof
-    // card, top middle of the card of the consequences), so that it does not move when boxes open or close
-    if (o.fill) {
-      const W2 = Math.max(W, o.fill.W), H2 = Math.max(H, o.fill.H);
-      all.forEach((it) => { it.cx += (W2 - W) / 2; });
-      if (back) offY = H2 - H;
-      W = W2; H = H2;
-    }
+    const H = rows.length * ROWH - (ROWH - BH) + 2 * M, offY = 0;
     const yOf = (it) => offY + M + it.c * ROWH;
     const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
     const mk = "fp-" + o.cls;
-    el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
+    el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
     // Edges with right angles (user, 3 November 2026), at most one horizontal piece above the first and one below the
     // last waypoint. The edges of a box leave it at points of its lower side in the order of their directions (the one
     // nearest below the box from its middle); they end at the middle of the upper side of their target. Every
@@ -1236,14 +1186,16 @@
     });
     lay.chains.forEach((ch, ci) => {
       const { edge, pts } = ch;
-      const yAt = (i) => (i === 0 ? yBottom(pts[0][1]) : i === pts.length - 1 ? yOf(pts[i][1]) - 2 : yOf(pts[i][1]) + BH / 2);
+      // the arrow head at the user of a premise: at the start on the proof card (pointing up), else at the end
+      const yAt = (i) => (i === 0 ? yBottom(pts[0][1]) + (back ? 2 : 0) : i === pts.length - 1 ? yOf(pts[i][1]) - (back ? 0 : 2) : yOf(pts[i][1]) + BH / 2);
       let d = `M${pts[0][0]},${yAt(0)}`;
       for (let i = 1; i < pts.length; i++) {
         if (Math.abs(pts[i][0] - pts[i - 1][0]) < 0.5) { d += `V${yAt(i)}`; continue; }
         const last = i === pts.length - 1, k = last ? "t:" + pts[i][1].id : "e:" + ci + ":" + i;
         d += `V${level.get(pts[i - 1][1].c + "|" + k)}H${pts[i][0]}V${yAt(i)}`;
       }
-      el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
+      const E = edge.orig || edge;
+      el("path", { d, class: "fokus-kante" + (E.dashed ? " gestrichelt" : ""), [back ? "marker-start" : "marker-end"]: `url(#${mk})`, "data-from": E.from, "data-to": E.to, "data-via": (E.via || []).join(" ") }, s);
     });
     ids.forEach((x) => {
       const it = lay.item[x], c = byId.get(x);
@@ -1322,9 +1274,6 @@
         card.appendChild(note);
       }
       cardIds = new Set(localIds(id, cardMode, Infinity));
-      // the size of the fully expanded card; the card keeps it, so that the selected node stays where it is
-      const full = layered([...cardIds], id, { ...CARD_BOX, mode: cardMode, label: c.name });
-      cardSize = { W: +full.getAttribute("width"), H: +full.getAttribute("height") };
       card.appendChild(body);
       drawCard(id);
       card.hidden = false;
@@ -1349,7 +1298,8 @@
   // The card shows only the boxes that are open or opened from (user, 3 November 2026): drawn anew at every click, the
   // direct premises in the row directly above; only the selected node keeps its place.
   const CARD_BOX = { switches: true, BW: 150, BH: 42, GAP: 14, ROWH: 78, M: 10, chars: 22, font: 12, cls: "karte-bild", centre: true };
-  let cardSize = null;
+  const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const boxAt = (g) => { const m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.getAttribute("transform")); return { x: +m[1], y: +m[2] }; };
   function drawCard(id) {
     const shown = (cardShown = computeShown(id));
     // only edges of opened boxes: into an opened box (proof) or out of an opened box (consequences)
@@ -1357,9 +1307,38 @@
     // (user, 3 November 2026)
     const edgeOk = (a, x) => (cardMode === "fwd" ? expanded.has(a) : expanded.has(x));
     const body = card.querySelector(".karte-inhalt"), keep = { left: card.scrollLeft, top: card.scrollTop };
+    // the card grows with its content (user, 3 November 2026); the selected node keeps its place on the screen
+    const old = new Map([...body.querySelectorAll(".fokus-knoten")].map((g) => [g.dataset.id, boxAt(g)]));
     body.innerHTML = "";
-    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk, fill: cardSize }));
+    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk }));
     card.scrollLeft = keep.left; card.scrollTop = keep.top;
+    const rootNew = boxAt(body.querySelector(".fokus-knoten.ziel")), rootOld = old.get(id);
+    const dx = rootOld ? rootNew.x - rootOld.x : 0, dy = rootOld ? rootNew.y - rootOld.y : 0;
+    // ... as far as the card stays inside the picture (its head always visible)
+    let sx = 0, sy = 0;
+    if (rootOld) {
+      const left = Math.max(10, card.offsetLeft - dx), top = Math.max(10, card.offsetTop - dy);
+      sx = card.offsetLeft - left; sy = card.offsetTop - top;
+      card.style.left = left + "px"; card.style.top = top + "px";
+    }
+    // a soft transition (user, 3 November 2026): boxes glide from their old places, new boxes and the edges fade in
+    if (old.size && !REDUCED) {
+      body.querySelectorAll(".fokus-knoten").forEach((g) => {
+        const n = boxAt(g), o = old.get(g.dataset.id);
+        if (!o) { g.style.opacity = "0"; g.style.transition = "opacity .3s"; requestAnimationFrame(() => requestAnimationFrame(() => { g.style.opacity = ""; })); return; }
+        const ox = o.x + sx, oy = o.y + sy;
+        if (Math.abs(ox - n.x) < 0.5 && Math.abs(oy - n.y) < 0.5) return;
+        g.style.transform = `translate(${ox}px, ${oy}px)`;
+        g.getBoundingClientRect();
+        g.style.transition = "transform .3s ease";
+        g.style.transform = `translate(${n.x}px, ${n.y}px)`;
+        g.addEventListener("transitionend", () => { g.style.transition = ""; g.style.transform = ""; }, { once: true });
+      });
+      body.querySelectorAll(".fokus-kante").forEach((p) => {
+        p.style.opacity = "0"; p.style.transition = "opacity .2s .25s";
+        requestAnimationFrame(() => requestAnimationFrame(() => { p.style.opacity = ""; }));
+      });
+    }
     // a box that can still be opened has a small mark
     card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => {
       g.classList.toggle("offen", expanded.has(g.dataset.id));
@@ -1462,7 +1441,7 @@
   function applyLevels() {
     const on = (l) => !!selected || shownLevels.has(l);
     concepts.forEach((c) => { nodeEls.get(c.id).style.display = on(level.get(c.id)) ? "" : "none"; });
-    edges.forEach((e) => { e.line.style.display = on(level.get(e.from)) && on(level.get(e.to)) ? "" : "none"; if (e.stub) e.stub.style.display = e.line.style.display; });
+    edges.forEach((e) => { e.line.style.display = on(level.get(e.from)) && on(level.get(e.to)) ? "" : "none"; });
     outsOf.forEach((list, id) => list.forEach((o) => { o.g.style.display = on(level.get(id)) ? "" : "none"; }));
   }
   // Hiding a level hides all higher levels, showing a level shows all lower levels (user, 2 November 2026), so that the
