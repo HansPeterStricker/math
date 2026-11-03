@@ -1,6 +1,6 @@
 // Column of areas at the far left of every graph page (user, 3 November 2026). Needs shared_scripts/areas.js. Loaded as
 // a classic script at the end of the page.
-// At the top "All graphs" and "Graph of areas" (graphs/areas.html). Below, the areas of the register in its groups
+// At the top "All graphs", "Graph of areas" (graphs/areas.html) and "Pairs and triples" (graphs/clusters.html). Below, the areas of the register in its groups
 // (GRAPH_AREA_GROUPS), each group under a small heading. Since there are more than thirty areas, every area takes one
 // line: its name leads to the page of the same kind (concept graph, theorem graph, concepts in theorems) of that area;
 // only the area shown has its three links Concepts, Theorems and In theorems below its name, the page shown is marked.
@@ -32,9 +32,10 @@
     const list = areas.filter((a) => a.group === g.key || (!window.GRAPH_AREA_GROUPS));
     return list.length ? `<div class="gruppe">${g.name ? `<div class="gruppe-name">${g.name}</div>` : ""}${list.map(entry).join("")}</div>` : "";
   }).join("");
-  const onAreas = here === null && page === "areas.html";
+  const onAreas = here === null && page === "areas.html", onClusters = here === null && page === "clusters.html";
   nav.innerHTML = `<a class="alle" href="${root}index.html">All graphs</a>` +
-    `<a class="alle${onAreas ? " hier" : ""}" href="${root}areas.html"${onAreas ? ' aria-current="page"' : ""}>Graph of areas</a>` + html;
+    `<a class="alle${onAreas ? " hier" : ""}" href="${root}areas.html"${onAreas ? ' aria-current="page"' : ""}>Graph of areas</a>` +
+    `<a class="alle${onClusters ? " hier" : ""}" href="${root}clusters.html"${onClusters ? ' aria-current="page"' : ""}>Pairs and triples</a>` + html;
   app.insertBefore(nav, app.firstChild);
   app.classList.add("mit-gebieten");
   // keep the area shown in view when the column scrolls

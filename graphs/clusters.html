@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en" data-nav-base="">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Pairs and triples of areas</title>
+<link rel="icon" href="../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../scripts/site-icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared_scripts/style.css">
+<link rel="stylesheet" href="shared_scripts/concept-graph.css">
+<link rel="stylesheet" href="shared_scripts/area-graph.css">
+<link rel="stylesheet" href="shared_scripts/area-cluster.css">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+</head>
+<body class="vollbild">
+<div class="app">
+  <aside id="side">
+    <div class="kopf">
+      <h1>Pairs and triples of areas</h1>
+      <div class="einleitung">
+        <p>Two or three strongly connected areas as touching circles. Inside each circle stand the nodes of that area
+          that are joined with a node of one of the others, near the point where the circles touch; nodes joined with
+          both others stand towards the middle. Squares are concepts, circles theorems, diamonds conjectures. A coloured
+          ring marks a node that also carries an MSC class of another of the areas. A thick outline marks a bridge: a
+          theorem whose statement uses concepts of two of the areas. The numbers where the circles touch count all
+          single edges between the two areas, as in the <a href="areas.html">graph of the areas</a>.</p>
+      </div>
+    </div>
+    <div id="controls"></div>
+  </aside>
+  <div class="graph"><svg id="cluster" class="cluster-graph" role="img" aria-label="Pairs and triples of areas"></svg></div>
+  <aside id="panel"></aside>
+</div>
+
+<!-- data:start -->
+<script src="shared_scripts/areas.js"></script>
+<script>window.AREA_CFG = [];</script>
+<script src="logic/data/concepts.js"></script>
+<script src="logic/data/theorem-graph.js"></script>
+<script src="logic/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="set-theory/data/concepts.js"></script>
+<script src="set-theory/data/theorem-graph.js"></script>
+<script src="set-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="general-algebra/data/concepts.js"></script>
+<script src="general-algebra/data/theorem-graph.js"></script>
+<script src="general-algebra/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="category-theory/data/concepts.js"></script>
+<script src="category-theory/data/theorem-graph.js"></script>
+<script src="category-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="elementary-number-theory/data/concepts.js"></script>
+<script src="elementary-number-theory/data/theorem-graph.js"></script>
+<script src="elementary-number-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="diophantine-number-theory/data/concepts.js"></script>
+<script src="diophantine-number-theory/data/theorem-graph.js"></script>
+<script src="diophantine-number-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="algebraic-number-theory/data/concepts.js"></script>
+<script src="algebraic-number-theory/data/theorem-graph.js"></script>
+<script src="algebraic-number-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="arithmetic-geometry/data/concept-graph.js"></script>
+<script src="arithmetic-geometry/data/theorem-graph.js"></script>
+<script src="arithmetic-geometry/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="further-number-theory/data/concepts.js"></script>
+<script src="further-number-theory/data/theorem-graph.js"></script>
+<script src="further-number-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="field-theory/data/concepts.js"></script>
+<script src="field-theory/data/theorem-graph.js"></script>
+<script src="field-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="commutative-algebra/data/concepts.js"></script>
+<script src="commutative-algebra/data/theorem-graph.js"></script>
+<script src="commutative-algebra/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="linear-algebra/data/concepts.js"></script>
+<script src="linear-algebra/data/theorem-graph.js"></script>
+<script src="linear-algebra/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="associative-algebras/data/concepts.js"></script>
+<script src="associative-algebras/data/theorem-graph.js"></script>
+<script src="associative-algebras/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="lie-theory/data/concepts.js"></script>
+<script src="lie-theory/data/theorem-graph.js"></script>
+<script src="lie-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="k-theory/data/concepts.js"></script>
+<script src="k-theory/data/theorem-graph.js"></script>
+<script src="k-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="group-theory/data/concepts.js"></script>
+<script src="group-theory/data/theorem-graph.js"></script>
+<script src="group-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="representation-theory/data/concepts.js"></script>
+<script src="representation-theory/data/theorem-graph.js"></script>
+<script src="representation-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="algebraic-geometry/data/concept-graph.js"></script>
+<script src="algebraic-geometry/data/theorem-graph.js"></script>
+<script src="algebraic-geometry/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="geometry/data/concepts.js"></script>
+<script src="geometry/data/theorem-graph.js"></script>
+<script src="geometry/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="topology/data/concepts.js"></script>
+<script src="topology/data/theorem-graph.js"></script>
+<script src="topology/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="global-analysis/data/concepts.js"></script>
+<script src="global-analysis/data/theorem-graph.js"></script>
+<script src="global-analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="analysis/data/concepts.js"></script>
+<script src="analysis/data/theorem-graph.js"></script>
+<script src="analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="several-complex-variables/data/concepts.js"></script>
+<script src="several-complex-variables/data/theorem-graph.js"></script>
+<script src="several-complex-variables/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="differential-equations/data/concepts.js"></script>
+<script src="differential-equations/data/theorem-graph.js"></script>
+<script src="differential-equations/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="dynamical-systems/data/concepts.js"></script>
+<script src="dynamical-systems/data/theorem-graph.js"></script>
+<script src="dynamical-systems/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="approximation-and-transforms/data/concepts.js"></script>
+<script src="approximation-and-transforms/data/theorem-graph.js"></script>
+<script src="approximation-and-transforms/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="calculus-of-variations/data/concepts.js"></script>
+<script src="calculus-of-variations/data/theorem-graph.js"></script>
+<script src="calculus-of-variations/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="combinatorics/data/concepts.js"></script>
+<script src="combinatorics/data/theorem-graph.js"></script>
+<script src="combinatorics/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="numerical-analysis/data/concepts.js"></script>
+<script src="numerical-analysis/data/theorem-graph.js"></script>
+<script src="numerical-analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="computer-science/data/concepts.js"></script>
+<script src="computer-science/data/theorem-graph.js"></script>
+<script src="computer-science/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="optimization/data/concepts.js"></script>
+<script src="optimization/data/theorem-graph.js"></script>
+<script src="optimization/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="information-theory/data/concepts.js"></script>
+<script src="information-theory/data/theorem-graph.js"></script>
+<script src="information-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="probability/data/concepts.js"></script>
+<script src="probability/data/theorem-graph.js"></script>
+<script src="probability/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="statistics/data/concepts.js"></script>
+<script src="statistics/data/theorem-graph.js"></script>
+<script src="statistics/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="mathematical-physics/data/concepts.js"></script>
+<script src="mathematical-physics/data/theorem-graph.js"></script>
+<script src="mathematical-physics/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="mathematical-biology/data/concepts.js"></script>
+<script src="mathematical-biology/data/theorem-graph.js"></script>
+<script src="mathematical-biology/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<!-- data:end -->
+<script src="shared_scripts/area-nav.js"></script>
+<script src="shared_scripts/area-graph.js"></script>
+<script src="shared_scripts/area-cluster.js"></script>
+<a href="../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>
+</body>
+</html>

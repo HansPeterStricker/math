@@ -1,0 +1,37 @@
+/* Pairs and triples of strongly connected areas (graphs/clusters.html, shared_scripts/area-cluster.js). Loaded after
+   style.css, concept-graph.css and area-graph.css, whose sidebar, panel, switches, tooltip and column of areas it uses. */
+#cluster { width: 100%; height: 100%; display: block; user-select: none; -webkit-user-select: none; touch-action: none; }
+.cluster-graph .kreis { fill-opacity: .07; stroke-opacity: .55; stroke-width: 2; }
+.cluster-graph .kreis-name { font-size: 22px; font-weight: 600; fill: var(--tinte); }
+.cluster-graph .beruehrung { cursor: help; }
+.cluster-graph .beruehrung text { font-size: 15px; font-weight: 600; fill: #6d655a; paint-order: stroke; stroke: #fbfaf6; stroke-width: 4px; }
+.cluster-graph .kante { fill: none; stroke-width: 1.1; stroke-opacity: .45; }
+.cluster-graph .kante.innen { stroke-dasharray: 3 3; stroke-opacity: .3; }
+.cluster-graph .kante.alt { stroke-dasharray: 6 3; }
+.cluster-graph .knoten { cursor: pointer; }
+.cluster-graph .knoten .form { stroke-width: 1.6; }
+.cluster-graph .knoten .ring { fill: none; stroke-width: 1.8; }
+.cluster-graph .knoten.bruecke .form { stroke: var(--tinte); stroke-width: 2.6; }
+.cluster-graph .knoten text { font-size: 10.5px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.cluster-graph.ohne-namen .knoten:not(.hell) text { display: none; }
+.cluster-graph.fokus .knoten, .cluster-graph.fokus .kante { opacity: .12; }
+.cluster-graph.fokus .knoten.hell, .cluster-graph.fokus .kante.hell { opacity: 1; }
+.cluster-graph.fokus .kante.hell { stroke-opacity: .9; stroke-width: 1.8; }
+.cluster-graph .knoten.gewaehlt .form { stroke: var(--tinte); stroke-width: 3.5; }
+.cluster-graph .knoten.gewaehlt text, .cluster-graph.fokus .knoten.hell text { font-size: 12px; }
+.cluster-graph .knoten.gewaehlt text { font-weight: 600; }
+
+/* sidebar */
+#controls .wahl { display: flex; flex-direction: column; gap: 4px; }
+#controls .wahl select { font: inherit; font-size: 13px; }
+#controls a.cluster { display: block; font-size: 12.5px; line-height: 1.3; padding: 2px 4px; border-radius: 3px; color: var(--tinte); text-decoration: none; }
+#controls a.cluster:hover { background: #efe9dc; }
+#controls a.cluster.hier { background: #e3eadc; font-weight: 600; }
+
+/* panel */
+#panel table.arten { border-collapse: collapse; font-size: 13px; margin: 6px 0 10px; }
+#panel table.arten th, #panel table.arten td { border-bottom: 1px solid #e3dccf; padding: 2px 5px; text-align: right; }
+#panel table.arten td:first-child { text-align: left; }
+#panel table.arten th { font-weight: 600; font-size: 12px; color: var(--leise); }
+#panel table.arten th i { display: inline-block; width: 10px; height: 5px; border-radius: 2px; margin-right: 3px; vertical-align: 2px; }
+#panel ul.einzel i.farbe { display: inline-block; width: 10px; height: 5px; border-radius: 2px; margin-right: 5px; vertical-align: 2px; }
