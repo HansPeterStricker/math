@@ -10,85 +10,53 @@
 <link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="shared_scripts/style.css">
 <style>
-  main { max-width: 900px; margin: 0 auto; padding: 24px 16px 40px; }
-  .liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 18px 0; }
-  .eintrag { display: block; border: 1px solid var(--linie); border-radius: 6px; background: #fbfaf6; padding: 14px 16px; color: inherit; text-decoration: none; }
-  .eintrag:hover { border-color: var(--tinte); }
-  .eintrag .vorschau { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 10px; background: #fbfaf6; }
-  .eintrag .gebiet { color: var(--leise); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
-  .eintrag h2 { font-size: 20px; margin: 2px 0 6px; }
-  .eintrag p { margin: 0; font-size: 15px; }
-  .eintrag .zahlen { color: var(--leise); font-size: 14px; margin-top: 6px; }
+  /* all graphs on one page (user, 3 November 2026): a narrow list of the areas on the left, the areas with small
+     previews of both graphs on the right */
+  .seite { display: grid; grid-template-columns: 190px minmax(0, 1fr); min-height: 100vh; }
+  .gebiete { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; box-sizing: border-box; padding: 18px 12px; border-right: 1px solid var(--linie); background: #efebe1; font-size: 14px; line-height: 1.3; }
+  .gebiete h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); margin: 0 0 10px; }
+  .gebiete .gebiet { margin: 0 0 10px; }
+  .gebiete .gebiet-name a { color: var(--tinte); text-decoration: none; }
+  .gebiete .gebiet-links { display: flex; gap: 10px; font-size: 12.5px; }
+  .gebiete a { color: #5a6f8f; text-decoration: none; }
+  .gebiete a:hover { text-decoration: underline; }
+  main { max-width: 1100px; padding: 24px 24px 40px; }
+  .liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 18px 0; }
+  .eintrag { border: 1px solid var(--linie); border-radius: 6px; background: #fbfaf6; padding: 12px 14px; scroll-margin-top: 12px; }
+  .eintrag .msc { color: var(--leise); font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
+  .eintrag h2 { font-size: 19px; margin: 2px 0 4px; }
+  .eintrag p { margin: 0 0 8px; font-size: 14.5px; }
+  .paar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .paar a { color: inherit; text-decoration: none; display: block; border: 1px solid transparent; border-radius: 4px; padding: 4px; }
+  .paar a:hover { border-color: var(--tinte); }
+  .paar img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; background: #fbfaf6; }
+  .paar .art { font-weight: 600; font-size: 14px; margin-top: 4px; }
+  .paar .zahlen { color: var(--leise); font-size: 12.5px; }
   .folgt { color: var(--leise); }
+  @media (max-width: 700px) {
+    .seite { grid-template-columns: 1fr; }
+    .gebiete { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--linie); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+    .gebiete h2 { width: 100%; }
+    .gebiete .gebiet { margin: 0; }
+    main { padding: 16px; }
+  }
 </style>
 </head>
 <body>
-<main>
-  <h1>Graphs of mathematics</h1>
-  <p>For each area of mathematics there will be several graphs: the theorems and their use in proofs, the definitions
-    and their use in other definitions and theorems, and the areas and their relations to each other. Concepts that
-    are defined in one area and used in another link the graphs of the two areas.</p>
-
-  <div class="liste">
-    <a class="eintrag" href="set-theory/concepts.html">
-      <img class="vorschau" src="previews/set-theory.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 03E, 06A</div>
-      <h2>Set theory</h2>
-      <p>Concept graph: sets, relations and maps, orders, ordinals and cardinals, and the construction of ℕ, ℤ, ℚ, ℝ and ℂ.</p>
-      <div class="zahlen" data-zahlen="ST_CONCEPTS"></div>
-    </a>
-    <a class="eintrag" href="elementary-number-theory/concepts.html">
-      <img class="vorschau" src="previews/elementary-number-theory.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 11A</div>
-      <h2>Elementary number theory</h2>
-      <p>Concept graph: divisibility, congruences, arithmetic functions, primes, continued fractions.</p>
-      <div class="zahlen" data-zahlen="ENT_CONCEPTS"></div>
-    </a>
-    <a class="eintrag" href="group-theory/concepts.html">
-      <img class="vorschau" src="previews/group-theory.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 20</div>
-      <h2>Group theory</h2>
-      <p>Concept graph: groups and homomorphisms, group actions and permutations, finite and abelian groups.</p>
-      <div class="zahlen" data-zahlen="GT_CONCEPTS"></div>
-    </a>
-    <a class="eintrag" href="commutative-algebra/concepts.html">
-      <img class="vorschau" src="previews/commutative-algebra.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 13</div>
-      <h2>Commutative algebra</h2>
-      <p>Concept graph: rings and ideals, localization, modules, chain conditions, special and local rings, completion.</p>
-      <div class="zahlen" data-zahlen="CA_CONCEPTS"></div>
-    </a>
-    <a class="eintrag" href="category-theory/concepts.html">
-      <img class="vorschau" src="previews/category-theory.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 18</div>
-      <h2>Category theory</h2>
-      <p>Concept graph: categories, functors and limits, abelian categories and homological algebra, sheaves, higher categories.</p>
-      <div class="zahlen" data-zahlen="CT_CONCEPTS"></div>
-    </a>
-    <a class="eintrag" href="algebraic-geometry/concepts.html">
-      <img class="vorschau" src="previews/algebraic-geometry.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 14</div>
-      <h2>Algebraic geometry</h2>
-      <p>Concept graph: schemes and morphisms, sheaves and cohomology, divisors and line bundles, curves, surfaces, birational geometry, moduli, abelian varieties.</p>
-      <div class="zahlen" data-zahlen="AG_CG"></div>
-    </a>
-    <a class="eintrag" href="arithmetic-geometry/concepts.html">
-      <img class="vorschau" src="previews/arithmetic-geometry.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 11F, 11G, 11M, 11N</div>
-      <h2>Arithmetic geometry</h2>
-      <p>Concept graph: L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
-      <div class="zahlen" data-zahlen="AR_CG"></div>
-    </a>
-    <a class="eintrag" href="algebraic-number-theory/concepts.html">
-      <img class="vorschau" src="previews/algebraic-number-theory.jpg" alt="" loading="lazy">
-      <div class="gebiet">MSC 11R, 11S</div>
-      <h2>Algebraic number theory</h2>
-      <p>Concept graph: number fields and rings of integers, ramification, units and class groups, cyclotomic fields, class field theory, adeles, local fields.</p>
-      <div class="zahlen" data-zahlen="ANT_CONCEPTS"></div>
-    </a>
-  </div>
-  <p class="folgt">The <a href="theorems.html">theorem graphs</a> of the same areas look the same. Further areas and the graph of the areas will follow.</p>
-</main>
+<div class="seite">
+  <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2></nav>
+  <main>
+    <h1>Graphs of mathematics</h1>
+    <p>For each area of mathematics there are two graphs. The <b>concept graph</b> shows the definitions and their use in
+      other definitions: an arrow leads from A to B when B is defined with A. The <b>theorem graph</b> shows the theorems,
+      lemmas and conjectures with their proofs: an arrow leads from each theorem a usual proof uses to the theorem it
+      proves. In both, each MSC class has a sector, and a node lies further out than the nodes it builds on. Concepts
+      and theorems of one area used in another link the graphs of the two areas.</p>
+    <div class="liste" id="liste"></div>
+    <p class="folgt">Further areas and the graph of the areas will follow.</p>
+  </main>
+</div>
+<script src="shared_scripts/areas.js"></script>
 <script src="set-theory/data/concepts.js"></script>
 <script src="elementary-number-theory/data/concepts.js"></script>
 <script src="group-theory/data/concepts.js"></script>
@@ -97,15 +65,14 @@
 <script src="algebraic-geometry/data/concept-graph.js"></script>
 <script src="arithmetic-geometry/data/concept-graph.js"></script>
 <script src="algebraic-number-theory/data/concepts.js"></script>
-<script>
-  // number of concepts and of definitional dependencies per entry
-  document.querySelectorAll("[data-zahlen]").forEach((d) => {
-    const data = window[d.dataset.zahlen];
-    if (!data) return;
-    const own = data.concepts.filter((c) => c.area !== "basic");
-    const edges = data.concepts.reduce((s, c) => s + (c.uses || []).length, 0);
-    d.textContent = own.length + " concepts of the area, " + edges + " definitional dependencies";
-  });
-</script>
+<script src="set-theory/data/theorem-graph.js"></script>
+<script src="elementary-number-theory/data/theorem-graph.js"></script>
+<script src="group-theory/data/theorem-graph.js"></script>
+<script src="category-theory/data/theorem-graph.js"></script>
+<script src="commutative-algebra/data/theorem-graph.js"></script>
+<script src="algebraic-geometry/data/theorem-graph.js"></script>
+<script src="arithmetic-geometry/data/theorem-graph.js"></script>
+<script src="algebraic-number-theory/data/theorem-graph.js"></script>
+<script src="index.js"></script>
 </body>
 </html>

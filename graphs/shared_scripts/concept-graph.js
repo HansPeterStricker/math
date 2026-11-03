@@ -554,10 +554,19 @@
     const P = (r, a) => `${(r * Math.cos(a)).toFixed(1)},${(r * Math.sin(a)).toFixed(1)}`;
     const large = a1 - a0 > Math.PI ? 1 : 0;
     el("path", { d: `M${P(rIn, a0)}L${P(rOut, a0)}A${rOut},${rOut} 0 ${large} 1 ${P(rOut, a1)}L${P(rIn, a1)}A${rIn},${rIn} 0 ${large} 0 ${P(rIn, a0)}Z`, fill: k === OTHER ? "#b9ad9a" : COLORS[k] || "#ccc", class: "sektor" }, gSectors);
-    const m = sec.mid, rT = rOut + 18, x = rT * Math.cos(m), y = rT * Math.sin(m);
-    const t = el("text", { x: x.toFixed(1), y: (y + 4).toFixed(1), "text-anchor": Math.abs(Math.cos(m)) < 0.3 ? "middle" : Math.cos(m) > 0 ? "start" : "end", class: "sektor-name" }, gSectors);
-    t.textContent = k === OTHER ? "Other classes" : D.areas[k];
-    if (k === OTHER) el("title", {}, t).textContent = smallAreas.map((a) => D.areas[a]).join("\n");
+    // the name follows the circle (user, 3 November 2026): on an arc around the middle of the sector, upright in the
+    // upper half (clockwise, letters outside the arc) and in the lower half (anticlockwise, the arc further out so that
+    // the letters hang down to the circle)
+    const m = sec.mid, low = Math.sin(m) > 0, rT = rOut + (low ? 30 : 12), half = Math.PI / 2;
+    const arcId = "sektor-bogen-" + String(k).replace(/[^\w-]/g, "_");
+    const b0 = low ? m + half : m - half, b1 = low ? m - half : m + half;
+    el("path", { id: arcId, d: `M${P(rT, b0)}A${rT},${rT} 0 0 ${low ? 0 : 1} ${P(rT, b1)}`, fill: "none", stroke: "none" }, gSectors);
+    const t = el("text", { class: "sektor-name" }, gSectors);
+    const tp = el("textPath", { href: "#" + arcId, startOffset: "50%", "text-anchor": "middle" }, t);
+    // as long as the arc of the sector allows (about 11.5 units per letter at this size); the full name in a tooltip
+    const full = k === OTHER ? "Other classes" : D.areas[k], room = Math.max(4, Math.floor((sec.w * rT) / 11.5));
+    tp.textContent = full.length <= room ? full : full.slice(0, room - 1).replace(/[\s,;]+\S*$/, "") + " …";
+    el("title", {}, t).textContent = k === OTHER ? smallAreas.map((a) => D.areas[a]).join("\n") : full;
   });
   // guide circle of the prerequisites (the levels have no global rings any more)
   const gRings = el("g", { class: "ringe" }, svg);
@@ -1197,7 +1206,9 @@
       `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
       `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges only of other ${WORDS.proofWord.toLowerCase()}s (dashed), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
+  // the mode of the click always visible, outside the collapsed blocks (user, 3 November 2026)
   document.getElementById("controls").innerHTML =
+    `<label class="toggle immer" title="On: a click opens the card of the ${WORDS.proofWord.toLowerCase()}, a right click the card of the consequences. Off: a click marks in the graph itself the ${WORDS.many} it builds on, a right click those building on it; each further click on it one step more."><input type="checkbox" id="c-mark"${clickMode === "card" ? " checked" : ""}><span class="regler"></span>click opens a card</label>` +
     block("Display", [
       `<label class="toggle"${isaEdges.length ? "" : ' style="display:none"'}><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
       `<label class="toggle"><input type="checkbox" id="c-trans"><span class="regler"></span>indirect dependencies</label>`,
@@ -1206,15 +1217,14 @@
       ...(outsOf.size ? [`<label class="toggle"><input type="checkbox" id="c-aus"><span class="regler"></span>arrows to other areas</label>`] : []),
       ...Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => `<label class="toggle"><input type="checkbox" class="c-hub"><span class="regler"></span>edges from ${byId.get(h).name}</label>`),
       `<label class="toggle"><input type="checkbox" id="c-names" checked><span class="regler"></span>names</label>`,
-      `<label class="toggle" title="Off: a click opens the card of the proof, a right click the card of the consequences. On: a click marks the ${WORDS.many} it builds on in the graph, a right click those building on it; each further click one step more."><input type="checkbox" id="c-mark"${clickMode === "graph" ? " checked" : ""}><span class="regler"></span>click marks in the graph</label>`,
       `<button id="c-home">Reset view</button>`,
-    ]) +
+    ], { closed: true }) +
     // levels in two columns, filled column by column (1 … 5 left, 6 … 10 right)
     block("Levels", [
       `<div class="spalten" style="grid-template-rows:repeat(${Math.ceil(levels.length / 2)},auto)">` + levels.filter((l) => !(OUTSIDE && l === 0)).map((l) =>
         `<label class="toggle" title="${countAt(l)} ${countAt(l) === 1 ? WORDS.one : WORDS.many}"><input type="checkbox" data-level="${l}" checked><span class="regler"></span>${l === 0 ? "prereq." : l} <span class="meta">(${countAt(l)})</span></label>`).join("") + "</div>",
       `<span class="hinweis">${WORDS.levelHint}</span>`,
-    ]);
+    ], { closed: true });
   const shownLevels = new Set(levels);
   // The level switches act only while nothing is selected (user, 3 November 2026)
   function applyLevels() {
@@ -1245,7 +1255,7 @@
   document.querySelectorAll("#controls .c-hub").forEach((box) => box.addEventListener("change", () => svg.classList.toggle("zeige-hub", box.checked)));
   document.getElementById("c-names").addEventListener("change", (ev) => svg.classList.toggle("ohne-namen", !ev.target.checked));
   document.getElementById("c-mark").addEventListener("change", (ev) => {
-    clickMode = ev.target.checked ? "graph" : "card";
+    clickMode = ev.target.checked ? "card" : "graph";
     try { localStorage.setItem("concept-graph-click", clickMode); } catch (err) { /* no storage */ }
     const id = selected;
     select(null);
@@ -1319,13 +1329,16 @@
   searchBox.addEventListener("focus", () => { if (searchBox.value) showHits(); });
 
   // ------------------------------------------------------------ explanation on demand
-  const about = document.getElementById("about");
-  const openAbout = () => { about.hidden = false; document.getElementById("about-close").focus(); };
-  const closeAbout = () => { about.hidden = true; document.getElementById("about-open").focus(); };
-  document.getElementById("about-open").addEventListener("click", openAbout);
-  document.getElementById("about-close").addEventListener("click", closeAbout);
-  about.addEventListener("click", (ev) => { if (ev.target === about) closeAbout(); });
-  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !about.hidden) closeAbout(); });
+  // the button "About this graph" was removed (user, 3 November 2026); the explanation opens only where a page has it
+  const about = document.getElementById("about"), aboutOpen = document.getElementById("about-open");
+  if (about && aboutOpen) {
+    const openAbout = () => { about.hidden = false; document.getElementById("about-close").focus(); };
+    const closeAbout = () => { about.hidden = true; aboutOpen.focus(); };
+    aboutOpen.addEventListener("click", openAbout);
+    document.getElementById("about-close").addEventListener("click", closeAbout);
+    about.addEventListener("click", (ev) => { if (ev.target === about) closeAbout(); });
+    document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !about.hidden) closeAbout(); });
+  }
 
   // address #mark=<id> (from a click on a node of this area in another graph): the node is only marked, lit in the
   // dimmed graph and centred, with its panel; no card and no premises (user, 3 November 2026)

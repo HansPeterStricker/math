@@ -18,8 +18,6 @@
   <aside id="side">
     <div class="kopf">
       <h1>Concepts of category theory</h1>
-      <button id="about-open" class="klein-knopf" aria-haspopup="dialog">About this graph</button>
-      <a class="klein-knopf" href="../index.html">All graphs</a>
     </div>
     <div class="suche">
       <input id="search" type="search" placeholder="Search concept …" autocomplete="off" aria-label="Search concept">
@@ -53,7 +51,7 @@
       concept with several definitions has a small switch “1/3 ›” for the next one. A right click lays the card of the
       consequences: the concept at the top, below it the concepts that use it in some definition (blue; dashed where not every
       definition uses it); a click on a box shows or hides the boxes below it. The card closes with ×, Escape or a click
-      outside it and starts afresh the next time. With the switch “click marks in the graph” a click marks instead,
+      outside it and starts afresh the next time. With the switch “click opens a card” turned off, a click marks instead,
       in the graph itself, the concepts its definition uses directly, and each further click on it one step more; a right
       click marks in the same way the concepts that use it. The panel shows the definition and, in the same drawing, all definitions it
       builds on. While a concept is selected, all levels are marked in the dimmed graph. Arrows to other areas lead to
@@ -74,6 +72,8 @@
 <script src="../arithmetic-geometry/data/concept-graph.js"></script>
 <script src="../algebraic-number-theory/data/concepts.js"></script>
 <script src="scripts/concept-page.js"></script>
+<script src="../shared_scripts/areas.js"></script>
+<script src="../shared_scripts/area-nav.js"></script>
 <script src="../shared_scripts/graph.js"></script>
 <script src="../shared_scripts/concept-graph.js"></script>
 </body>
