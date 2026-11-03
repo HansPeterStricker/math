@@ -54,8 +54,8 @@
   }, CFG.words || {});
   const { el } = window.GL;
   // Formulas (user, 3 November 2026): no line break inside a formula; a formula with several parts separated by
-  // ",\quad", "\quad", ",\;" or ",\ " at the outer level is split there, and every part is set on its own as one
-  // unbreakable piece. The pieces stand side by side and wrap only between each other; the commas are dropped.
+  // ",\quad", "\quad", ",\;" or ",\ \ " at the outer level is split there, and every part is set on its own as one
+  // unbreakable piece (one per line in the panel); the commas are dropped.
   const formulaParts = (f) => {
     if (/\\begin\{/.test(f)) return [f];
     const parts = [];
@@ -66,7 +66,9 @@
       if (ch === "{") depth++;
       else if (ch === "}") depth--;
       if (depth) continue;
-      const m = /^(,\s*\\q?quad(?![a-zA-Z])|\\q?quad(?![a-zA-Z])|,\s*\\;|,\s*\\ )\s*/.exec(f.slice(i));
+      // a single ",\ " joins the pieces of one condition (a \le b,\ b \le a \Rightarrow a = b) and is not split
+      // (user, 3 November 2026); ",\ \ " separates parts
+      const m = /^(,\s*\\q?quad(?![a-zA-Z])|\\q?quad(?![a-zA-Z])|,\s*\\;|,\s*\\ \s*\\ )\s*/.exec(f.slice(i));
       if (m) { parts.push(f.slice(start, i)); i += m[0].length - 1; start = i + 1; }
     }
     parts.push(f.slice(start));
@@ -824,13 +826,8 @@
     else { cardMode = dir; expanded = new Set([id]); proofChoice.clear(); cardFor = null; select(id); }
   }
   function toggle(x) {
-    if (expanded.has(x)) {
-      // closing a box also closes everything that is no longer visible through it, so that opening it again shows
-      // only the next row (user, 3 November 2026)
-      expanded.delete(x);
-      const still = computeShown(selected);
-      expanded = new Set([...expanded].filter((y) => still.has(y)));
-    } else expanded.add(x);
+    // a closed subtree keeps its opened boxes: opened again, it appears as far as before (user, 3 November 2026)
+    if (expanded.has(x)) expanded.delete(x); else expanded.add(x);
     showCard(selected);
     mark(selected);
   }
@@ -969,11 +966,45 @@
   });
   // another proof of the selected theorem: the card is drawn anew, the steps start again
   function showProof(id, k) {
+    if (id === selected && cardMode === "back" && clickMode === "card") { switchProof(id, k); return; }
     proofChoice.set(id, k);
-    // another proof of the selected node: only its direct premises are shown
     cardMode = "back"; expanded = new Set([id]);
     cardFor = null;
     select(id);
+  }
+  // Another proof or definition at a box (user, 3 November 2026, for quick comparisons): it is opened at least as far
+  // as the previous one (the same number of levels above the box), and completely if the previous one was opened
+  // completely.
+  function switchProof(x, k) {
+    const root = selected, next = (y) => backFrom(root)(y);
+    let depth = 0, full = true, frontier = [x];
+    const seen = new Set([x]);
+    while (frontier.length) {
+      const nf = [];
+      let opened = false;
+      frontier.forEach((y) => {
+        const ch = next(y);
+        if (!ch.length) return;
+        if (!expanded.has(y)) { full = false; return; }
+        opened = true;
+        ch.forEach((z) => { if (!seen.has(z)) { seen.add(z); nf.push(z); } });
+      });
+      if (opened) depth++;
+      frontier = nf;
+    }
+    const old = closure(x, next);
+    proofChoice.set(x, k);
+    expanded = new Set([...expanded].filter((y) => !old.has(y)));
+    const limit = full ? Infinity : Math.max(1, depth);
+    let fr = [x], d = 0;
+    const seen2 = new Set([x]);
+    while (fr.length && d < limit) {
+      const nf = [];
+      fr.forEach((y) => { const ch = next(y); if (ch.length) expanded.add(y); ch.forEach((z) => { if (!seen2.has(z)) { seen2.add(z); nf.push(z); } }); });
+      fr = nf; d++;
+    }
+    // the side view in the panel shows the chosen proofs as well
+    cardFor = null; select(root);
   }
 
 
@@ -1278,7 +1309,11 @@
     if (cardFor !== id) {
       cardFor = id;
       const P = proofsOf(c), pk = proofChoice.get(id) || 0;
-      const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${WORDS.proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button></div>` : "";
+      // the formula of the shown definition, so that two definitions with the same premises can be told apart
+      // (user, 3 November 2026: the two definitions of a partial order)
+      const shownFormula = pk === 0 ? c.formula : P[pk].formula;
+      const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${WORDS.proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button>` +
+        `${shownFormula && window.katex ? `<div class="karte-formel">${tex(shownFormula)}</div>` : ""}</div>` : "";
       const backBtn = jumpStack.length ? `<button class="klein-knopf karte-zurueck" title="Back to ${plainName(byId.get(jumpStack[jumpStack.length - 1].id).name)}">‹ Back</button> ` : "";
       card.innerHTML = `<div class="karte-kopf">${backBtn}<b>${c.name}</b> <button class="karte-zu" aria-label="Close">×</button>${switcher}</div>`;
       card.querySelectorAll("[data-step]").forEach((bt) => bt.addEventListener("click", (ev) => { ev.stopPropagation(); showProof(id, (pk + Number(bt.dataset.step) + P.length) % P.length); }));
@@ -1368,18 +1403,11 @@
     if (jb) { jump(jb.dataset.jump); return; }
     if (ev.target.closest(".karte-zurueck")) { history.back(); return; }
     const w = ev.target.closest("[data-proof-of]");
-    // another proof at a box: above it only its direct premises are shown, everything further up is folded
-    // (user, 3 November 2026)
+    // another proof at a box: opened as far as the previous one (switchProof)
     if (w) {
-      const x = w.dataset.proofOf, n = proofsOf(byId.get(x)).length, root = selected;
-      const above = (y) => closure(y, (z) => backFrom(root)(z));
-      const old = above(x);
-      proofChoice.set(x, ((proofChoice.get(x) || 0) + 1) % n);
-      const now = above(x);
-      expanded = new Set([...expanded].filter((y) => !old.has(y) && !now.has(y)));
-      expanded.add(x);
-      // the side view in the panel shows the chosen proofs as well
-      cardFor = null; select(root); return;
+      const x = w.dataset.proofOf, n = proofsOf(byId.get(x)).length;
+      switchProof(x, ((proofChoice.get(x) || 0) + 1) % n);
+      return;
     }
     const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
   card.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });

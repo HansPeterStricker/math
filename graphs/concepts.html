@@ -1,0 +1,136 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concept graphs</title>
+<link rel="icon" href="../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../scripts/site-icon-180.png">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="shared_scripts/style.css">
+<style>
+  /* all graphs on one page (user, 3 November 2026): a narrow list of the areas on the left, the areas with small
+     previews of both graphs on the right */
+  .seite { display: grid; grid-template-columns: 190px minmax(0, 1fr); min-height: 100vh; }
+  .gebiete { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; box-sizing: border-box; padding: 18px 12px; border-right: 1px solid var(--linie); background: #efebe1; font-size: 14px; line-height: 1.3; }
+  .gebiete h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); margin: 0 0 10px; }
+  .gebiete .gebiet { margin: 0 0 10px; }
+  .gebiete .gebiet-name a { color: var(--tinte); text-decoration: none; }
+  .gebiete .gebiet-links { display: flex; gap: 10px; font-size: 12.5px; }
+  .gebiete a { color: #5a6f8f; text-decoration: none; }
+  .gebiete a:hover { text-decoration: underline; }
+  main { max-width: 1100px; padding: 24px 24px 40px; }
+  .liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 14px; margin: 18px 0; }
+  .eintrag { border: 1px solid var(--linie); border-radius: 6px; background: #fbfaf6; padding: 12px 14px; scroll-margin-top: 12px; }
+  .eintrag .msc { color: var(--leise); font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
+  .eintrag h2 { font-size: 19px; margin: 2px 0 4px; }
+  .eintrag p { margin: 0 0 8px; font-size: 14.5px; }
+  .paar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .paar a { color: inherit; text-decoration: none; display: block; border: 1px solid transparent; border-radius: 4px; padding: 4px; }
+  .paar a:hover { border-color: var(--tinte); }
+  .paar img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; background: #fbfaf6; }
+  .paar .art { font-weight: 600; font-size: 14px; margin-top: 4px; }
+  .paar .zahlen { color: var(--leise); font-size: 12.5px; }
+  .folgt { color: var(--leise); }
+  @media (max-width: 700px) {
+    .seite { grid-template-columns: 1fr; }
+    .gebiete { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--linie); display: flex; flex-wrap: wrap; gap: 4px 16px; }
+    .gebiete h2 { width: 100%; }
+    .gebiete .gebiet { margin: 0; }
+    main { padding: 16px; }
+  }
+  .paar.einzeln { grid-template-columns: 1fr; max-width: 320px; }
+</style>
+</head>
+<body>
+<div class="seite">
+  <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2>
+    <!-- areas:start -->
+    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div><div class="gebiet-links"><a href="set-theory/concepts.html">Concepts</a><a href="set-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div><div class="gebiet-links"><a href="elementary-number-theory/concepts.html">Concepts</a><a href="elementary-number-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div><div class="gebiet-links"><a href="group-theory/concepts.html">Concepts</a><a href="group-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div><div class="gebiet-links"><a href="commutative-algebra/concepts.html">Concepts</a><a href="commutative-algebra/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div><div class="gebiet-links"><a href="category-theory/concepts.html">Concepts</a><a href="category-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div><div class="gebiet-links"><a href="algebraic-geometry/concepts.html">Concepts</a><a href="algebraic-geometry/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div><div class="gebiet-links"><a href="arithmetic-geometry/concepts.html">Concepts</a><a href="arithmetic-geometry/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div><div class="gebiet-links"><a href="algebraic-number-theory/concepts.html">Concepts</a><a href="algebraic-number-theory/theorems.html">Theorems</a></div></div>
+    <!-- areas:end -->
+  </nav>
+  <main>
+    <h1>Concept graphs</h1>
+    <p>For each area the definitions and their use in other definitions: an arrow leads from A to B when B is defined with A. Each MSC class has a sector, and a concept lies further out than the concepts its definition uses. <a href="index.html">All kinds of graph side by side</a>.</p>
+    <div class="liste" id="liste">
+    <!-- entries:start -->
+    <section class="eintrag" id="set-theory">
+      <div class="msc">MSC 03E, 06A</div>
+      <h2>Set theory</h2>
+      <p>Sets, relations and maps, orders, ordinals and cardinals, forcing, and the construction of ℚ, ℝ and ℂ.</p>
+      <div class="paar einzeln">
+        <a href="set-theory/concepts.html"><img src="previews/set-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">66 concepts, 161 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="elementary-number-theory">
+      <div class="msc">MSC 11A</div>
+      <h2>Elementary number theory</h2>
+      <p>Divisibility, congruences, arithmetic functions, primes, continued fractions.</p>
+      <div class="paar einzeln">
+        <a href="elementary-number-theory/concepts.html"><img src="previews/elementary-number-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">65 concepts, 148 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="group-theory">
+      <div class="msc">MSC 20</div>
+      <h2>Group theory</h2>
+      <p>Groups and homomorphisms, group actions and permutations, finite and abelian groups.</p>
+      <div class="paar einzeln">
+        <a href="group-theory/concepts.html"><img src="previews/group-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">48 concepts, 97 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="commutative-algebra">
+      <div class="msc">MSC 13</div>
+      <h2>Commutative algebra</h2>
+      <p>Rings and ideals, localization, modules, chain conditions, special and local rings, completion.</p>
+      <div class="paar einzeln">
+        <a href="commutative-algebra/concepts.html"><img src="previews/commutative-algebra.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">64 concepts, 167 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="category-theory">
+      <div class="msc">MSC 18</div>
+      <h2>Category theory</h2>
+      <p>Categories, functors and limits, abelian categories and homological algebra, sheaves, higher categories.</p>
+      <div class="paar einzeln">
+        <a href="category-theory/concepts.html"><img src="previews/category-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">80 concepts, 195 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="algebraic-geometry">
+      <div class="msc">MSC 14</div>
+      <h2>Algebraic geometry</h2>
+      <p>Schemes and morphisms, sheaves and cohomology, divisors, curves, surfaces, birational geometry, moduli, abelian varieties.</p>
+      <div class="paar einzeln">
+        <a href="algebraic-geometry/concepts.html"><img src="previews/algebraic-geometry.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">124 concepts, 509 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="arithmetic-geometry">
+      <div class="msc">MSC 11F, 11G, 11M, 11N</div>
+      <h2>Arithmetic geometry</h2>
+      <p>L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
+      <div class="paar einzeln">
+        <a href="arithmetic-geometry/concepts.html"><img src="previews/arithmetic-geometry.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">57 concepts, 184 definitional dependencies</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="algebraic-number-theory">
+      <div class="msc">MSC 11R, 11S</div>
+      <h2>Algebraic number theory</h2>
+      <p>Number fields and rings of integers, ramification, units and class groups, cyclotomic fields, class field theory, adeles, local fields.</p>
+      <div class="paar einzeln">
+        <a href="algebraic-number-theory/concepts.html"><img src="previews/algebraic-number-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">64 concepts, 288 definitional dependencies</div></a>
+      </div>
+    </section>
+    <!-- entries:end -->
+    </div>
+    <p class="folgt">Further areas and the graph of the areas will follow.</p>
+  </main>
+</div>
+<a href="../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>
+</body>
+</html>
