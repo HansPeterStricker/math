@@ -849,7 +849,13 @@
     else { cardMode = dir; expanded = new Set([id]); proofChoice.clear(); cardFor = null; select(id); }
   }
   function toggle(x) {
-    if (expanded.has(x)) expanded.delete(x); else expanded.add(x);
+    if (expanded.has(x)) {
+      // closing a box also closes everything that is no longer visible through it, so that opening it again shows
+      // only the next row (user, 3 November 2026)
+      expanded.delete(x);
+      const still = computeShown(selected);
+      expanded = new Set([...expanded].filter((y) => still.has(y)));
+    } else expanded.add(x);
     showCard(selected);
     mark(selected);
   }
@@ -981,6 +987,91 @@
     const keep = (x) => !isPre(x) || [id, ...up].some((y) => !isPre(y) && backOf(y).includes(x));
     return [...up.filter(keep), id];
   };
+  // Horizontal positions in a layered drawing after Brandes and Köpf, "Fast and simple horizontal coordinate
+  // assignment" (2001), used for the cards (user, 3 November 2026: no needless bends). Each node is aligned with a median
+  // neighbour in the row above or below; segments between two waypoints of a long edge take precedence, so that a long
+  // edge runs as one vertical line. Four alignments (up/down × left/right) are compacted to the left, aligned to the
+  // narrowest and combined as the mean of the two middle values. layersIn: rows from top to bottom, each in its order,
+  // items with `links` (neighbours in the row above), `rechts` (below) and `kind` ("weg" for waypoints); sep(a, b):
+  // least distance between the centres of neighbours a, b. Returns a Map item -> x.
+  function placeBK(layersIn, sep) {
+    const flat = layersIn.flat();
+    flat.forEach((v, i) => { v.__n = i; });
+    const results = [];
+    for (const vdir of ["down", "up"]) for (const hdir of ["left", "right"]) {
+      let L = layersIn.map((l) => (hdir === "left" ? l.slice() : l.slice().reverse()));
+      if (vdir === "up") L = L.reverse();
+      const upper = (v) => (vdir === "down" ? v.links : v.rechts);
+      const pos = new Map(), row = new Map();
+      L.forEach((l, i) => l.forEach((v, k) => { pos.set(v, k); row.set(v, i); }));
+      const key = (u, v) => u.__n + "|" + v.__n;
+      // type 1 conflicts: segments that cross a segment between two waypoints are not used for alignment
+      const marked = new Set();
+      for (let i = 1; i < L.length; i++) {
+        const up = L[i - 1], low = L[i];
+        let k0 = 0, l = 0;
+        for (let l1 = 0; l1 < low.length; l1++) {
+          const v = low[l1], inner = v.kind === "weg" ? upper(v).find((u) => u.kind === "weg") : null;
+          if (l1 === low.length - 1 || inner) {
+            const k1 = inner ? pos.get(inner) : up.length - 1;
+            for (; l <= l1; l++) upper(low[l]).forEach((u) => { const k = pos.get(u); if (k < k0 || k > k1) marked.add(key(u, low[l])); });
+            k0 = k1;
+          }
+        }
+      }
+      // vertical alignment with the median neighbours
+      const root = new Map(flat.map((v) => [v, v])), align = new Map(flat.map((v) => [v, v]));
+      for (let i = 1; i < L.length; i++) {
+        let r = -1;
+        for (const v of L[i]) {
+          const U = upper(v).slice().sort((a, b) => pos.get(a) - pos.get(b)), d = U.length;
+          if (!d) continue;
+          for (const m of [...new Set([Math.floor((d - 1) / 2), Math.ceil((d - 1) / 2)])]) {
+            if (align.get(v) !== v) continue;
+            const u = U[m];
+            if (!marked.has(key(u, v)) && r < pos.get(u)) { align.set(u, v); root.set(v, root.get(u)); align.set(v, root.get(v)); r = pos.get(u); }
+          }
+        }
+      }
+      // horizontal compaction of the blocks
+      const sink = new Map(flat.map((v) => [v, v])), shift = new Map(flat.map((v) => [v, Infinity])), x = new Map();
+      const place = (v) => {
+        if (x.has(v)) return;
+        x.set(v, 0);
+        let w = v;
+        do {
+          const k = pos.get(w);
+          if (k > 0) {
+            const p = L[row.get(w)][k - 1], u = root.get(p);
+            place(u);
+            if (sink.get(v) === v) sink.set(v, sink.get(u));
+            if (sink.get(v) !== sink.get(u)) shift.set(sink.get(u), Math.min(shift.get(sink.get(u)), x.get(v) - x.get(u) - sep(p, w)));
+            else x.set(v, Math.max(x.get(v), x.get(u) + sep(p, w)));
+          }
+          w = align.get(w);
+        } while (w !== v);
+      };
+      flat.forEach((v) => { if (root.get(v) === v) place(v); });
+      const X = new Map();
+      flat.forEach((v) => {
+        const r0 = root.get(v), s = shift.get(sink.get(r0));
+        const xv = x.get(r0) + (s < Infinity ? s : 0);
+        X.set(v, hdir === "left" ? xv : -xv);
+      });
+      results.push({ X, hdir });
+    }
+    // align the four results to the narrowest one and take the mean of the two middle values
+    const span = (r) => { const xs = [...r.X.values()]; return { min: Math.min(...xs), max: Math.max(...xs) }; };
+    const spans = results.map(span), narrow = spans.reduce((b, s, i) => (s.max - s.min < spans[b].max - spans[b].min ? i : b), 0);
+    results.forEach((r, i) => { r.d = r.hdir === "left" ? spans[narrow].min - spans[i].min : spans[narrow].max - spans[i].max; });
+    const out = new Map();
+    flat.forEach((v) => {
+      const xs = results.map((r) => r.X.get(v) + r.d).sort((a, b) => a - b);
+      out.set(v, (xs[1] + xs[2]) / 2);
+    });
+    // the balanced result and the four single alignments (in each of them every aligned block is vertical)
+    return [out, ...results.map((r) => new Map([...r.X].map(([v, x]) => [v, x + r.d])))];
+  }
   function layered(ids, id, o) {
     const set = new Set(ids), back = o.mode !== "fwd";
     // edges: proof card along the chosen proofs, card of the consequences along all proofs (dashed unless essential);
@@ -1018,10 +1109,17 @@
     const lay = GL.layers(ids, (x) => rows.indexOf(rowOf(x)), fEdges, { BH: BW, GAP_N: GAP, GAP_W: 6, MARGIN: M, HEAD: 0, ROUNDS: 40 });
     const wOf = (it) => (it.kind === "knoten" ? BW : 0);
     const sep = (a, b) => (wOf(a) + wOf(b)) / 2 + (a.kind === "knoten" && b.kind === "knoten" ? GAP : 10);
+    // positions after Brandes and Köpf; afterwards, only as a safeguard, neighbours that are too close are pushed apart
+    // of the five results the one with the fewest offsets along the edges: between two waypoints (a bend in the
+    // middle of an edge) counts ten times as much as at the boxes at the ends
+    const offsets = (X) => lay.chains.reduce((sum, { chain }) => sum + chain.slice(1).reduce((s, it, i) => {
+      const prev = chain[i];
+      if (Math.abs(X.get(it) - X.get(prev)) < 0.5) return s;
+      return s + (it.kind === "weg" && prev.kind === "weg" ? 10 : 1);
+    }, 0), 0);
+    const bk = placeBK(lay.columns.filter(Boolean), sep).map((X) => ({ X, n: offsets(X) })).reduce((b, c) => (c.n < b.n ? c : b)).X;
     lay.columns.forEach((row) => {
-      row.forEach((it, i) => {
-        it.cx = it.links.length ? it.links.reduce((a, q) => a + q.cx, 0) / it.links.length : (i - (row.length - 1) / 2) * (BW + GAP);
-      });
+      row.forEach((it) => { it.cx = bk.get(it); });
       for (let round = 0; round < 50; round++) {
         let moved = false;
         for (let i = 1; i < row.length; i++) {
@@ -1030,6 +1128,22 @@
         }
         if (!moved) break;
       }
+    });
+    // one vertical line for all waypoints of an edge wherever every row has room for it between the neighbours of the
+    // waypoint; preferably at the target, else at the source
+    for (let round = 0; round < 3; round++) lay.chains.forEach(({ chain }) => {
+      const ways = chain.slice(1, -1);
+      if (!ways.length) return;
+      let lo = -Infinity, hi = Infinity;
+      ways.forEach((it) => {
+        const row = lay.columns[it.c], k = row.indexOf(it);
+        if (k > 0) lo = Math.max(lo, row[k - 1].cx + sep(row[k - 1], it));
+        if (k < row.length - 1) hi = Math.min(hi, row[k + 1].cx - sep(it, row[k + 1]));
+      });
+      if (lo > hi) return;
+      const a = chain[0], b = chain[chain.length - 1];
+      const x = [b.cx, a.cx].find((v) => v >= lo && v <= hi) ?? Math.max(lo, Math.min(hi, b.cx));
+      ways.forEach((it) => { it.cx = x; });
     });
     const all = lay.columns.flat();
     const minX = Math.min(...all.map((it) => it.cx - wOf(it) / 2)), maxX = Math.max(...all.map((it) => it.cx + wOf(it) / 2));
@@ -1049,25 +1163,51 @@
     const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
     const mk = "fp-" + o.cls;
     el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
-    // edges over several rows (user, 3 November 2026: no needless swings): the bends of an edge lie on the straight
-    // line between its two boxes wherever no box of that row is in the way; then the edge is drawn straight
-    const boxesIn = (c) => all.filter((it) => it.kind === "knoten" && it.c === c);
-    lay.chains.forEach(({ chain }) => {
-      if (chain.length < 3) return;
-      const a = chain[0], b = chain[chain.length - 1];
-      const ya = yOf(a) + BH, yb = yOf(b);
-      chain.slice(1, -1).forEach((it) => {
-        const y = yOf(it) + BH / 2, x = a.cx + ((b.cx - a.cx) * (y - ya)) / (yb - ya || 1);
-        if (!boxesIn(it.c).some((q) => Math.abs(q.cx - x) < BW / 2 + 8)) it.cx = x;
-      });
+    // Edges with right angles (user, 3 November 2026), at most one horizontal piece above the first and one below the
+    // last waypoint. The edges of a box leave it at points of its lower side in the order of their directions (the one
+    // nearest below the box from its middle); they end at the middle of the upper side of their target. Every
+    // horizontal piece has its own height in the gap between two rows; only pieces into the same box share one.
+    const outOf = new Map();
+    lay.chains.forEach((ch) => { const a = ch.chain[0]; if (!outOf.has(a)) outOf.set(a, []); outOf.get(a).push(ch); });
+    outOf.forEach((list, a) => {
+      list.sort((p, q) => p.chain[1].cx - q.chain[1].cx);
+      const n = list.length, step = n > 1 ? Math.min(14, (BW - 24) / (n - 1)) : 0;
+      let j = 0;
+      list.forEach((ch, i) => { if (Math.abs(ch.chain[1].cx - a.cx) < Math.abs(list[j].chain[1].cx - a.cx)) j = i; });
+      // the points as a group inside the box: shifted, not cut off at its sides
+      const left = a.cx + (0 - j) * step, right = a.cx + (n - 1 - j) * step;
+      const d = Math.max(0, a.cx - BW / 2 + 10 - left) - Math.max(0, right - (a.cx + BW / 2 - 10));
+      list.forEach((ch, i) => { ch.port = a.cx + (i - j) * step + d; });
     });
-    lay.chains.forEach(({ edge, chain }) => {
-      const pts = chain.map((it, i) => it.kind === "knoten" ? [it.cx, yOf(it) + (i === 0 ? BH : 0)] : [it.cx, yOf(it) + BH / 2]);
-      let d = `M${pts[0][0]},${pts[0][1]}`;
-      // only right angles (user, 3 November 2026): down to the middle between two rows, across, down again
+    const yBottom = (it) => yOf(it) + BH;
+    const pieces = new Map(); // gap (row above) -> Map key -> { kind, x }
+    lay.chains.forEach((ch, ci) => {
+      const pts = ch.chain.map((it, i) => [i === 0 ? ch.port : it.cx, it]);
+      ch.pts = pts;
       for (let i = 1; i < pts.length; i++) {
-        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2, end = y1 - (i === pts.length - 1 ? 2 : 0);
-        d += Math.abs(x1 - x0) < 0.5 ? `V${end}` : `V${m}H${x1}V${end}`;
+        if (Math.abs(pts[i][0] - pts[i - 1][0]) < 0.5) continue;
+        const gap = pts[i - 1][1].c, last = i === pts.length - 1;
+        const k = last ? "t:" + pts[i][1].id : "e:" + ci + ":" + i;
+        if (!pieces.has(gap)) pieces.set(gap, new Map());
+        const g = pieces.get(gap);
+        if (!g.has(k)) g.set(k, { order: i === 1 ? 0 : last ? 2 : 1, x: Math.min(pts[i][0], pts[i - 1][0]) });
+        else g.get(k).x = Math.min(g.get(k).x, pts[i][0], pts[i - 1][0]);
+      }
+    });
+    const level = new Map(); // gap|key -> y
+    pieces.forEach((g, gap) => {
+      const list = [...g.entries()].sort((p, q) => p[1].order - q[1].order || p[1].x - q[1].x);
+      const top = M + offY + gap * ROWH + BH, bottom = M + offY + (gap + 1) * ROWH;
+      list.forEach(([k], i) => level.set(gap + "|" + k, top + ((i + 1) * (bottom - top)) / (list.length + 1)));
+    });
+    lay.chains.forEach((ch, ci) => {
+      const { edge, pts } = ch;
+      const yAt = (i) => (i === 0 ? yBottom(pts[0][1]) : i === pts.length - 1 ? yOf(pts[i][1]) - 2 : yOf(pts[i][1]) + BH / 2);
+      let d = `M${pts[0][0]},${yAt(0)}`;
+      for (let i = 1; i < pts.length; i++) {
+        if (Math.abs(pts[i][0] - pts[i - 1][0]) < 0.5) { d += `V${yAt(i)}`; continue; }
+        const last = i === pts.length - 1, k = last ? "t:" + pts[i][1].id : "e:" + ci + ":" + i;
+        d += `V${level.get(pts[i - 1][1].c + "|" + k)}H${pts[i][0]}V${yAt(i)}`;
       }
       el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
     });
@@ -1393,5 +1533,7 @@
     return rel > sec.w;
   }).map((c) => c.id);
   const edgeLength = () => layoutEdges.reduce((sum, e) => sum + Math.hypot(pos.get(e.from).x - pos.get(e.to).x, pos.get(e.from).y - pos.get(e.to).y), 0);
-  window.CONCEPT_GRAPH = { positions: pos, level, select, centerOn, outsideSectors, edgeLength, circleRadius: rOut, isSettled: () => true };
+  // for tests: the fully expanded card of a node (mode "back": proof or definition, "fwd": consequences)
+  const cardSvg = (x, mode) => layered(localIds(x, mode, Infinity), x, { ...CARD_BOX, mode, label: x });
+  window.CONCEPT_GRAPH = { positions: pos, level, select, centerOn, outsideSectors, edgeLength, circleRadius: rOut, isSettled: () => true, cardSvg, ids: () => concepts.filter((c) => !isPre(c.id)).map((c) => c.id) };
 })();
