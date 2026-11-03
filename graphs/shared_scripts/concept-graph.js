@@ -27,12 +27,29 @@
 (function () {
   "use strict";
   const CFG = window.CONCEPT_PAGE;
+  // Theorems: `premises` and `proof` are the standard proof (name in `proofName`), `alternativeProofs` further proofs
+  // ({ name, premises, idea, year, who }), as on the maps (user, 3 November 2026). The graph uses the standard proof.
   const asGraph = (d) => (!d || d.concepts ? d : { ...d, concepts: d.theorems.map((t) => ({ ...t, uses: t.premises || [] })) });
+  // Concepts likewise (user, 3 November 2026): `uses` is the standard definition (name in `definitionName`),
+  // `alternativeDefinitions` further equivalent definitions ({ name, uses, formula, text }).
+  const proofsOf = (c) => {
+    if ((c.alternativeDefinitions || []).length || c.definitionName)
+      return [{ name: c.definitionName || "Standard definition", premises: c.uses || [], idea: "" }]
+        .concat((c.alternativeDefinitions || []).map((d) => ({ name: d.name, premises: d.uses || [], idea: d.text || "", formula: d.formula })));
+    return c.premises || c.proof || (c.alternativeProofs || []).length
+      ? [{ name: c.proofName || "Standard proof", premises: c.premises || [], idea: c.proof || "", year: c.proofYear, who: c.proofWho }].concat(c.alternativeProofs || [])
+      : [];
+  };
   const OWN = asGraph(window[CFG.data]);
+  // names for SVG text: <sup>/<sub> as Unicode superscripts and subscripts where they exist, other tags removed
+  const SUP = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "+": "⁺", "-": "⁻", "−": "⁻", n: "ⁿ", i: "ⁱ", d: "ᵈ", k: "ᵏ", m: "ᵐ", p: "ᵖ", e: "ᵉ", r: "ʳ", x: "ˣ", "*": "*" };
+  const SUB = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉", "+": "₊", "-": "₋", "−": "₋", n: "ₙ", k: "ₖ", p: "ₚ", i: "ᵢ", m: "ₘ", e: "ₑ", x: "ₓ" };
+  const conv = (t, map, mark) => ([...t].every((ch) => map[ch]) ? [...t].map((ch) => map[ch]).join("") : mark + t);
+  const plainName = (n) => n.replace(/<sup>(.*?)<\/sup>/g, (m, t) => conv(t, SUP, "^")).replace(/<sub>(.*?)<\/sub>/g, (m, t) => conv(t, SUB, "_")).replace(/<[^>]+>/g, "");
   const WORDS = Object.assign({
     one: "concept", many: "concepts", usingIt: "concepts using it",
     usesHead: "Defined with", usedByHead: "Used in the definitions of", edges: "definitional dependencies",
-    arrow: "A → B: B is defined with A", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
+    arrow: "A → B: B is defined with A", proofsHead: "Definitions", proofWord: "Definition", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
     levelHint: "Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.",
   }, CFG.words || {});
   const { el } = window.GL;
@@ -68,7 +85,7 @@
   const D = { ...OWN, concepts: OWN.concepts.slice() };
   const KIND_LABEL = D.kinds;
   const refs = new Set();
-  OWN.concepts.forEach((c) => (c.uses || []).concat(c.isA || []).forEach((t) => { if (t.includes(":")) refs.add(t); }));
+  OWN.concepts.forEach((c) => (c.uses || []).concat(c.isA || [], ...(c.alternativeProofs || []).map((b) => b.premises || []), ...(c.alternativeDefinitions || []).map((d) => d.uses || [])).forEach((t) => { if (t.includes(":")) refs.add(t); }));
   // a concept of another folder by its prefixed id (null if that folder's data are not loaded)
   const lookup = (ref) => {
     const [prefix, id] = ref.split(":");
@@ -112,8 +129,19 @@
   const byId = new Map(concepts.map((c) => [c.id, c]));
   const usesEdges = [];
   const isaEdges = [];
+  // The whole graph shows "is used in some proof" (user, 3 November 2026): edges of all proofs; edges only of
+  // alternative proofs are marked `alt` (drawn lighter). For concepts there is only one "proof", the definition.
+  const premiseSets = (c) => {
+    const P = proofsOf(c);
+    return (P.length ? P.map((b) => b.premises || []) : [c.uses || []]).map((S) => S.filter((t) => byId.has(t)));
+  };
+  const allUses = new Map();
   concepts.forEach((c) => {
-    (c.uses || []).forEach((t) => byId.has(t) && usesEdges.push({ from: t, to: c.id, kind: "uses" }));
+    const all = [...new Set(premiseSets(c).flat())];
+    allUses.set(c.id, all);
+    all.forEach((t) => usesEdges.push({ from: t, to: c.id, kind: "uses", alt: !(c.uses || []).includes(t),
+      // essential: every proof of the target uses it
+      essential: premiseSets(c).every((S) => S.includes(t)) }));
     (c.isA || []).forEach((t) => byId.has(t) && isaEdges.push({ from: c.id, to: t, kind: "isa" }));
   });
   const edges = usesEdges.concat(isaEdges);
@@ -126,7 +154,7 @@
     while (stack.length) for (const x of next(stack.pop())) if (!seen.has(x)) { seen.add(x); stack.push(x); }
     return seen;
   };
-  const ancestors = (id) => closure(id, (x) => (byId.get(x).uses || []).filter((t) => byId.has(t)));
+  const ancestors = (id) => closure(id, (x) => allUses.get(x));
   const descendants = (id) => closure(id, (x) => usedBy.get(x));
 
   // Level of a concept (definitional depth within the area; user, 2 November 2026): concepts from outside the area
@@ -134,14 +162,22 @@
   // concept has level 1 if its definition uses no other own concept, otherwise 1 + the highest level among the own
   // concepts its definition uses.
   const isPre = (id) => byId.get(id).area === FOREIGN;
+  // With several proofs the level is the depth of the shortest proof (user, 3 November 2026): the smallest level any
+  // proof gives, 1 + the highest level among the own theorems it uses. Well defined also where proofs go round in a
+  // circle (axiom of choice, Zorn, well-ordering): computed outward from the nodes without own premises.
   const level = new Map();
-  const levelOf = (id) => {
-    if (!level.has(id)) {
-      level.set(id, isPre(id) ? 0 : 1 + Math.max(0, ...(byId.get(id).uses || []).filter((t) => byId.has(t) && !isPre(t)).map(levelOf)));
-    }
-    return level.get(id);
-  };
-  concepts.forEach((c) => levelOf(c.id));
+  concepts.forEach((c) => level.set(c.id, isPre(c.id) ? 0 : Infinity));
+  for (let changed = true; changed;) {
+    changed = false;
+    concepts.forEach((c) => {
+      if (isPre(c.id)) return;
+      const v = Math.min(...premiseSets(c).map((S) => 1 + Math.max(0, ...S.filter((t) => !isPre(t)).map((t) => level.get(t)))));
+      if (v < level.get(c.id)) { level.set(c.id, v); changed = true; }
+    });
+  }
+  const finite = [...level.values()].filter(Number.isFinite);
+  concepts.forEach((c) => { if (!Number.isFinite(level.get(c.id))) level.set(c.id, Math.max(1, ...finite) + 1); });
+  const levelOf = (id) => level.get(id);
 
   // ------------------------------------------------------------ edges that are hidden by default
   // transitive: A → B where B also uses a concept that already depends on A (indirect dependency).
@@ -150,8 +186,8 @@
   const HUBS = {};
   (CFG.hubs || []).forEach((h) => { HUBS[h] = true; });
   usesEdges.forEach((e) => {
-    const uses = (byId.get(e.to).uses || []).filter((u) => byId.has(u));
-    e.transitive = uses.some((u) => u !== e.from && ancestors(u).has(e.from));
+    const uses = allUses.get(e.to);
+    e.transitive = uses.some((u) => u !== e.from && ancestors(u).has(e.from) && !ancestors(e.from).has(u));
     e.pre = isPre(e.from) && !isPre(e.to); // edges among the prerequisites stay visible
     e.hub = !e.pre && e.from in HUBS;
   });
@@ -429,7 +465,7 @@
   const gEdges = el("g", {}, svg), gNodes = el("g", {}, svg), gStubs = el("g", {}, svg);
 
   edges.forEach((e) => {
-    e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
+    e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : "") + (e.alt ? " alternativ" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
     if (OUTSIDE && e.pre && e.kind === "uses") {
       // arrow from outside: a small point in the colour of the origin next to the target, with the name of the result
       const c = byId.get(e.from);
@@ -437,7 +473,7 @@
       e.stub.style.setProperty("--herkunft", colorOf(c));
       e.stubDot = el("circle", { r: 5 }, e.stub);
       e.stubText = el("text", {}, e.stub);
-      e.stubText.textContent = c.name;
+      e.stubText.textContent = plainName(c.name);
       el("title", {}, e.stub).textContent = c.name + " — " + originName(originOf(c));
       // a click keeps the point where it is and shows from there the arrows to all theorems using the result
       const stubClick = (ev) => { ev.preventDefault(); ev.stopPropagation(); anchor = { id: e.from, x: e.sx, y: e.sy, ux: e.ux, uy: e.uy }; step(e.from, "fwd"); };
@@ -467,7 +503,7 @@
       o.line = el("line", { class: "kante aus-linie", "marker-end": "url(#pfeil)" }, o.g);
       o.dot = el("circle", { r: 5 }, o.g);
       o.text = el("text", {}, o.g);
-      o.text.textContent = t.name;
+      o.text.textContent = plainName(t.name);
       el("title", {}, o.g).textContent = t.name + " — " + src.title.replace(/^the /, "");
       o.g.addEventListener("click", (ev) => { ev.stopPropagation(); location.href = o.page; });
       outsOf.get(id).push(o);
@@ -487,18 +523,29 @@
   };
 
   const nodeEls = new Map();
+  let hoverTimer = null;
+  const tip = document.createElement("div");
+  tip.className = "knoten-tip";
+  tip.hidden = true;
+  document.body.appendChild(tip);
+  const moveTip = (ev) => { tip.style.left = ev.clientX + 14 + "px"; tip.style.top = ev.clientY + 14 + "px"; };
+  const showTip = (text, ev) => { tip.textContent = text; tip.hidden = false; moveTip(ev); };
+  const hideTip = () => { tip.hidden = true; };
   let nodeDrag = null; // { p, moved }
   concepts.forEach((c) => {
     const p = pos.get(c.id);
-    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" + (OUTSIDE ? " aussen" : "") : "") }, gNodes);
+    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" + (OUTSIDE ? " aussen" : "") : ""), "data-id": c.id }, gNodes);
     // prerequisites: light fill with a thick border in the colour of their origin, unlike the filled own concepts
     shape(g, c.kind, p.r, c.area === FOREIGN ? "#fbfaf6" : colorOf(c));
     if (c.area === FOREIGN) g.style.setProperty("--herkunft", colorOf(c));
     const t = el("text", { x: 0, y: p.r + 13, "text-anchor": "middle" }, g);
-    t.textContent = c.name;
-    el("title", {}, g).textContent = c.name + " — " + (KIND_LABEL[c.kind] || c.kind) + ", " + (c.msc5 || c.msc.join(", "));
-    g.addEventListener("mouseenter", () => { if (!nodeDrag) hover(c.id); });
-    g.addEventListener("mouseleave", () => { if (!nodeDrag) hover(null); });
+    t.textContent = plainName(c.name);
+    // tooltip of its own (appears at once), not the slow one of the browser (user, 3 November 2026)
+    g.dataset.tip = plainName(c.name) + " — " + (KIND_LABEL[c.kind] || c.kind) + ", " + (c.msc5 || c.msc.join(", "));
+    // pointing: the node is lit only after half a second; leaving it ends that at once (user, 3 November 2026)
+    g.addEventListener("mouseenter", (ev) => { clearTimeout(hoverTimer); if (nodeDrag) return; showTip(g.dataset.tip, ev); hoverTimer = setTimeout(() => hover(c.id), 500); });
+    g.addEventListener("mousemove", (ev) => moveTip(ev));
+    g.addEventListener("mouseleave", () => { clearTimeout(hoverTimer); hideTip(); if (!nodeDrag) hover(null); });
     g.addEventListener("pointerdown", (ev) => {
       if (ev.button !== 0) return;
       ev.stopPropagation();
@@ -620,13 +667,26 @@
   let selected = null;
   function clearMarks() {
     svg.classList.remove("fokus");
+    if (typeof hoverLayer !== "undefined" && hoverLayer) hoverLayer.innerHTML = "";
+    svg.querySelectorAll(".knoten.zeiger").forEach((g) => { g.classList.remove("zeiger"); const t = g.querySelector("text"); t.style.fontSize = ""; t.removeAttribute("dominant-baseline"); if (t.dataset.y) t.setAttribute("y", t.dataset.y); });
     svg.querySelectorAll(".hell, .vorfahr, .nachfahr, .gewaehlt").forEach((x) => x.classList.remove("hell", "vorfahr", "nachfahr", "gewaehlt"));
     usesEdges.forEach((e) => e.line.setAttribute("marker-end", "url(#pfeil)"));
   }
-  // Clicks as on the maps (user, 3 November 2026): a click shows the direct prerequisites, every further click on the
-  // same point one step more (indirect prerequisites), until all are shown; the next click ends the selection. A right
-  // click does the same for the consequences. Prerequisites brown, consequences blue.
-  const backOf = (x) => (byId.get(x).uses || []).concat(byId.get(x).isA || []).filter((t) => byId.has(t));
+  // Selection (user, 3 November 2026): the whole graph is the view without a selection. A click lays the card of the
+  // proof over the dimmed graph: the theorem at the bottom, above it the theorems its proof uses, one proof chosen at
+  // every node (standard proof unless switched). A right click lays the card of the consequences: the theorem at the
+  // top, below it the theorems that use it in some proof (solid: every proof uses it; dashed: only some). Further
+  // clicks of the same kind add one step; the card stays when all is shown and closes with × or a click outside.
+  // proof shown for a theorem (index into proofsOf; default 0, the standard proof)
+  const proofChoice = new Map();
+  const usesOf = (x) => {
+    const c = byId.get(x), k = proofChoice.get(x) || 0;
+    return (k ? proofsOf(c)[k].premises || [] : c.uses || []).filter((t) => byId.has(t));
+  };
+  const backOf = (x) => usesOf(x).concat((byId.get(x).isA || []).filter((t) => byId.has(t)));
+  // In the proof card and the side view, foundations (`foundation: true`, e.g. Bézout's identity) are shown but not
+  // expanded further (user, 3 November 2026)
+  const backFrom = (root) => (x) => (x !== root && byId.get(x).foundation ? [] : backOf(x));
   const fwdOf = (x) => usedBy.get(x).concat(isaEdges.filter((e) => e.to === x).map((e) => e.from));
   const within = (id, next, k) => {
     const seen = new Set();
@@ -638,42 +698,59 @@
     }
     return seen;
   };
-  const maxDepth = (id, dir) => { let k = 0, n = 0; for (;;) { const m = within(id, dir === "fwd" ? fwdOf : backOf, k + 1).size; if (m === n) return k; n = m; k++; } };
-  let selDir = "back", selDepth = 1;
-  function step(id, dir) {
-    if (OUTSIDE && isPre(id)) dir = "fwd"; // a result of another area has only consequences here
-    if (id === selected && dir === selDir) {
-      if (selDepth >= maxDepth(id, dir)) { select(null); return; }
-      selDepth++;
-    } else { selDir = dir; selDepth = Math.min(1, maxDepth(id, dir)); }
-    select(id);
+  const maxDepth = (id, dir) => { let k = 0, n = 0; for (;;) { const m = within(id, dir === "fwd" ? fwdOf : backFrom(id), k + 1).size; if (m === n) return k; n = m; k++; } };
+  // Each box of a card shows and hides its own prerequisites (proof card) or consequences (card of the consequences)
+  // with a click; nothing jumps to another card (user, 3 November 2026). `expanded`: boxes whose neighbours are shown.
+  let cardMode = "back", cardDepth = 1, expanded = new Set(), cardIds = null, cardShown = null;
+  const cardNext = (root, x) => (cardMode === "fwd" ? fwdOf(x) : backFrom(root)(x)).filter((y) => !cardIds || cardIds.has(y));
+  function computeShown(root) {
+    const shown = new Set([root]), queue = [root];
+    while (queue.length) {
+      const x = queue.shift();
+      if (!expanded.has(x)) continue;
+      cardNext(root, x).forEach((y) => { if (!shown.has(y)) { shown.add(y); queue.push(y); } });
+    }
+    return shown;
   }
-  function mark(id, dir, depth) {
+  function step(id, dir) {
+    if (id === selected && dir === cardMode) toggle(id);
+    else { cardMode = dir; expanded = new Set([id]); proofChoice.clear(); cardFor = null; select(id); }
+  }
+  function toggle(x) {
+    if (expanded.has(x)) expanded.delete(x); else expanded.add(x);
+    showCard(selected);
+    mark(selected);
+  }
+  function mark(id) {
     clearMarks();
     if (!id) return;
     svg.classList.add("fokus");
-    const out = dir === "fwd";
-    const up = out ? new Set() : within(id, backOf, depth);
-    const down = !out ? new Set() : within(id, fwdOf, depth);
-    const deep = true;
+    const back = cardMode === "back";
+    const set = new Set(cardShown || []);
+    set.delete(id);
     nodeEls.get(id).classList.add("hell", "gewaehlt");
-    up.forEach((x) => nodeEls.get(x).classList.add("hell", "vorfahr"));
-    down.forEach((x) => nodeEls.get(x).classList.add("hell", "nachfahr"));
+    set.forEach((x) => nodeEls.get(x).classList.add("hell", back ? "vorfahr" : "nachfahr"));
+    const inSet = (x) => x === id || set.has(x);
     edges.forEach((e) => {
-      const isUp = (e.to === id || up.has(e.to)) && up.has(e.from) && (deep || e.to === id || e.from === id);
-      const isDown = (e.from === id || down.has(e.from)) && down.has(e.to) && (deep || e.from === id || e.to === id);
-      const direct = e.from === id || e.to === id;
-      // indirect dependencies stay hidden also for a selected concept (user, 3 November 2026); switch "indirect dependencies"
       if (e.kind === "uses" && e.transitive) return;
-      if (e.kind === "uses" && isUp) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); }
-      else if (e.kind === "uses" && isDown) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); }
-      else if (e.kind === "isa" && (out ? e.to === id : e.from === id)) e.line.classList.add("hell");
+      if (!inSet(e.from) || !inSet(e.to)) return;
+      if (e.kind === "uses" && back && usesOf(e.to).includes(e.from)) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); }
+      else if (e.kind === "uses" && !back) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); }
+      else if (e.kind === "isa") e.line.classList.add("hell");
     });
     edges.forEach((e) => { if (e.stub) ["hell", "vorfahr", "nachfahr"].forEach((k) => e.stub.classList.toggle(k, e.line.classList.contains(k))); });
-    (outsOf.get(id) || []).forEach((o) => o.g.classList.add("hell"));
+    if (!back) (outsOf.get(id) || []).forEach((o) => o.g.classList.add("hell"));
   }
-  function hover(id) { if (id) mark(id, "back", 1); else mark(selected, selDir, selDepth); }
-
+  // pointing at a node (user, 3 November 2026): after half a second only the node itself is lit, all else dimmed; its
+  // name and kind in a tooltip that appears at once
+  var hoverLayer = null; // kept for clearMarks
+  function hover(id) {
+    if (selected) return;
+    clearMarks();
+    if (!id) return;
+    svg.classList.add("fokus");
+    nodeEls.get(id).classList.add("hell", "zeiger");
+  }
   const chip = (id) => `<span class="chip" data-id="${id}">${byId.get(id).name}</span>`;
   function select(id) {
     selected = id && byId.has(id) ? id : null;
@@ -681,30 +758,40 @@
     stubSelected = selected;
     if (OUTSIDE) render();
     if (found && found !== selected) markFound(null);
-    mark(selected, selDir, selDepth);
+    // a card opened otherwise than by a click (address #id, search, panel): the node's first step is shown
+    if (selected && cardFor !== selected && !expanded.has(selected)) { expanded = new Set([selected]); if (!proofChoice.has(selected)) proofChoice.clear(); }
+    showCard(selected);
+    mark(selected);
     applyLevels();
     if (location.hash.slice(1) !== (selected || "")) history.replaceState(null, "", selected ? "#" + selected : location.pathname + location.search);
     if (!selected) { panel.innerHTML = overview(); return; }
     const c = byId.get(selected);
     const generalisations = c.isA || [];
     const special = isaEdges.filter((e) => e.to === c.id).map((e) => e.from);
-    const md = maxDepth(c.id, selDir);
-    const stepNote = `<p class="meta schritt">${selDir === "fwd" ? "Consequences" : "Prerequisites"}: ${md ? `step ${selDepth} of ${md}; click again for ${selDepth < md ? "the next step" : "no selection"}` : "none in this graph"}. ${selDir === "fwd" ? "Left click: prerequisites." : "Right click: consequences."}</p>`;
+    const stepNote = ""; // no step line (user, 3 November 2026)
     panel.innerHTML = `<h2>${c.name}</h2>${stepNote}
       <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + CFG.foreignLabel + ")" : D.areas[c.area]}</div>
       ${c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
       ${c.formula && window.katex ? `<div class="formel">${tex(c.formula)}</div>` : ""}
       <p>${c.text || ""}</p>
       ${c.who || c.year ? `<p class="meta">${[c.who, c.year < 0 ? -c.year + " BC" : c.year].filter(Boolean).join(", ")}</p>` : ""}
-      ${c.proof ? `<h3>Proof idea</h3><p>${c.proof}</p>` : ""}
+      ${c.proof && proofsOf(c).length <= 1 ? `<h3>Proof idea</h3><p>${c.proof}</p>` : ""}
       ${statementConcepts(c)}
       ${focusView(c.id)}
-      <h3>${WORDS.usesHead}</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>
+      ${proofList(c)}
       <h3>${WORDS.usedByHead}</h3><p>${usedBy.get(c.id).length ? usedBy.get(c.id).map(chip).join("") : "—"}</p>
       ${(outsOf.get(c.id) || []).length ? `<h3>Used in other areas</h3><p>${outsOf.get(c.id).map((o) => `<a class="chip" href="${o.page}" title="${o.title}">${o.t.name}</a>`).join("")}</p>` : ""}
       ${generalisations.length ? `<h3>Is a special case of</h3><p>${generalisations.map(chip).join("")}</p>` : ""}
       ${special.length ? `<h3>Special cases</h3><p>${special.map(chip).join("")}</p>` : ""}
       <p class="meta">Depends on ${ancestors(c.id).size} ${WORDS.many}; ${descendants(c.id).size} ${WORDS.many} depend on it.</p>`;
+  }
+  function proofList(c) {
+    const P = proofsOf(c);
+    if (P.length <= 1) return `<h3>${WORDS.usesHead}</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>`;
+    const k = proofChoice.get(c.id) || 0;
+    return `<h3>${WORDS.proofsHead} (${P.length})</h3>` + P.map((b, i) => `<div class="beweis${i === k ? " gezeigt" : ""}" data-proof="${i}">
+      <div class="beweis-name">${b.name}${b.who || b.year ? ` <span class="meta">${[b.who, b.year].filter(Boolean).join(", ")}</span>` : ""}${i === k ? ' <span class="meta">(shown)</span>' : ""}</div>
+      ${b.formula && window.katex ? `<div class="formel">${tex(b.formula)}</div>` : ""}${b.idea ? `<p>${b.idea}</p>` : ""}<p>${(b.premises || []).filter((t) => byId.has(t)).map(chip).join("") || "—"}</p></div>`).join("");
   }
   // concepts occurring in the statement of a theorem, as links into the concept graphs (field `concepts`)
   function statementConcepts(c) {
@@ -717,37 +804,64 @@
     }).join("");
     return links ? `<h3>Concepts in the statement</h3><p>${links}</p>` : "";
   }
-  panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-id]"); if (t) { selected = null; step(t.dataset.id, "back"); } });
+  panel.addEventListener("click", (ev) => {
+    const t = ev.target.closest("[data-id]");
+    if (t) { selected = null; step(t.dataset.id, "back"); return; }
+    const b = ev.target.closest("[data-proof]");
+    if (b && selected) showProof(selected, Number(b.dataset.proof));
+  });
+  // another proof of the selected theorem: the card is drawn anew, the steps start again
+  function showProof(id, k) {
+    proofChoice.set(id, k);
+    if (selected !== id || cardMode !== "back") { cardMode = "back"; expanded = new Set([id]); }
+    cardFor = null;
+    select(id);
+  }
 
-  // ------------------------------------------------------------ side view: the definitions a concept builds on
-  // Small layered graph in the panel: the selected concept and all its predecessors along `uses`, one row per depth
-  // within these concepts (top: concepts without predecessors, bottom: the concept); the depth counts prerequisites
-  // too, unlike the level. Indirect dependencies are left out; edges from prerequisites are drawn. The order within
-  // the rows comes from GL.layers (barycentre method, columns of GL.layers are the rows here); the horizontal
-  // positions are computed here (see below).
-  // Only predecessors (user, 2 November 2026). A click on a box selects that concept.
-  function focusView(id) {
-    // Only what belongs to the definition (user, 3 November 2026): the concepts of the area it builds on, and of the
-    // prerequisites only those the definition itself names, not those reached through other concepts (prime ideal
-    // through spectrum for points).
-    const own = (byId.get(id).uses || []).filter((t) => byId.has(t));
-    const ids = [...ancestors(id)].filter((x) => !isPre(x) || own.includes(x)).concat([id]);
-    if (ids.length < 2) return "";
-    const set = new Set(ids);
-    const fEdges = usesEdges.filter((e) => set.has(e.from) && set.has(e.to) && !e.transitive);
-    const depth = new Map();
-    const depthOf = (x) => {
-      if (!depth.has(x)) depth.set(x, Math.max(-1, ...fEdges.filter((e) => e.to === x).map((e) => depthOf(e.from))) + 1);
-      return depth.get(x);
-    };
-    ids.forEach(depthOf);
-    const rows = [...new Set(depth.values())].sort((a, b) => a - b);
-    const rowOf = (x) => rows.indexOf(depth.get(x));
-    const BW = 112, BH = 34, GAP = 10, ROWH = 64, M = 6;
-    const lay = GL.layers(ids, rowOf, fEdges, { BH: BW, GAP_N: GAP, GAP_W: 6, MARGIN: M, HEAD: 0, ROUNDS: 40 });
-    // Horizontal positions: GL.layers gives only the order within each row. Every box is placed below the mean of
-    // its predecessors (waypoints of long edges straight below theirs), then boxes in a row that overlap are pushed
-    // apart symmetrically, keeping the order. Rows without predecessors are centred.
+
+  // ------------------------------------------------------------ layered drawings: the card and the side view
+  // One row per depth within the shown nodes (top: nodes without predecessors among them), so that every arrow points
+  // down; the selected node lies between its prerequisites (above) and its consequences (below). Indirect dependencies
+  // are left out. The order within the rows comes from GL.layers (barycentre method, columns of GL.layers are the rows
+  // here); every box is placed below the mean of its predecessors, then overlapping boxes in a row are pushed apart.
+  // Nodes of other areas appear when a shown node of this area uses them directly; chains among them are not followed.
+  // nodes of a card: the selected node and its prerequisites (proof card) or consequences (card of the consequences);
+  // nodes of other areas only where a shown node of this area uses them directly
+  const localIds = (id, mode, depth) => {
+    if (mode === "fwd") return [id, ...within(id, fwdOf, depth)];
+    const up = [...within(id, backFrom(id), depth)];
+    const keep = (x) => !isPre(x) || [id, ...up].some((y) => !isPre(y) && backOf(y).includes(x));
+    return [...up.filter(keep), id];
+  };
+  function layered(ids, id, o) {
+    const set = new Set(ids), back = o.mode !== "fwd";
+    // edges: proof card along the chosen proofs, card of the consequences along all proofs (dashed unless essential);
+    // "is a" like a use (general above special)
+    const prem = (x) => (back ? (x !== id && byId.get(x).foundation ? [] : usesOf(x)) : allUses.get(x)).filter((a) => set.has(a));
+    const anc = (x) => closure(x, (y) => (back ? usesOf(y) : allUses.get(y)));
+    let fEdges = ids.flatMap((x) => {
+      const P = prem(x);
+      return P.filter((a) => !P.some((b) => b !== a && anc(b).has(a) && !anc(a).has(b)))
+        .map((a) => ({ from: a, to: x, kind: "uses", dashed: !back && !usesEdges.some((e) => e.from === a && e.to === x && e.essential) }));
+    }).concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to)).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
+    // rows: longest path from the selected node (cycles of alternative proofs broken by leaving out back edges)
+    const out = new Map(ids.map((x) => [x, []]));
+    fEdges.forEach((e) => (back ? out.get(e.to).push(e) : out.get(e.from).push(e)));
+    const state = new Map(), keepE = new Set();
+    const dfs = (x) => { state.set(x, 1); out.get(x).forEach((e) => { const y = back ? e.from : e.to; if (state.get(y) === 1) return; keepE.add(e); if (!state.has(y)) dfs(y); }); state.set(x, 2); };
+    dfs(id);
+    fEdges = fEdges.filter((e) => keepE.has(e));
+    const dist = new Map([[id, 0]]);
+    for (let changed = true, round = 0; changed && round < ids.length + 2; round++) {
+      changed = false;
+      fEdges.forEach((e) => { const [a, b] = back ? [e.to, e.from] : [e.from, e.to]; if (dist.has(a) && (dist.get(b) || -1) < dist.get(a) + 1) { dist.set(b, dist.get(a) + 1); changed = true; } });
+    }
+    ids.forEach((x) => { if (!dist.has(x)) dist.set(x, 1); });
+    const maxD = Math.max(...dist.values());
+    const rowOf = (x) => (back ? maxD - dist.get(x) : dist.get(x));
+    const rows = [...new Set(ids.map(rowOf))].sort((a, b) => a - b);
+    const { BW, BH, GAP, ROWH, M, chars, font } = o;
+    const lay = GL.layers(ids, (x) => rows.indexOf(rowOf(x)), fEdges, { BH: BW, GAP_N: GAP, GAP_W: 6, MARGIN: M, HEAD: 0, ROUNDS: 40 });
     const wOf = (it) => (it.kind === "knoten" ? BW : 0);
     const sep = (a, b) => (wOf(a) + wOf(b)) / 2 + (a.kind === "knoten" && b.kind === "knoten" ? GAP : 10);
     lay.columns.forEach((row) => {
@@ -766,33 +880,117 @@
     const all = lay.columns.flat();
     const minX = Math.min(...all.map((it) => it.cx - wOf(it) / 2)), maxX = Math.max(...all.map((it) => it.cx + wOf(it) / 2));
     all.forEach((it) => { it.cx += M - minX; });
-    const W = maxX - minX + 2 * M, H = rows.length * ROWH - (ROWH - BH) + 2 * M;
+    let W = maxX - minX + 2 * M;
+    if (o.centre) { const cx = lay.item[id].cx, half = Math.max(cx, W - cx); all.forEach((it) => { it.cx += half - cx; }); W = 2 * half; }
+    const H = rows.length * ROWH - (ROWH - BH) + 2 * M;
     const yOf = (it) => M + it.c * ROWH;
-    const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: "max-width:100%;height:auto", class: "fokus-ansicht", role: "img", "aria-label": WORDS.buildsOn });
-    el("defs", {}, s).innerHTML = `<marker id="fpfeil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
-    lay.chains.forEach(({ chain }) => {
-      const pts = chain.map((it, i) => it.kind === "knoten"
-        ? [it.cx, yOf(it) + (i === 0 ? BH : 0)]
-        : [it.cx, yOf(it) + BH / 2]);
+    const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
+    const mk = "fp-" + o.cls;
+    el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
+    lay.chains.forEach(({ edge, chain }) => {
+      const pts = chain.map((it, i) => it.kind === "knoten" ? [it.cx, yOf(it) + (i === 0 ? BH : 0)] : [it.cx, yOf(it) + BH / 2]);
       let d = `M${pts[0][0]},${pts[0][1]}`;
       for (let i = 1; i < pts.length; i++) {
         const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2;
         d += `C${x0},${m} ${x1},${m} ${x1},${y1 - (i === pts.length - 1 ? 2 : 0)}`;
       }
-      el("path", { d, class: "fokus-kante", "marker-end": "url(#fpfeil)" }, s);
+      el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to }, s);
     });
     ids.forEach((x) => {
       const it = lay.item[x], c = byId.get(x);
-      const g = el("g", { class: "fokus-knoten" + (x === id ? " ziel" : ""), "data-id": x, transform: `translate(${it.cx - BW / 2},${yOf(it)})` }, s);
+      const g = el("g", { class: "fokus-knoten" + (x === id ? " ziel" : back ? " oben" : " unten") + (back && x !== id && c.foundation ? " grundlage" : ""), "data-id": x, transform: `translate(${it.cx - BW / 2},${yOf(it)})` }, s);
       el("rect", c.area === FOREIGN ? { width: BW, height: BH, rx: 4, style: `fill:#fbfaf6;fill-opacity:1;stroke:${colorOf(c)};stroke-width:2.6` } : { width: BW, height: BH, rx: 4, fill: colorOf(c) }, g);
-      const lines = GL.textLines(c.name, 16, 2);
+      const lines = GL.textLines(plainName(c.name), chars, 2);
       lines.forEach((t, i) => {
-        el("text", { x: BW / 2, y: BH / 2 + (i - (lines.length - 1) / 2) * 12 + 4, "text-anchor": "middle" }, g).textContent = t;
+        el("text", { x: BW / 2, y: BH / 2 + (i - (lines.length - 1) / 2) * (font + 2) + font / 3, "text-anchor": "middle", style: `font-size:${font}px` }, g).textContent = t;
       });
-      el("title", {}, g).textContent = c.name + " — level " + level.get(x);
+      // proof card: a theorem with several proofs gets a small switch "1/3" (user, 3 November 2026)
+      const P = proofsOf(c);
+      if (back && o.switches && P.length > 1 && x !== id && !c.foundation) {
+        const k = proofChoice.get(x) || 0;
+        const b = el("g", { class: "beweis-wahl", "data-proof-of": x, transform: `translate(${BW - 30},${BH - 11})` }, g);
+        el("rect", { width: 28, height: 13, rx: 3 }, b);
+        el("text", { x: 14, y: 10, "text-anchor": "middle" }, b).textContent = `${k + 1}/${P.length} ›`;
+        el("title", {}, b).textContent = `${WORDS.proofWord} ${k + 1} of ${P.length}: ${P[k].name}. Click for the next one.`;
+      }
+      el("title", {}, g).textContent = plainName(c.name) + (c.area === FOREIGN ? " — " + originName(originOf(c)) : "");
     });
-    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + s.outerHTML;
+    return s;
   }
+  // side view in the panel: all prerequisites, fully expanded (user, 3 November 2026: looks like the card)
+  function focusView(id) {
+    const ids = localIds(id, "back", Infinity);
+    if (ids.length < 2) return "";
+    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + layered(ids, id, { mode: "back", BW: 112, BH: 34, GAP: 10, ROWH: 64, M: 6, chars: 16, font: 10, fit: true, cls: "seite", label: WORDS.buildsOn }).outerHTML;
+  }
+  const stepText = (id) => {
+    const m = maxDepth(id, cardMode);
+    if (cardMode === "fwd") return (m ? `Consequences (used in some proof; dashed: not in every proof): step ${cardDepth} of ${m}` : "No consequences in this graph") + ". Right click: one step more; click: the proof; × or a click outside closes the card.";
+    return (m ? `Proof: step ${cardDepth} of ${m}` : "No prerequisites in this graph") + ". Click: one step more; right click: the consequences; × or a click outside closes the card.";
+  };
+  // the card over the dimmed graph
+  const card = document.createElement("div");
+  card.className = "karte";
+  card.hidden = true;
+  svg.parentNode.appendChild(card);
+  // The card opens at once in the size of the fully expanded neighbourhood (all prerequisites above, all consequences
+  // below) with the selected node in the horizontal middle; it stays where it is. Only one step in each direction is
+  // shown at first; clicks and right clicks show further boxes at their fixed places (user, 3 November 2026).
+  let cardFor = null;
+  function showCard(id) {
+    const box = svg.parentNode;
+    // closing a card, however, resets it completely (user, 3 November 2026): opened again it starts from scratch
+    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); return; }
+    const c = byId.get(id);
+    if (cardFor !== id) {
+      cardFor = id;
+      const P = proofsOf(c), pk = proofChoice.get(id) || 0;
+      const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${WORDS.proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button></div>` : "";
+      card.innerHTML = `<div class="karte-kopf"><b>${c.name}</b> <button class="karte-zu" aria-label="Close">×</button>${switcher}</div>`;
+      card.querySelectorAll("[data-step]").forEach((bt) => bt.addEventListener("click", (ev) => { ev.stopPropagation(); showProof(id, (pk + Number(bt.dataset.step) + P.length) % P.length); }));
+      const body = document.createElement("div");
+      body.className = "karte-inhalt";
+      // a proof (or definition) that uses nothing of this graph: say so instead of an empty card
+      if (cardMode === "back" && P.length && !usesOf(id).length) {
+        const note = document.createElement("div");
+        note.className = "karte-hinweis";
+        note.innerHTML = `This ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one} of this graph.` + (P[pk].idea ? ` <span>${P[pk].idea}</span>` : "");
+        card.appendChild(note);
+      }
+      cardIds = new Set(localIds(id, cardMode, Infinity));
+      body.appendChild(layered([...cardIds], id, { mode: cardMode, switches: true, BW: 150, BH: 42, GAP: 14, ROWH: 78, M: 10, chars: 22, font: 12, cls: "karte-bild", label: c.name, centre: true }));
+      card.appendChild(body);
+      card.hidden = false;
+      box.classList.add("mit-karte");
+      card.querySelector(".karte-zu").addEventListener("click", (ev) => { ev.stopPropagation(); select(null); });
+      // the card as large as the drawing needs (at most the picture), over the node; scrolled so that the node is visible
+      card.style.left = "10px"; card.style.top = "10px";
+      const r = box.getBoundingClientRect(), n = nodeEls.get(id).getBoundingClientRect();
+      const w = Math.min(card.offsetWidth, r.width - 20), h = Math.min(card.offsetHeight, r.height - 20);
+      const x = Math.max(10, Math.min(r.width - w - 10, n.left + n.width / 2 - r.left - w / 2));
+      const y = Math.max(10, Math.min(r.height - h - 10, n.top + n.height / 2 - r.top - h / 2));
+      card.style.left = x + "px"; card.style.top = y + "px";
+      const z = card.querySelector(".fokus-knoten.ziel").getBoundingClientRect(), k = card.getBoundingClientRect();
+      card.scrollLeft += z.left + z.width / 2 - (k.left + k.width / 2);
+      card.scrollTop += z.top + z.height / 2 - (k.top + k.height / 2);
+    }
+    const shown = (cardShown = computeShown(id));
+    // a box that can still be opened has a small mark
+    card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => {
+      g.classList.toggle("offen", expanded.has(g.dataset.id));
+      g.classList.toggle("hat-mehr", !expanded.has(g.dataset.id) && cardNext(id, g.dataset.id).length > 0);
+    });
+    card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => { g.style.visibility = shown.has(g.dataset.id) ? "" : "hidden"; });
+    card.querySelectorAll(".karte-bild .fokus-kante").forEach((p) => { p.style.visibility = shown.has(p.dataset.from) && shown.has(p.dataset.to) ? "" : "hidden"; });
+  }
+  card.addEventListener("click", (ev) => { ev.stopPropagation();
+    const w = ev.target.closest("[data-proof-of]");
+    if (w) { const x = w.dataset.proofOf, n = proofsOf(byId.get(x)).length; proofChoice.set(x, ((proofChoice.get(x) || 0) + 1) % n); cardFor = null; showCard(selected); mark(selected); return; }
+    const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
+  card.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
+  card.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+  card.addEventListener("wheel", (ev) => ev.stopPropagation());
+  document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && selected) select(null); });
 
 
   function overview() {

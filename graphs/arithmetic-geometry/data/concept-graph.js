@@ -153,7 +153,7 @@ window.AR_CG = {
     { id: "modular-form", name: "Modular form and cusp form", kind: "objekt", area: "11F", field: [11], msc: ["11F"], msc5: "11F11", uses: ["holomorphic-function", "congruence-subgroup", "modular-group"],
       formula: String.raw`f\Big(\frac{az + b}{cz + d}\Big) = (cz + d)^k f(z)`,
       text: "A holomorphic function on the upper half-plane ℍ with this transformation law of weight k for the matrices of the congruence subgroup Γ<sub>0</sub>(N) of the modular group, and holomorphic at the cusps; a cusp form vanishes at the cusps." },
-    { id: "theta-function", name: "Theta function", kind: "konstruktion", area: "11F", field: [11], msc: ["11F"], msc5: "11F27", uses: ["holomorphic-function", "st:integer"], isA: ["half-integral-weight"],
+    { id: "theta-function", name: "Theta function", kind: "konstruktion", area: "11F", field: [11], msc: ["11F"], msc5: "11F27", uses: ["holomorphic-function", "st:integer"], isA: [],
       formula: String.raw`\theta(z) = \sum_{n \in \mathbb Z} e^{2\pi i n^2 z}`,
       text: "The holomorphic function on the upper half-plane given by this sum over all integers n, the generating function of squares; its powers count representations as sums of squares." },
     { id: "half-integral-weight", name: "Modular form of half-integral weight", kind: "eigenschaft", area: "11F", field: [11], msc: ["11F"], msc5: "11F37", uses: ["modular-form", "theta-function"], isA: ["modular-form"],

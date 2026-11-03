@@ -17,7 +17,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "cancellation-law"
+    "subgroup-criterion"
   ],
   "sources": {
     "st": {
@@ -96,6 +96,8 @@ window.CONCEPT_PAGE = {
     "usedByHead": "Used in the proofs of",
     "edges": "proof dependencies",
     "arrow": "A → B: the proof of B uses A",
+    "proofsHead": "Proofs",
+    "proofWord": "Proof",
     "buildsOn": "Theorems this proof builds on",
     "homeVerb": "Proved",
     "levelHint": "Level 1: proved without other theorems of the area; level k: 1 + highest level among the theorems the proof uses. Results of other areas are not counted; their arrows come from outside."
