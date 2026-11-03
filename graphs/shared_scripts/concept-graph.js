@@ -1221,7 +1221,8 @@
       });
       // proof card: a theorem with several proofs gets a small switch "1/3" (user, 3 November 2026)
       const P = proofsOf(c);
-      if (back && o.switches && P.length > 1 && x !== id && !c.foundation) {
+      // not on nodes of other areas: their premises are not followed here, a switch would show nothing (user, 3 November 2026)
+      if (back && o.switches && P.length > 1 && x !== id && !c.foundation && c.area !== FOREIGN) {
         const k = proofChoice.get(x) || 0;
         const b = el("g", { class: "beweis-wahl", "data-proof-of": x, transform: `translate(${BW - 30},${BH - 11})` }, g);
         el("rect", { width: 28, height: 13, rx: 3 }, b);
