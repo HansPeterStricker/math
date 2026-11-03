@@ -1,0 +1,465 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Rational Explorer – mockup</title>
+<link rel="icon" href="../../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../../scripts/site-icon-180.png">
+<style>
+  :root {
+    --bg: #f6f6f4; --panel: #ffffff; --ink: #1a1a1a; --muted: #6b6b6b; --line: #dedcd6;
+    --accent: #1d4ed8; --accent-soft: #e6ecfb; --red: #c81e1e;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--ink); font: 14px/1.45 system-ui, "Segoe UI", Roboto, Arial, sans-serif; }
+  button, select, input { font: inherit; }
+  a { color: var(--accent); }
+
+  /* ---------- header ---------- */
+  header { display: flex; align-items: center; gap: 24px; padding: 10px 20px; background: var(--panel); border-bottom: 1px solid var(--line); }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; letter-spacing: .2px; }
+  .tabs { display: flex; gap: 4px; }
+  .tabs a { padding: 6px 14px; border-radius: 6px; text-decoration: none; color: var(--muted); }
+  .tabs a.active { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .note { margin-left: auto; font-size: 12px; color: var(--muted); }
+
+  /* ---------- three columns ---------- */
+  .page { display: grid; grid-template-columns: 270px minmax(0, 1fr) 440px; gap: 20px; padding: 20px; align-items: start; }
+  .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 10px; }
+
+  /* ---------- left: controls ---------- */
+  .controls { padding: 16px; position: sticky; top: 20px; }
+  .fraction { display: grid; grid-template-columns: auto 1fr auto; align-items: center; row-gap: 2px; }
+  .fraction .val { text-align: center; font-size: 40px; font-weight: 600; font-variant-numeric: tabular-nums; line-height: 1.1; width: 100%; border: 0; background: transparent; }
+  .fraction .bar { grid-column: 1 / 4; height: 3px; background: var(--ink); margin: 2px 8px; border-radius: 2px; }
+  .step { width: 34px; height: 34px; border-radius: 50%; border: 1px solid var(--line); background: var(--panel); cursor: pointer; font-size: 18px; color: var(--muted); }
+  .step:hover { border-color: var(--accent); color: var(--accent); }
+  .mapping { text-align: center; margin: 10px 0 12px; font-size: 15px; }
+  .row { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+  .btn { padding: 5px 10px; border: 1px solid var(--line); border-radius: 6px; background: var(--panel); cursor: pointer; }
+  .btn:hover:not(:disabled) { border-color: var(--accent); color: var(--accent); }
+  .btn:disabled { color: #bbb; cursor: default; }
+  .seg { display: inline-flex; border: 1px solid var(--line); border-radius: 6px; overflow: hidden; }
+  .seg button { border: 0; padding: 5px 12px; background: var(--panel); cursor: pointer; }
+  .seg button.on { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
+  .controls details { border-top: 1px solid var(--line); padding: 10px 0 4px; margin-top: 10px; }
+  .controls summary { cursor: pointer; font-weight: 600; font-size: 13px; text-transform: uppercase; letter-spacing: .5px; color: var(--muted); }
+  .opt { display: flex; align-items: center; gap: 8px; margin: 8px 0; }
+  .opt .glyph { margin-left: auto; }
+  .opt input[type=range] { flex: 1; }
+  .opt small { color: var(--muted); }
+  .inert { opacity: .55; }
+  .inert::after { content: " (placeholder)"; font-size: 11px; color: var(--muted); }
+
+  /* ---------- middle: graph ---------- */
+  .stage { position: sticky; top: 20px; padding: 16px; }
+  .stage svg.graph { display: block; width: 100%; max-height: calc(100vh - 210px); }
+  svg.graph .el { transition: opacity .15s; }
+  svg.graph.focus .el:not(.hi) { opacity: .1; }
+  .key { display: flex; flex-wrap: wrap; gap: 6px 18px; padding-top: 10px; border-top: 1px solid var(--line); margin-top: 8px; font-size: 13px; }
+  .key span[data-target] { display: inline-flex; align-items: center; gap: 6px; cursor: default; padding: 2px 6px; border-radius: 4px; }
+  .key span[data-target]:hover { background: var(--accent-soft); }
+  .key b { font-variant-numeric: tabular-nums; }
+  .key .off { color: #aaa; }
+
+  /* ---------- right: analysis ---------- */
+  .analysis { padding: 18px; }
+  .analysis h2 { margin: 0 0 4px; font-size: 22px; }
+  .analysis .reduced { color: var(--muted); font-size: 14px; }
+  .summary { margin: 10px 0 14px; font-size: 15px; }
+  .cards { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 14px; }
+  .card { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; }
+  .card .v { font-size: 22px; font-weight: 600; font-variant-numeric: tabular-nums; }
+  .card .k { font-size: 12px; color: var(--muted); }
+  .analysis details { border-top: 1px solid var(--line); padding: 10px 0; }
+  .analysis summary { cursor: pointer; font-weight: 600; font-size: 15px; }
+  .analysis summary small { font-weight: 400; color: var(--muted); margin-left: 6px; }
+  .intro { color: var(--muted); margin: 6px 0 8px; }
+  .fact { margin: 8px 0; }
+  .fact .f { font-weight: 600; }
+  .fact .d { display: block; color: var(--muted); font-size: 12.5px; }
+  .fact .d a { color: var(--muted); }
+  table.t { border-collapse: collapse; margin: 6px 0; font-variant-numeric: tabular-nums; }
+  table.t th, table.t td { border: 1px solid var(--line); padding: 3px 8px; text-align: right; }
+  table.t th { background: #f3f3f0; font-weight: 600; }
+  table.t td.l, table.t th.l { text-align: left; }
+  table.t tr[data-target]:hover td { background: var(--accent-soft); }
+  .sw { display: inline-block; width: 22px; height: 6px; border-radius: 3px; vertical-align: middle; }
+  .members { max-width: 230px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; text-align: left !important; }
+  sub, sup { font-size: 70%; }
+
+  @media (max-width: 1150px) {
+    .page { grid-template-columns: 250px minmax(0, 1fr); }
+    .analysis { grid-column: 1 / 3; }
+  }
+  @media (max-width: 760px) {
+    .page { grid-template-columns: 1fr; padding: 12px; gap: 12px; }
+    .analysis { grid-column: auto; }
+    .controls, .stage { position: static; }
+    .cards { grid-template-columns: repeat(2, 1fr); }
+    .note { display: none; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Rational Explorer</h1>
+  <nav class="tabs"><a class="active" href="#">Graph N:M</a><a href="../../index.html?view=table">Table n:m</a></nav>
+  <span class="note">Mockup. N, M, highlights, line filter and play work; controls marked “placeholder” do not.</span>
+</header>
+
+<div class="page">
+  <!-- ================= controls ================= -->
+  <aside class="panel controls">
+    <div class="fraction">
+      <button class="step" data-act="n-1" title="N − 1">‹</button>
+      <input class="val" id="nIn" type="number" min="1" max="2000" aria-label="N">
+      <button class="step" data-act="n+1" title="N + 1">›</button>
+      <div class="bar"></div>
+      <button class="step" data-act="m-1" title="M − 1">‹</button>
+      <input class="val" id="mIn" type="number" min="2" max="2000" aria-label="M">
+      <button class="step" data-act="m+1" title="M + 1">›</button>
+    </div>
+    <div class="mapping" id="mapping"></div>
+    <div class="row">
+      <button class="btn" data-act="both-1" title="N − 1 and M − 1">both −1</button>
+      <button class="btn" data-act="both+1" title="N + 1 and M + 1">both +1</button>
+      <button class="btn" id="reduceBtn" data-act="reduce" title="Divide N and M by gcd(N, M)">÷ gcd</button>
+      <button class="btn" data-act="expand" title="Multiply N and M by 2">× 2</button>
+    </div>
+    <div class="row">
+      <span class="seg inert"><button class="on">a ↦ n·a</button><button>a ↦ n+a</button></span>
+    </div>
+    <label class="opt inert"><input type="checkbox"> without 0</label>
+
+    <details open>
+      <summary>Highlight</summary>
+      <label class="opt"><input type="checkbox" id="optCycles" checked> cycles in colour</label>
+      <label class="opt"><input type="checkbox" id="optFixed" checked> fixed points <span class="glyph" data-glyph="fixed"></span></label>
+      <label class="opt"><input type="checkbox" id="optImage" checked> non-image points grey <span class="glyph" data-glyph="nonimage"></span></label>
+      <label class="opt"><input type="checkbox" id="optUnits" checked> units and square roots <span class="glyph" data-glyph="unit"></span></label>
+    </details>
+
+    <details open>
+      <summary>Line lengths</summary>
+      <label class="opt"><select id="preset">
+        <option value="all">all lengths</option><option value="shortest">shortest third</option>
+        <option value="medium">medium third</option><option value="longest">longest third</option>
+        <option value="notShortest">not shortest</option><option value="notMedium">not medium</option>
+        <option value="notLongest">not longest</option>
+      </select></label>
+      <label class="opt"><small>from</small><input type="range" id="fMin" min="0" max="1" step="0.01"><small id="fMinV"></small></label>
+      <label class="opt"><small>to</small><input type="range" id="fMax" min="0" max="1" step="0.01"><small id="fMaxV"></small></label>
+    </details>
+
+    <details>
+      <summary>Animation and sound</summary>
+      <div class="row"><button class="btn" id="play">▶ play</button>
+        <select id="tempo" title="tempo"><option value="4">fast</option><option value="1" selected>normal</option><option value="0.3">slow</option></select></div>
+      <label class="opt inert"><input type="checkbox"> play n:m as interval on click</label>
+    </details>
+
+    <details>
+      <summary>View</summary>
+      <label class="opt inert"><input type="checkbox"> show the 8 neighbours</label>
+      <label class="opt"><input type="checkbox" id="optLabels" checked> numbers on the circle</label>
+      <label class="opt inert">zoom <button class="btn">fit</button></label>
+    </details>
+  </aside>
+
+  <!-- ================= graph ================= -->
+  <section class="panel stage">
+    <svg class="graph" id="graph" viewBox="0 0 600 600" role="img"></svg>
+    <div class="key" id="key"></div>
+  </section>
+
+  <!-- ================= analysis ================= -->
+  <section class="panel analysis" id="analysis"></section>
+</div>
+
+<script src="../../js/core/numberTheory.js"></script>
+<script src="../../js/core/constants.js"></script>
+<script src="../../js/core/multiplicationGraph.js"></script>
+<script src="../../js/core/analysis.js"></script>
+<script src="../../js/core/lengthFilter.js"></script>
+<script src="../../js/core/geometry.js"></script>
+<script>
+(function () {
+  'use strict'
+  const { gcd, buildGraph, analyze, circlePoints, COLORS, LENGTH_PRESETS, passesLengthFilter } = Ratios.core
+  const NS = 'http://www.w3.org/2000/svg'
+  const W = 'https://en.wikipedia.org/wiki/'
+  const $ = id => document.getElementById(id)
+  const state = { n: 6, m: 25, cycles: true, fixed: true, image: true, units: true, labels: true, filter: { min: 0, max: 1 } }
+  let timer = null
+
+  const svg = (tag, attrs, text) => {
+    const e = document.createElementNS(NS, tag)
+    for (const [k, v] of Object.entries(attrs)) if (v !== null && v !== undefined) e.setAttribute(k, v)
+    if (text !== undefined) e.textContent = text
+    return e
+  }
+  const wiki = (page, text) => `<a href="${W}${page}" target="_blank" rel="noopener">${text}</a>`
+  const zx = m => `ℤ<sub>${m}</sub><sup>×</sup>`
+  const list = (xs, max = 12) => xs.length > max ? `${xs.slice(0, max).join(', ')}, … (${xs.length})` : xs.join(', ')
+
+  // ---------- symbols, shared by graph, key and controls ----------
+  const GLYPH = {
+    fixed: () => `<svg width="18" height="18"><circle cx="9" cy="9" r="7" fill="#1a1a1a"/></svg>`,
+    nonimage: () => `<svg width="18" height="18"><circle cx="9" cy="9" r="4" fill="silver"/></svg>`,
+    unit: () => `<svg width="18" height="18"><circle cx="9" cy="9" r="3.5"/><circle cx="9" cy="9" r="7" fill="none" stroke="#1a1a1a"/></svg>`,
+    sqrt1: () => `<svg width="18" height="18"><circle cx="9" cy="9" r="3.5"/><rect x="2" y="2" width="14" height="14" fill="none" stroke="#1a1a1a"/></svg>`,
+    sqrtN: () => `<svg width="18" height="18"><circle cx="9" cy="9" r="3.5"/><circle cx="9" cy="9" r="7.5" fill="none" stroke="#1a1a1a" stroke-dasharray="3 2" stroke-width="1.4"/></svg>`,
+    zero: () => `<svg width="18" height="18"><line x1="2" y1="16" x2="16" y2="2" stroke="silver" stroke-width="2"/><circle cx="16" cy="2" r="2" fill="var(--red)"/></svg>`
+  }
+  document.querySelectorAll('[data-glyph]').forEach(e => { e.innerHTML = GLYPH[e.dataset.glyph]() })
+
+  // ---------- graph ----------
+  function drawGraph(graph, anim) {
+    const g = $('graph')
+    g.replaceChildren()
+    const C = 300, R = 245
+    const pts = circlePoints(graph)
+    const P = a => ({ x: C + R * pts.get(a).x, y: C + R * pts.get(a).y })
+    g.append(svg('circle', { cx: C, cy: C, r: R, fill: 'none', stroke: '#c9c7c0' }))
+
+    const fixedSet = new Set(graph.fixedPoints), imageSet = new Set(graph.imagePoints)
+    const lineEls = []
+    const lines = svg('g', { 'stroke-linecap': 'round' })
+    graph.edges.forEach((e, i) => {
+      if (e.from === e.to) return
+      if (!passesLengthFilter(e.distance, graph.m, state.filter)) return
+      const p = P(e.from), q = P(e.to)
+      let color = '#1a1a1a', width = 1.2
+      if (state.cycles) {
+        if (e.cycleIndex !== null) {
+          color = COLORS[e.cycleIndex % COLORS.length]
+          width = Math.min(7, Math.max(1, 30 / graph.cycles[e.cycleIndex].length))
+        } else color = 'silver'
+      }
+      const el = svg('line', {
+        x1: p.x, y1: p.y, x2: q.x, y2: q.y, stroke: color, 'stroke-width': width,
+        class: `el ${e.cycleIndex !== null ? 'cyc' + e.cycleIndex : 'tail'} dist${e.distance}${e.to === 0 && e.from !== 0 ? ' zero' : ''}`
+      })
+      if (anim) el.style.display = 'none'
+      lineEls.push(el)
+      lines.append(el)
+    })
+    g.append(lines)
+
+    for (const a of graph.residues) {
+      const p = P(a)
+      const fixed = state.fixed && fixedSet.has(a)
+      const grey = state.image && !imageSet.has(a)
+      const ci = graph.edges.find(e => e.from === a).cycleIndex
+      let cls = `el pt${a}`
+      if (fixed) cls += ' fixed'
+      if (fixedSet.has(a)) cls += ' dist0'
+      if (grey) cls += ' nonimage'
+      if (ci !== null) cls += ' cyc' + ci
+      const fill = grey ? 'silver' : fixed && state.cycles && ci !== null ? COLORS[ci % COLORS.length] : '#1a1a1a'
+      const dot = svg('g', { class: cls })
+      dot.append(svg('circle', { cx: p.x, cy: p.y, r: fixed ? 8 : 4, fill }))
+      if (fixed && a === 0) dot.append(svg('circle', { cx: p.x, cy: p.y, r: 2.5, fill: 'white' }))
+      g.append(dot)
+    }
+
+    if (state.units) {
+      const ring = (list, cls, make) => list.forEach(a => { const p = P(a); const e = make(p); e.setAttribute('class', `el ${cls} pt${a}`); g.append(e) })
+      ring(graph.units, 'unit', p => svg('circle', { cx: p.x, cy: p.y, r: 8, fill: 'none', stroke: '#1a1a1a' }))
+      ring(graph.squareRootsOfUnity, 'sqrt1', p => svg('rect', { x: p.x - 11, y: p.y - 11, width: 22, height: 22, fill: 'none', stroke: '#1a1a1a' }))
+      ring(graph.squareRootsOfN, 'sqrtN', p => svg('circle', { cx: p.x, cy: p.y, r: 13, fill: 'none', stroke: '#1a1a1a', 'stroke-width': 1.4, 'stroke-dasharray': '3 2' }))
+    }
+
+    if (state.labels && graph.m < 100) {
+      for (const a of graph.residues) {
+        const p = pts.get(a)
+        g.append(svg('text', {
+          x: C + 1.11 * R * p.x, y: C + 1.11 * R * p.y, 'text-anchor': 'middle', dy: '0.35em',
+          'font-size': graph.m > 60 ? 10 : 13, fill: a === 0 ? 'var(--red)' : '#555', class: `el lbl pt${a}`
+        }, String(a)))
+      }
+    }
+
+    if (anim) {
+      let shown = 0
+      const step = () => {
+        const k = Math.max(1, Math.round(state.tempo))
+        for (let j = 0; j < k && shown < lineEls.length; j++) lineEls[shown++].style.display = ''
+        if (shown < lineEls.length) timer = setTimeout(step, Math.max(8, 600 / Math.sqrt(graph.m) / state.tempo))
+      }
+      step()
+    }
+  }
+
+  // ---------- key under the graph ----------
+  function renderKey(graph) {
+    const items = []
+    const item = (target, glyph, text, count, on = true) =>
+      items.push(`<span data-target="${target}" class="${on ? '' : 'off'}">${glyph}${text} <b>${count}</b></span>`)
+    item('fixed', GLYPH.fixed(), 'fixed points', graph.fixedPoints.length, state.fixed)
+    item('nonimage', GLYPH.nonimage(), 'not in image', graph.m - graph.imagePoints.length, state.image)
+    item('zero', GLYPH.zero(), 'lines into 0', graph.edges.filter(e => e.to === 0 && e.from !== 0).length)
+    item('unit', GLYPH.unit(), 'units', graph.units.length, state.units)
+    item('sqrt1', GLYPH.sqrt1(), 'a² ≡ 1', graph.squareRootsOfUnity.length, state.units)
+    item('sqrtN', GLYPH.sqrtN(), `a² ≡ ${graph.n % graph.m}`, graph.squareRootsOfN.length, state.units)
+    $('key').innerHTML = items.join('')
+  }
+
+  // ---------- analysis column ----------
+  function fact(formula, definition) {
+    return `<div class="fact"><span class="f">${formula}</span>${definition ? `<span class="d">${definition}</span>` : ''}</div>`
+  }
+
+  function renderAnalysis(graph) {
+    const { n, m } = graph
+    const a = analyze(n, m, graph)
+    const nm = n % m
+    const lengths = a.cycleLengthCounts.map(c => c.length)
+    const sym = a.fixedPointCount
+
+    let summary
+    if (a.gcd === 1) {
+      summary = `a ↦ ${n}·a mod ${m} permutes the ${m} residues. They fall into <b>${a.totalCycles} cycles</b> of length ${lengths.join(' and ')}.`
+    } else {
+      summary = `a ↦ ${n}·a mod ${m} is <b>not a permutation</b>, because gcd(${n}, ${m}) = ${a.gcd}. It maps the ${m} residues onto ${a.imageSize} image points. ${a.zeroDivisorCount} non-zero residues are sent to 0.`
+    }
+    summary += sym > 1 ? ` The figure has <b>${sym}-fold</b> rotational symmetry.` : ' The figure has no rotational symmetry.'
+
+    const cards = [
+      [a.gcd, a.gcd === 1 ? 'gcd(n, m), coprime' : 'gcd(n, m)'],
+      [a.order ?? '–', a.order !== null ? `order ω, ${nm}<sup>${a.order}</sup> ≡ 1` : 'order ω, n is not a unit'],
+      [a.totalCycles, `cycles, lengths ${list(lengths, 6)}`],
+      [a.fixedPointCount, 'fixed points, n·a ≡ a'],
+      [sym > 1 ? `${sym}×` : 'none', 'rotational symmetry'],
+      [a.phi, `units, φ(${m})`]
+    ]
+
+    let html = `<h2>${n} : ${m}</h2>`
+    if (a.reduced) html += `<div class="reduced">≡ ${a.reduced.n} : ${a.reduced.m} after dividing by gcd ${a.gcd}</div>`
+    html += `<p class="summary">${summary}</p>`
+    html += `<div class="cards">${cards.map(([v, k]) => `<div class="card"><div class="v">${v}</div><div class="k">${k}</div></div>`).join('')}</div>`
+
+    // cycles
+    const cycRows = graph.cycles.slice(0, 14).map((c, i) =>
+      `<tr data-target="cyc${i}"><td class="l"><span class="sw" style="background:${COLORS[i % COLORS.length]}"></span></td><td>${c.length}</td><td class="members">${c.join(' → ')}</td></tr>`).join('')
+    const more = graph.cycles.length > 14 ? `<tr><td colspan="3" class="l">… ${graph.cycles.length - 14} more cycles</td></tr>` : ''
+    html += `<details open><summary>Cycles<small>${a.totalCycles} cycles, hover a row</small></summary>
+      <p class="intro">Following the lines from any residue ends in a closed loop. Each colour is one loop.</p>
+      <table class="t"><tr><th class="l"></th><th>length</th><th class="l">residues</th></tr>${cycRows}${more}</table>
+      <table class="t"><tr><th class="l">length L</th>${a.cycleLengthCounts.map(c => `<td>${c.length}</td>`).join('')}</tr>
+      <tr><th class="l">number #(L)</th>${a.cycleLengthCounts.map(c => `<td>${c.count}</td>`).join('')}</tr></table>
+    </details>`
+
+    // units and roots
+    let units = ''
+    units += fact(`φ(${m}) = ${a.phi}`, `${wiki('Euler%27s_totient_function', "Euler's totient")}: number of residues coprime to ${m}, the units of ${zx(m)}`)
+    if (a.inverse !== null) units += fact(`${n} · ${a.inverse} ≡ 1 mod ${m}`, `${n} is a ${wiki('Unit_(ring_theory)', 'unit')}, its inverse is ${a.inverse}`)
+    else if (a.zeroDivisorPartner !== null) units += fact(`${n} · ${a.zeroDivisorPartner} ≡ 0 mod ${m}`, `${n} is a ${wiki('Zero_divisor', 'zero divisor')}`)
+    if (a.order !== null) units += fact(`ω<sub>${n}</sub>(${m}) = ${a.order}`, `${wiki('Multiplicative_order', 'multiplicative order')}: smallest k with ${n}<sup>k</sup> ≡ 1, the length of the cycle through 1`)
+    units += fact(`λ(${m}) = ${a.carmichael}`, `${wiki('Carmichael_function', 'Carmichael function')}: smallest k with a<sup>k</sup> ≡ 1 for every unit a`)
+    units += fact(a.primitiveRootCount !== null ? `${a.primitiveRootCount} primitive roots` : 'no primitive roots',
+      `${wiki('Primitive_root_modulo_n', 'primitive root')}: a unit whose powers give all units${a.isPrimitiveRoot ? `; ${n} is one of them` : ''}`)
+    units += fact(`a² ≡ 1: {${list(graph.squareRootsOfUnity)}}`, 'square roots of unity, drawn as squares')
+    units += fact(graph.squareRootsOfN.length ? `a² ≡ ${nm}: {${list(graph.squareRootsOfN)}}` : `a² ≡ ${nm} has no solution`,
+      `${nm} is ${graph.squareRootsOfN.length ? '' : '<b>not</b> '}a ${wiki('Quadratic_residue', 'quadratic residue')} mod ${m}; solutions are drawn with a dashed ring`)
+    for (const r of a.rootsOfUnity) if (r.k !== 2 && r.roots.length > 1) units += fact(`a<sup>${r.k}</sup> ≡ 1: {${list(r.roots)}}`, `${r.k === 3 ? 'third' : 'fifth'} roots of unity`)
+    html += `<details><summary>Units and roots<small>φ = ${a.phi}</small></summary>${units}</details>`
+
+    // line lengths
+    const distRows = a.distanceTable.map(r => `<tr data-target="dist${r.distance}"><td>${r.k}</td><td>${r.distance}</td><td>${r.count}</td></tr>`).join('')
+    html += `<details><summary>Line lengths<small>${a.distanceTable.length} different lengths, hover a row</small></summary>
+      <p class="intro">The length D of a line a → ${n}·a is the shorter distance on the circle. Every D is a multiple of gcd(n−1, m) = ${sym}.</p>
+      <table class="t"><tr><th>k</th><th>D = k·${sym}</th><th>lines</th></tr>${distRows}</table></details>`
+
+    // divisor table
+    const dRows = a.divisorTable
+    html += `<details><summary>Cycles by divisor<small>σ<sub>1</sub>(${m}) = ${a.sigma1}</small></summary>
+      <p class="intro">Each divisor d of ${m} collects the φ(d) residues a with gcd(a, ${m}) = ${m}/d. Within that class every cycle has length ω<sub>d</sub>(n), so the class forms φ(d)/ω<sub>d</sub>(n) cycles.</p>
+      <table class="t">
+        <tr><th class="l">d | ${m}</th>${dRows.map(r => `<td>${r.d}</td>`).join('')}</tr>
+        <tr><th class="l">φ(d)</th>${dRows.map(r => `<td>${r.phi}</td>`).join('')}</tr>
+        <tr><th class="l">ω<sub>d</sub>(n)</th>${dRows.map(r => `<td>${r.order ?? ''}</td>`).join('')}</tr>
+        <tr><th class="l">cycles</th>${dRows.map(r => `<td>${r.cyclesFromD ?? ''}</td>`).join('')}</tr>
+      </table></details>`
+
+    // prime factors and counts
+    let pf = fact(`${n} = ${a.factorN}`, `divisors {${list(a.divisorsN)}}${a.nIsPrime ? ', prime' : ''}`)
+    pf += fact(`${m} = ${a.factorM}`, `divisors {${list(a.divisorsM)}}${a.mIsPrime ? `, prime; divisors of ${m}−1: {${list(a.divisorsMMinus1)}}` : ''}`)
+    pf += fact(`${a.zeroDivisorCount} zero divisors`, 'non-zero a with n·a ≡ 0, equals gcd(n, m) − 1')
+    pf += fact(`${a.imageSize} image points`, 'residues reached by some line, equals m / gcd(n, m)')
+    pf += fact(`translation period ${a.translationPeriod}`, 'smallest b with n·(a + b) ≡ n·a + b for all a, equals m / gcd(n−1, m)')
+    html += `<details><summary>Factors and counts</summary>${pf}</details>`
+
+    $('analysis').innerHTML = html
+  }
+
+  // ---------- hover: key and table rows highlight graph elements ----------
+  function hookHover(root) {
+    root.addEventListener('mouseover', ev => {
+      const t = ev.target.closest('[data-target]')
+      if (!t) return
+      const g = $('graph')
+      g.querySelectorAll('.hi').forEach(e => e.classList.remove('hi'))
+      g.querySelectorAll('.' + t.dataset.target).forEach(e => e.classList.add('hi'))
+      g.classList.add('focus')
+    })
+    root.addEventListener('mouseout', ev => {
+      if (ev.target.closest('[data-target]') && !(ev.relatedTarget && ev.relatedTarget.closest && ev.relatedTarget.closest('[data-target]'))) {
+        $('graph').classList.remove('focus')
+      }
+    })
+  }
+  hookHover($('key'))
+  hookHover($('analysis'))
+
+  // ---------- render ----------
+  function render(anim = false) {
+    clearTimeout(timer)
+    const graph = buildGraph(state.n, state.m, { op: 'mul', dropZero: false })
+    $('nIn').value = state.n
+    $('mIn').value = state.m
+    $('mapping').innerHTML = `a ↦ ${state.n}·a mod ${state.m}`
+    $('reduceBtn').disabled = gcd(state.n, state.m) === 1
+    $('fMin').value = state.filter.min; $('fMax').value = state.filter.max
+    $('fMinV').textContent = state.filter.min.toFixed(2); $('fMaxV').textContent = state.filter.max.toFixed(2)
+    const p = Object.entries(LENGTH_PRESETS).find(([, v]) => v.min === state.filter.min && v.max === state.filter.max)
+    $('preset').value = p ? p[0] : ''
+    drawGraph(graph, anim)
+    renderKey(graph)
+    const open = [...document.querySelectorAll('#analysis details')].map(d => d.open)
+    renderAnalysis(graph)
+    if (open.length) document.querySelectorAll('#analysis details').forEach((d, i) => { d.open = open[i] })
+  }
+
+  const clampSet = (n, m) => {
+    if (n >= 1 && n <= 2000 && m >= 2 && m <= 2000) { state.n = n; state.m = m }
+    render()
+  }
+  document.querySelector('.controls').addEventListener('click', ev => {
+    const act = ev.target.closest('[data-act]')
+    if (!act) return
+    const { n, m } = state, g = gcd(n, m)
+    const map = {
+      'n-1': [n - 1, m], 'n+1': [n + 1, m], 'm-1': [n, m - 1], 'm+1': [n, m + 1],
+      'both-1': [n - 1, m - 1], 'both+1': [n + 1, m + 1], reduce: [n / g, m / g], expand: [2 * n, 2 * m]
+    }
+    clampSet(...map[act.dataset.act])
+  })
+  $('nIn').addEventListener('change', e => clampSet(Math.round(+e.target.value), state.m))
+  $('mIn').addEventListener('change', e => clampSet(state.n, Math.round(+e.target.value)))
+  for (const [id, key] of [['optCycles', 'cycles'], ['optFixed', 'fixed'], ['optImage', 'image'], ['optUnits', 'units'], ['optLabels', 'labels']]) {
+    $(id).addEventListener('change', e => { state[key] = e.target.checked; render() })
+  }
+  $('preset').addEventListener('change', e => { if (LENGTH_PRESETS[e.target.value]) { state.filter = { ...LENGTH_PRESETS[e.target.value] }; render() } })
+  $('fMin').addEventListener('change', e => { state.filter = { ...state.filter, min: +e.target.value }; render() })
+  $('fMax').addEventListener('change', e => { state.filter = { ...state.filter, max: +e.target.value }; render() })
+  $('play').addEventListener('click', () => { state.tempo = +$('tempo').value; render(true) })
+
+  render()
+})()
+</script>
+</body>
+</html>

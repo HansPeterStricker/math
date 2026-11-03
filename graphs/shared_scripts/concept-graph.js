@@ -804,7 +804,8 @@
   const backOf = (x) => usesOf(x).concat((byId.get(x).isA || []).filter((t) => byId.has(t)));
   // In the proof card and the side view, foundations (`foundation: true`, e.g. Bézout's identity) are shown but not
   // expanded further (user, 3 November 2026)
-  const backFrom = (root) => (x) => (x !== root && byId.get(x).foundation ? [] : backOf(x));
+  // Nodes of other areas are not expanded either (user, 3 November 2026): their premises are shown in their own graph.
+  const backFrom = (root) => (x) => (x !== root && (byId.get(x).foundation || isPre(x)) ? [] : backOf(x));
   const fwdOf = (x) => usedBy.get(x).concat(isaEdges.filter((e) => e.to === x).map((e) => e.from));
   const within = (id, next, k) => {
     const seen = new Set();
@@ -1105,7 +1106,8 @@
     const set = new Set(ids), back = o.mode !== "fwd";
     // edges: proof card along the chosen proofs, card of the consequences along all proofs (dashed unless essential);
     // "is a" like a use (general above special)
-    const prem = (x) => (back ? (x !== id && byId.get(x).foundation ? [] : usesOf(x)) : allUses.get(x)).filter((a) => set.has(a));
+    // foundations and nodes of other areas: no edges into them (their premises are not followed here)
+    const prem = (x) => (back ? (x !== id && (byId.get(x).foundation || isPre(x)) ? [] : usesOf(x)) : allUses.get(x)).filter((a) => set.has(a));
     const anc = (x) => closure(x, (y) => (back ? usesOf(y) : allUses.get(y)));
     let fEdges = ids.flatMap((x) => {
       const P = prem(x);
@@ -1115,7 +1117,8 @@
         dashed: !back && !usesEdges.some((e) => e.from === a && e.to === x && e.essential) }));
     });
     // "is a" only where no use already joins the two
-    fEdges = fEdges.concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to) && !fEdges.some((u) => u.from === e.to && u.to === e.from)).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
+    fEdges = fEdges.concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to) && !fEdges.some((u) => u.from === e.to && u.to === e.from)
+      && !(back && e.from !== id && (isPre(e.from) || byId.get(e.from).foundation))).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
     // the card lays out only the edges it shows (user, 3 November 2026: direct premises directly above)
     if (o.edgeOk) fEdges = fEdges.filter((e) => o.edgeOk(e.from, e.to, e.via || []));
     // rows: longest path from the selected node (cycles of alternative proofs broken by leaving out back edges)
@@ -1344,15 +1347,10 @@
   let cardSize = null;
   function drawCard(id) {
     const shown = (cardShown = computeShown(id));
-    // an indirect edge a → x is left out while a visible path leads from a to x through one of its intermediate premises
-    const reach = (start) => {
-      const seen = new Set([start]), stack = [start];
-      while (stack.length) { const y = stack.pop(); if (!expanded.has(y)) continue; cardNext(id, y).forEach((z) => { if (shown.has(z) && !seen.has(z)) { seen.add(z); stack.push(z); } }); }
-      return seen;
-    };
-    const pathVia = (a, x, b) => (cardMode === "fwd" ? reach(a).has(b) && reach(b).has(x) : reach(x).has(b) && reach(b).has(a));
     // only edges of opened boxes: into an opened box (proof) or out of an opened box (consequences)
-    const edgeOk = (a, x, via) => (cardMode === "fwd" ? expanded.has(a) : expanded.has(x)) && !via.some((b) => shown.has(b) && pathVia(a, x, b));
+    // every direct use by an opened box is shown, also where a longer way leads there too, as in the side view
+    // (user, 3 November 2026)
+    const edgeOk = (a, x) => (cardMode === "fwd" ? expanded.has(a) : expanded.has(x));
     const body = card.querySelector(".karte-inhalt"), keep = { left: card.scrollLeft, top: card.scrollTop };
     body.innerHTML = "";
     body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk, fill: cardSize }));
@@ -1378,7 +1376,8 @@
       const now = above(x);
       expanded = new Set([...expanded].filter((y) => !old.has(y) && !now.has(y)));
       expanded.add(x);
-      cardFor = null; showCard(root); mark(root); return;
+      // the side view in the panel shows the chosen proofs as well
+      cardFor = null; select(root); return;
     }
     const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
   card.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });

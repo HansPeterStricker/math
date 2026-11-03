@@ -1,0 +1,8 @@
+{
+  "name": "ratios-next",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test": "node --test \"test/**/*.test.js\""
+  }
+}
