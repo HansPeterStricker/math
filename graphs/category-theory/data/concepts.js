@@ -9,7 +9,9 @@
 // natural number in elementary number theory. Concepts from outside category theory without a home folder (set,
 // topological space, tensor product) have the area "basic"; concepts of group theory are referenced with "gt:".
 // Where several usual definitions exist, one is chosen and named in `text` (products, kernels and cokernels as limits
-// and colimits; presheaves on a category; sheaves first on a topological space, then on a site).
+// and colimits; presheaves on a category; sheaves first on a topological space, then on a site). Concepts with several
+// usual equivalent definitions name the standard one in `definitionName` and list the others in `alternativeDefinitions`
+// ({ name, uses, formula, text }; user, 3 November 2026); no alternative definition depends on the concept itself.
 //
 // Prefix for references from other folders: "ct:<id>".
 // Sources: Mac Lane, Categories for the Working Mathematician (2nd ed. 1998); Riehl, Category Theory in Context (2016);
@@ -53,7 +55,12 @@ window.CT_CONCEPTS = {
     // ------------------------------------------------------------ 18A General theory
     { id: "category", name: "Category", kind: "objekt", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["st:class", "st:set", "st:map"],
       formula: String.raw`\operatorname{Hom}(X, Y),\quad g \circ f,\quad \mathrm{id}_X`,
-      text: "A class of objects, for any two objects a set Hom(X, Y) of morphisms, and composition maps that are associative and have identity morphisms. Sets with maps, groups with homomorphisms and topological spaces with continuous maps each form a category." },
+      text: "A class of objects, for any two objects a set Hom(X, Y) of morphisms, and composition maps that are associative and have identity morphisms. Sets with maps, groups with homomorphisms and topological spaces with continuous maps each form a category.",
+      definitionName: "Objects and hom sets",
+      alternativeDefinitions: [
+        { name: "Arrows only", uses: ["st:class", "st:map"], formula: String.raw`s(g \circ f) = s(f),\quad t(g \circ f) = t(g)`,
+          text: "One-sorted definition (Mac Lane I.1): a class of arrows with source and target maps s and t to the identity arrows and a composition g ∘ f defined exactly when s(g) = t(f), associative and with the identity arrows as units. The objects are recovered as the identity arrows." },
+      ], },
     { id: "opposite-category", name: "Opposite category", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["category"], isA: ["category"],
       formula: String.raw`\operatorname{Hom}_{\mathcal C^{\mathrm{op}}}(X, Y) = \operatorname{Hom}_{\mathcal C}(Y, X)`,
       text: "The same objects with all morphisms reversed. Every concept has a dual concept in the opposite category (limit and colimit, mono and epi)." },
@@ -89,7 +96,12 @@ window.CT_CONCEPTS = {
       text: "A natural transformation all of whose components are isomorphisms." },
     { id: "equivalence-of-categories", name: "Equivalence of categories", kind: "morphismus", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["functor", "natural-isomorphism"],
       formula: String.raw`G \circ F \cong \mathrm{id}_{\mathcal C},\quad F \circ G \cong \mathrm{id}_{\mathcal D}`,
-      text: "Functors in both directions whose composites are naturally isomorphic to the identities. The right notion of sameness for categories, weaker than isomorphism." },
+      text: "Functors in both directions whose composites are naturally isomorphic to the identities. The right notion of sameness for categories, weaker than isomorphism.",
+      definitionName: "Pseudo-inverse functor",
+      alternativeDefinitions: [
+        { name: "Fully faithful and essentially surjective", uses: ["functor", "fully-faithful", "isomorphism"], formula: String.raw`Y \cong F(X)`,
+          text: "A functor F: C → D that is fully faithful and essentially surjective: every object Y of D is isomorphic to an object F(X). Equivalent to the standard definition by the equivalence criterion (with the axiom of choice)." },
+      ], },
     { id: "product-category", name: "Product of categories", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["category", "st:ordered-pair"], isA: ["category"],
       formula: String.raw`\mathcal C \times \mathcal D`,
       text: "The category whose objects are the ordered pairs (X, Y) of an object of C and an object of D and whose morphisms are the pairs of morphisms, composed componentwise. A functor of two variables is a functor on a product of categories." },
@@ -101,7 +113,12 @@ window.CT_CONCEPTS = {
       text: "For an object X the contravariant functor to the category of sets that sends Y to the set Hom(Y, X) of morphisms Y → X (and dually the functor Hom(X, −))." },
     { id: "representable-functor", name: "Representable functor", kind: "eigenschaft", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["hom-functor", "natural-isomorphism", "category-of-sets"], isA: ["functor"],
       formula: String.raw`F \cong \operatorname{Hom}(-, X)`,
-      text: "A functor to the category of sets that is naturally isomorphic to a hom functor Hom(−, X). By the Yoneda lemma the representing object X is unique up to unique isomorphism; many objects of algebraic geometry are defined as representing objects." },
+      text: "A functor to the category of sets that is naturally isomorphic to a hom functor Hom(−, X). By the Yoneda lemma the representing object X is unique up to unique isomorphism; many objects of algebraic geometry are defined as representing objects.",
+      definitionName: "Natural isomorphism with a hom functor",
+      alternativeDefinitions: [
+        { name: "Universal element", uses: ["contravariant-functor", "category-of-sets", "st:bijection"], formula: String.raw`\operatorname{Hom}(Y, X) \to F(Y),\quad f \mapsto F(f)(u)`,
+          text: "A functor F: C<sup>op</sup> → Set together with an object X and an element u of F(X) such that for every object Y the map Hom(Y, X) → F(Y), f ↦ F(f)(u), is a bijection. Equivalent to the standard definition by the Yoneda lemma." },
+      ], },
     { id: "yoneda-embedding", name: "Yoneda embedding", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["functor", "hom-functor", "presheaf", "functor-category"],
       formula: String.raw`X \mapsto \operatorname{Hom}(-, X),\quad \mathcal C \to [\mathcal C^{\mathrm{op}}, \mathbf{Set}]`,
       text: "The functor from C to the functor category [C<sup>op</sup>, Set] of presheaves that sends an object X to its hom functor Hom(−, X). By the Yoneda lemma it is fully faithful: an object is determined by the morphisms into it." },
@@ -113,10 +130,24 @@ window.CT_CONCEPTS = {
       text: "An object L with morphisms to all objects of a diagram that commute with the morphisms u: i → j of the diagram." },
     { id: "limit", name: "Limit", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["cone"],
       formula: String.raw`\lim D`,
-      text: "A universal cone over a diagram: every other cone factors through it by exactly one morphism." },
+      text: "A universal cone over a diagram: every other cone factors through it by exactly one morphism.",
+      definitionName: "Universal cone",
+      alternativeDefinitions: [
+        { name: "Terminal cone", uses: ["cone", "terminal-object", "category"],
+          text: "A terminal object of the category whose objects are the cones over D and whose morphisms are the morphisms between their vertices that commute with all legs." },
+        { name: "Representing object of the cone functor", uses: ["cone", "representable-functor"], formula: String.raw`\operatorname{Hom}(A, L) \cong \operatorname{Cone}(A, D)`,
+          text: "An object L representing the functor that sends an object A to the set of cones from A over D; the universal element is the limit cone." },
+      ], },
     { id: "colimit", name: "Colimit", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["cocone", "limit", "opposite-category"],
       formula: String.raw`\operatorname{colim} D`,
-      text: "The dual of a limit: a universal cocone under a diagram, so that every other cocone factors through it by exactly one morphism (a limit in the opposite category)." },
+      text: "The dual of a limit: a universal cocone under a diagram, so that every other cocone factors through it by exactly one morphism (a limit in the opposite category).",
+      definitionName: "Universal cocone",
+      alternativeDefinitions: [
+        { name: "Initial cocone", uses: ["cocone", "initial-object", "category"],
+          text: "An initial object of the category whose objects are the cocones under D and whose morphisms are the morphisms between their vertices that commute with all legs." },
+        { name: "Corepresenting object of the cocone functor", uses: ["cocone", "hom-functor", "natural-isomorphism"], formula: String.raw`\operatorname{Hom}(L, A) \cong \operatorname{Cocone}(D, A)`,
+          text: "An object L with a natural isomorphism between the hom functor Hom(L, −) and the functor that sends an object A to the set of cocones from D to A." },
+      ], },
     { id: "terminal-object", name: "Terminal object", kind: "objekt", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["category"],
       formula: String.raw`|\operatorname{Hom}(X, 1)| = 1`,
       text: "An object to which every object has exactly one morphism (the one-point set). Dually an initial object (the empty set)." },
@@ -131,16 +162,31 @@ window.CT_CONCEPTS = {
       text: "The dual of a cone: an object L with morphisms from all objects of a diagram that commute with the morphisms u: i → j of the diagram." },
     { id: "product", name: "Product", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["limit", "diagram"], isA: ["limit"],
       formula: String.raw`X \times Y,\quad \operatorname{Hom}(Z, X \times Y) \cong \operatorname{Hom}(Z, X) \times \operatorname{Hom}(Z, Y)`,
-      text: "The limit of a diagram without arrows (a family of objects): the cartesian product of sets, the direct product of groups. Dually the coproduct." },
+      text: "The limit of a diagram without arrows (a family of objects): the cartesian product of sets, the direct product of groups. Dually the coproduct.",
+      definitionName: "Limit of a discrete diagram",
+      alternativeDefinitions: [
+        { name: "Projections with a universal property", uses: ["category"], formula: String.raw`p_i \circ f = f_i`,
+          text: "An object P with morphisms p<sub>i</sub>: P → X<sub>i</sub> such that for every object Z and every family of morphisms f<sub>i</sub>: Z → X<sub>i</sub> there is exactly one morphism f: Z → P with p<sub>i</sub> ∘ f = f<sub>i</sub> for all i." },
+      ], },
     { id: "equalizer", name: "Equalizer", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["limit"], isA: ["limit"],
       formula: String.raw`E \to X \rightrightarrows Y`,
       text: "The limit of two parallel morphisms f, g: X → Y; in sets the subset where f and g agree." },
     { id: "pullback", name: "Pullback", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["limit"], isA: ["limit"],
       formula: String.raw`X \times_Z Y`,
-      text: "The limit of two morphisms X → Z ← Y (fibre product). In algebraic geometry the base change of schemes." },
+      text: "The limit of two morphisms X → Z ← Y (fibre product). In algebraic geometry the base change of schemes.",
+      definitionName: "Limit of a cospan",
+      alternativeDefinitions: [
+        { name: "Product in the slice category", uses: ["product", "slice-category"], formula: String.raw`X \times_Z Y = X \times Y \ \text{in}\ \mathcal C / Z`,
+          text: "The product of the objects X → Z and Y → Z in the slice category C / Z, with its projections." },
+      ], },
     { id: "coproduct", name: "Coproduct", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["colimit", "diagram"], isA: ["colimit"],
       formula: String.raw`X \sqcup Y,\quad \operatorname{Hom}(X \sqcup Y, Z) \cong \operatorname{Hom}(X, Z) \times \operatorname{Hom}(Y, Z)`,
-      text: "The colimit of a diagram without arrows (a family of objects), dual to the product: the disjoint union of sets, the free product of groups, the direct sum of modules." },
+      text: "The colimit of a diagram without arrows (a family of objects), dual to the product: the disjoint union of sets, the free product of groups, the direct sum of modules.",
+      definitionName: "Colimit of a discrete diagram",
+      alternativeDefinitions: [
+        { name: "Injections with a universal property", uses: ["category"], formula: String.raw`f \circ \iota_i = f_i`,
+          text: "An object S with morphisms ι<sub>i</sub>: X<sub>i</sub> → S such that for every object Z and every family of morphisms f<sub>i</sub>: X<sub>i</sub> → Z there is exactly one morphism f: S → Z with f ∘ ι<sub>i</sub> = f<sub>i</sub> for all i." },
+      ], },
     { id: "coequalizer", name: "Coequalizer", kind: "konstruktion", area: "18A", field: [18], msc: ["18A"], msc5: "18A30", uses: ["colimit"], isA: ["colimit"],
       formula: String.raw`X \rightrightarrows Y \to Q`,
       text: "The colimit of two parallel morphisms f, g: X → Y, dual to the equalizer; in sets the quotient of Y by the equivalence relation generated by f(x) ∼ g(x)." },
@@ -149,7 +195,14 @@ window.CT_CONCEPTS = {
       text: "The colimit of two morphisms X ← Z → Y: gluing X and Y along Z." },
     { id: "adjunction", name: "Adjunction", kind: "morphismus", area: "18A", field: [18], msc: ["18A"], msc5: "18A40", uses: ["functor", "natural-transformation"],
       formula: String.raw`\operatorname{Hom}(FX, Y) \cong \operatorname{Hom}(X, GY)`,
-      text: "Functors F: C → D and G: D → C with natural transformations η: id → GF and ε: FG → id satisfying the triangle identities; equivalently a natural bijection of hom sets. Free constructions are left adjoint to forgetful functors." },
+      text: "Functors F: C → D and G: D → C with natural transformations η: id → GF and ε: FG → id satisfying the triangle identities; equivalently a natural bijection of hom sets. Free constructions are left adjoint to forgetful functors.",
+      definitionName: "Unit and counit",
+      alternativeDefinitions: [
+        { name: "Hom-set bijection", uses: ["functor", "hom-functor", "natural-isomorphism", "product-category", "opposite-category"], formula: String.raw`\operatorname{Hom}_{\mathcal D}(FX, Y) \cong \operatorname{Hom}_{\mathcal C}(X, GY)`,
+          text: "Functors F: C → D and G: D → C with a bijection Hom(FX, Y) ≅ Hom(X, GY) natural in X and Y, i.e. a natural isomorphism between two functors C<sup>op</sup> × D → Set built from hom functors (Mac Lane IV.1)." },
+        { name: "Universal arrows", uses: ["functor"], formula: String.raw`G(g) \circ \eta_X = f`,
+          text: "A functor G: D → C and for every object X of C an object FX of D with a morphism η<sub>X</sub>: X → G(FX) such that for every object Y and every morphism f: X → GY there is exactly one morphism g: FX → Y with G(g) ∘ η<sub>X</sub> = f. F then extends uniquely to a functor." },
+      ], },
 
     // ------------------------------------------------------------ 18B Special categories, topoi
     { id: "category-of-sets", name: "Category of sets", kind: "objekt", area: "18B", field: [18], msc: ["18B"], msc5: "18B05", uses: ["category", "st:set", "st:map"], isA: ["category"],
@@ -163,7 +216,12 @@ window.CT_CONCEPTS = {
       text: "An object Ω with a morphism true: 1 → Ω from the terminal object 1 such that every monomorphism is the pullback of true along exactly one morphism. In sets Ω = {true, false}." },
     { id: "topos", name: "Topos", kind: "objekt", area: "18B", field: [18], msc: ["18B", "03G"], msc5: "18B25", uses: ["cartesian-closed", "limit", "subobject-classifier"], isA: ["category"],
       formula: String.raw`\text{finite limits},\ \ \text{exponentials},\ \ \Omega`,
-      text: "Elementary topos (Lawvere and Tierney 1970): a cartesian closed category with finite limits and a subobject classifier. A category that behaves like the category of sets, with its own internal logic." },
+      text: "Elementary topos (Lawvere and Tierney 1970): a cartesian closed category with finite limits and a subobject classifier. A category that behaves like the category of sets, with its own internal logic.",
+      definitionName: "Cartesian closed with a subobject classifier",
+      alternativeDefinitions: [
+        { name: "Power objects", uses: ["limit", "monomorphism", "product", "pullback"], formula: String.raw`\operatorname{Sub}(Y \times X) \cong \operatorname{Hom}(Y, PX)`,
+          text: "A category with finite limits in which every object X has a power object PX with a monomorphism ∈<sub>X</sub> → PX × X such that every monomorphism R → Y × X is the pullback of ∈<sub>X</sub> along exactly one morphism Y × X → PX × X of the form h × id<sub>X</sub> (Mac Lane and Moerdijk IV.1)." },
+      ], },
 
     { id: "groupoid", name: "Groupoid", kind: "eigenschaft", area: "18B", field: [18, 20], msc: ["18B", "20L"], msc5: "18B40", uses: ["category", "isomorphism"], isA: ["category"],
       formula: String.raw`\operatorname{Hom}(X, Y) = \operatorname{Iso}(X, Y)`,
@@ -172,7 +230,14 @@ window.CT_CONCEPTS = {
     // ------------------------------------------------------------ 18C Monads
     { id: "monad", name: "Monad", kind: "objekt", area: "18C", field: [18], msc: ["18C"], msc5: "18C15", uses: ["functor", "natural-transformation"],
       formula: String.raw`T : \mathcal C \to \mathcal C,\quad \mu : T^2 \to T,\quad \eta : \mathrm{id} \to T`,
-      text: "An endofunctor with a multiplication and a unit satisfying associativity and unit laws. Every adjunction gives a monad GF." },
+      text: "An endofunctor with a multiplication and a unit satisfying associativity and unit laws. Every adjunction gives a monad GF.",
+      definitionName: "Endofunctor with multiplication and unit",
+      alternativeDefinitions: [
+        { name: "Kleisli triple", uses: ["category"], formula: String.raw`\eta_X^{*} = \mathrm{id}_{TX},\quad f^{*} \circ \eta_X = f,\quad (g^{*} \circ f)^{*} = g^{*} \circ f^{*}`,
+          text: "For every object X an object TX and a morphism η<sub>X</sub>: X → TX, and for every morphism f: X → TY a morphism f<sup>*</sup>: TX → TY, satisfying the three laws shown (Manes; used in functional programming). T becomes a functor with T(f) = (η ∘ f)<sup>*</sup>." },
+        { name: "Monoid of endofunctors", uses: ["monoidal-category", "functor-category"], formula: String.raw`\mu : T \circ T \to T,\quad \eta : \mathrm{id} \to T`,
+          text: "A monoid object in the functor category [C, C] of endofunctors, which is a monoidal category with composition as tensor product and the identity functor as unit." },
+      ], },
     { id: "monad-algebra", name: "Algebra for a monad", kind: "objekt", area: "18C", field: [18], msc: ["18C"], msc5: "18C20", uses: ["monad"],
       formula: String.raw`a : TX \to X`,
       text: "An object X with a morphism TX → X compatible with μ and η (Eilenberg–Moore algebra). Groups are the algebras for the free-group monad on sets." },
@@ -180,7 +245,12 @@ window.CT_CONCEPTS = {
     // ------------------------------------------------------------ 18D Categories with structure
     { id: "cartesian-closed", name: "Cartesian closed category", kind: "eigenschaft", area: "18D", field: [18], msc: ["18D"], msc5: "18D15", uses: ["product", "terminal-object", "functor", "adjunction"], isA: ["category"],
       formula: String.raw`\operatorname{Hom}(Z \times X, Y) \cong \operatorname{Hom}(Z, Y^X)`,
-      text: "A category with finite products (including the empty product, a terminal object) in which every functor − × X has a right adjoint (an adjunction), the exponential (−)<sup>X</sup>. Sets and the simply typed lambda calculus are examples." },
+      text: "A category with finite products (including the empty product, a terminal object) in which every functor − × X has a right adjoint (an adjunction), the exponential (−)<sup>X</sup>. Sets and the simply typed lambda calculus are examples.",
+      definitionName: "Right adjoint to the product functor",
+      alternativeDefinitions: [
+        { name: "Exponential objects with evaluation", uses: ["product", "terminal-object"], formula: String.raw`\mathrm{ev} \circ (h \times \mathrm{id}_X) = g`,
+          text: "A category with finite products (including a terminal object) in which for any two objects X and Y there is an object Y<sup>X</sup> with a morphism ev: Y<sup>X</sup> × X → Y such that for every morphism g: Z × X → Y there is exactly one morphism h: Z → Y<sup>X</sup> with ev ∘ (h × id<sub>X</sub>) = g." },
+      ], },
 
     // ------------------------------------------------------------ 18E Additive and abelian categories
     { id: "additive-category", name: "Additive category", kind: "eigenschaft", area: "18E", field: [18], msc: ["18E"], msc5: "18E05", uses: ["category", "gt:abelian-group", "zero-object", "product", "coproduct"], isA: ["category"],
@@ -198,9 +268,14 @@ window.CT_CONCEPTS = {
     { id: "coimage", name: "Coimage of a morphism", kind: "konstruktion", area: "18E", field: [18], msc: ["18E"], msc5: "18E10", uses: ["additive-category", "kernel", "cokernel"],
       formula: String.raw`\operatorname{coim} f = \operatorname{coker}(\ker f)`,
       text: "The dual of the image: in an additive category with kernels and cokernels the cokernel of the kernel of f: Y → Z. For modules Y / ker f, which f maps isomorphically onto the image." },
-    { id: "abelian-category", name: "Abelian category", kind: "eigenschaft", area: "18E", field: [18], msc: ["18E"], msc5: "18E10", uses: ["additive-category", "kernel", "cokernel", "monomorphism", "epimorphism", "image", "coimage", "isomorphism"], isA: ["additive-category"],
-      formula: String.raw`\operatorname{coim} f \xrightarrow{\ \sim\ } \operatorname{im} f`,
-      text: "An additive category with kernels and cokernels in which every monomorphism is a kernel and every epimorphism a cokernel; equivalently, for every morphism f the canonical morphism from the coimage coim f to the image im f is an isomorphism. Abelian groups, modules and sheaves of abelian groups form abelian categories (Grothendieck 1957)." },
+    { id: "abelian-category", name: "Abelian category", kind: "eigenschaft", area: "18E", field: [18], msc: ["18E"], msc5: "18E10", uses: ["additive-category", "kernel", "cokernel", "monomorphism", "epimorphism"], isA: ["additive-category"],
+      formula: String.raw`m = \ker(\operatorname{coker} m),\quad e = \operatorname{coker}(\ker e)`,
+      text: "An additive category with kernels and cokernels in which every monomorphism is a kernel and every epimorphism a cokernel. Abelian groups, modules and sheaves of abelian groups form abelian categories (Grothendieck 1957).",
+      definitionName: "Normal monomorphisms and epimorphisms",
+      alternativeDefinitions: [
+        { name: "Coimage isomorphic to image", uses: ["additive-category", "kernel", "cokernel", "coimage", "image", "isomorphism"], formula: String.raw`\operatorname{coim} f \xrightarrow{\ \sim\ } \operatorname{im} f`,
+          text: "An additive category with kernels and cokernels in which for every morphism f the canonical morphism from the coimage coim f to the image im f is an isomorphism (Grothendieck 1957)." },
+      ], },
     { id: "exact-sequence", name: "Exact sequence", kind: "objekt", area: "18E", field: [18], msc: ["18E", "18G"], msc5: "18E10", uses: ["abelian-category", "image", "kernel"],
       formula: String.raw`\operatorname{im} f = \ker g`,
       text: "A sequence of morphisms in an abelian category in which the image of each morphism is the kernel of the next. A short exact sequence 0 → A → B → C → 0 presents B as an extension of C by A." },
@@ -214,7 +289,12 @@ window.CT_CONCEPTS = {
       text: "A contravariant functor from a category to sets. On the open sets of a space: sections over each open set with restriction maps." },
     { id: "sheaf", name: "Sheaf", kind: "eigenschaft", area: "18F", field: [18, 14], msc: ["18F", "14F", "54B"], msc5: "18F20", uses: ["presheaf", "topological-space", "product", "equalizer", "open-cover"], isA: ["presheaf"],
       formula: String.raw`F(U) \to \prod_i F(U_i) \rightrightarrows \prod_{i,j} F(U_i \cap U_j)`,
-      text: "A presheaf on the open sets of a topological space whose sections are determined locally and can be glued: the diagram of products shown is an equalizer for every open cover of U by open sets U<sub>i</sub>." },
+      text: "A presheaf on the open sets of a topological space whose sections are determined locally and can be glued: the diagram of products shown is an equalizer for every open cover of U by open sets U<sub>i</sub>.",
+      definitionName: "Equalizer condition",
+      alternativeDefinitions: [
+        { name: "Locality and gluing", uses: ["presheaf", "topological-space", "open-cover"], formula: String.raw`s|_{U_i} = t|_{U_i} \Rightarrow s = t`,
+          text: "A presheaf on the open sets of a topological space such that for every open cover of U by open sets U<sub>i</sub> two sections over U that agree on every U<sub>i</sub> are equal (locality), and sections s<sub>i</sub> over the U<sub>i</sub> that agree on all overlaps U<sub>i</sub> ∩ U<sub>j</sub> come from a section over U (gluing)." },
+      ], },
     { id: "local-system", name: "Local system", kind: "eigenschaft", area: "18F", field: [18, 55], msc: ["18F", "55N"], msc5: "18F20", uses: ["sheaf", "open-cover", "st:map"], isA: ["sheaf"],
       formula: String.raw`\mathcal L|_{U_i} \cong \underline{A}`,
       text: "A locally constant sheaf ℒ on a topological space X: X has an open cover by open sets U<sub>i</sub> such that ℒ restricted to each U<sub>i</sub> is isomorphic to the constant sheaf A, whose sections over V are the locally constant maps from V to a fixed set or abelian group A. On a connected, locally simply connected space local systems correspond to representations of the fundamental group (monodromy)." },
@@ -232,7 +312,12 @@ window.CT_CONCEPTS = {
       text: "A presheaf F on a site for which every covering sieve S of every object X gives a bijection between the sections F(X) over X and the compatible families on S, i.e. the natural transformations S → F (the set Hom(S, F))." },
     { id: "grothendieck-topos", name: "Grothendieck topos", kind: "objekt", area: "18F", field: [18], msc: ["18F", "18B"], msc5: "18F10", uses: ["category", "equivalence-of-categories", "sheaf-on-site"],
       formula: String.raw`\operatorname{Sh}(\mathcal C, J)`,
-      text: "A category with an equivalence of categories to the category Sh(C, J) of sheaves on a site. Every Grothendieck topos is an elementary topos." },
+      text: "A category with an equivalence of categories to the category Sh(C, J) of sheaves on a site. Every Grothendieck topos is an elementary topos.",
+      definitionName: "Sheaves on a site",
+      alternativeDefinitions: [
+        { name: "Giraud's axioms", uses: ["limit", "coproduct", "pullback", "epimorphism", "coequalizer"],
+          text: "A locally small category with finite limits in which all small coproducts exist, are disjoint and are stable under pullback, every epimorphism is a coequalizer, every equivalence relation is the kernel pair of its coequalizer and coequalizers are stable under pullback, and which has a set of generators. Equivalent to the standard definition by Giraud's theorem." },
+      ], },
 
     // ------------------------------------------------------------ 18G Homological algebra
     { id: "chain-complex", name: "Chain complex", kind: "objekt", area: "18G", field: [18], msc: ["18G"], msc5: "18G35", uses: ["abelian-category"],
@@ -273,7 +358,12 @@ window.CT_CONCEPTS = {
       text: "An additive category with a shift functor and a class of distinguished triangles satisfying Verdier's axioms; it replaces short exact sequences." },
     { id: "derived-category", name: "Derived category", kind: "konstruktion", area: "18G", field: [18, 14], msc: ["18G", "14F"], msc5: "18G80", uses: ["category", "chain-complex", "chain-map", "quasi-isomorphism"],
       formula: String.raw`D(\mathcal A) = \operatorname{Ch}(\mathcal A)[\text{qis}^{-1}]`,
-      text: "The category of chain complexes and chain maps in which the quasi-isomorphisms are made invertible (Grothendieck and Verdier). Derived functors become functors between derived categories; it is a triangulated category." },
+      text: "The category of chain complexes and chain maps in which the quasi-isomorphisms are made invertible (Grothendieck and Verdier). Derived functors become functors between derived categories; it is a triangulated category.",
+      definitionName: "Localisation at quasi-isomorphisms",
+      alternativeDefinitions: [
+        { name: "Verdier quotient of the homotopy category", uses: ["chain-complex", "chain-homotopy", "triangulated-category", "quasi-isomorphism"], formula: String.raw`D(\mathcal A) = K(\mathcal A) / K_{\mathrm{acyc}}(\mathcal A)`,
+          text: "The Verdier quotient of the homotopy category K(A) (chain complexes, chain maps up to chain homotopy), a triangulated category, by the thick subcategory of acyclic complexes, those quasi-isomorphic to zero." },
+      ], },
 
     // ------------------------------------------------------------ 18M Monoidal categories
     { id: "monoidal-category", name: "Monoidal category", kind: "eigenschaft", area: "18M", field: [18], msc: ["18M"], msc5: "18M05", uses: ["category", "product-category", "functor", "natural-isomorphism"], isA: ["category"],

@@ -23,6 +23,10 @@
 // Modern Number Theory (2nd ed. 1990). Starting material: the 11A theorems of maps/karte-1830 and maps/karte-1900.
 // Not checked by a specialist.
 // Checked by tests/check-theorems.js.
+// `fromDefinitions: true` marks a theorem whose usual proof uses only definitions and axioms of its area and no
+// theorem (it has no premises); a theorem without premises that rests on theory outside these graphs carries
+// `foundation: true`, and its `proof` names that theory. tests/check-theorems.js warns about theorems without
+// premises that have neither mark.
 
 window.ENT_THEOREMS = {
   title: "Theorems of elementary number theory",
@@ -47,6 +51,7 @@ window.ENT_THEOREMS = {
     // ------------------------------------------------------------ 11A05 Multiplicative structure, Euclidean algorithm
     { id: "division-with-remainder", name: "Division with remainder", kind: "theorem", area: "11A05", field: [11], msc: ["11A"], msc5: "11A05",
       premises: [],
+      fromDefinitions: true,
       foundation: true,
       formula: String.raw`a = qb + r,\quad 0 \le r < b`,
       text: "For every integer a and every natural number b there are unique integers q and r with a = qb + r and 0 ≤ r < b.",
@@ -97,6 +102,7 @@ window.ENT_THEOREMS = {
       concepts: ["coprime", "divisibility"] },
     { id: "existence-of-prime-factorization", name: "Existence of prime factorization", kind: "lemma", area: "11A05", field: [11], msc: ["11A"], msc5: "11A05",
       premises: [],
+      fromDefinitions: true,
       text: "Every natural number n > 1 is a product of primes.",
       proof: "Strong induction on n: a prime is its own factorization; otherwise n = ab with 1 < a, b < n, and the factorizations of a and b combine.",
       concepts: ["prime-number", "prime-factorization"],
@@ -424,13 +430,18 @@ window.ENT_THEOREMS = {
       concepts: ["euler-phi", "prime-factorization"],
       year: 1763, who: "Euler" },
     { id: "phi-divisor-sum", name: "Divisor sum of Euler's totient function", kind: "theorem", area: "11A25", field: [11], msc: ["11A"], msc5: "11A25",
+      premises: ["bezout-identity"],
       formula: String.raw`\sum_{d \mid n} \varphi(d) = n`,
       text: "For every natural number n the values φ(d) over the positive divisors d of n add up to n.",
+      proof: "Sort the numbers k = 1, …, n by d = n/gcd(k, n). Writing k = (n/d)j, one has gcd(k, n) = (n/d)·gcd(j, d) by Bézout's identity, so gcd(k, n) = n/d holds exactly when 1 ≤ j ≤ d and gcd(j, d) = 1; there are φ(d) such k.",
       concepts: ["euler-phi", "divisibility"],
       year: 1801, who: "Gauss" },
     { id: "dirichlet-ring", name: "Ring of arithmetic functions", kind: "theorem", area: "11A25", field: [11], msc: ["11A"], msc5: "11A25",
+      premises: [],
+      fromDefinitions: true,
       formula: String.raw`f * g = g * f,\quad (f * g) * h = f * (g * h),\quad f * \varepsilon = f`,
       text: "Under addition and Dirichlet convolution the arithmetic functions form a commutative ring with unit ε (ε(1) = 1, ε(n) = 0 for n > 1); f is invertible exactly when f(1) ≠ 0.",
+      proof: "Commutativity and associativity hold because (f * g * h)(n) is the sum of f(a)g(b)h(c) over all ordered triples with abc = n; ε is the unit. If f(1) ≠ 0, the equations (f * g)(n) = ε(n) determine g(n) recursively from the values g(d) with d < n; conversely f(1)g(1) = 1 for an inverse g.",
       concepts: ["arithmetic-function", "dirichlet-convolution"] },
     { id: "multiplicative-convolution", name: "Convolution of multiplicative functions", kind: "theorem", area: "11A25", field: [11], msc: ["11A"], msc5: "11A25",
       premises: ["divisors-of-coprime-product"],
@@ -525,8 +536,11 @@ window.ENT_THEOREMS = {
       proof: "For such primes p<sub>1</sub>, …, p<sub>k</sub> let q be a prime factor of (2p<sub>1</sub> ⋯ p<sub>k</sub>)<sup>2</sup> + 1. Then −1 is a square modulo q, so q ≡ 1 modulo 4 by the first supplementary law, and q is new.",
       concepts: ["prime-number", "congruence"] },
     { id: "mersenne-exponent-prime", name: "Prime Mersenne numbers have prime exponent", kind: "lemma", area: "11A41", field: [11], msc: ["11A"], msc5: "11A41",
+      premises: [],
+      fromDefinitions: true,
       formula: String.raw`2^{ab} - 1 = (2^a - 1)(2^{a(b-1)} + \dots + 2^a + 1)`,
       text: "If 2<sup>n</sup> − 1 is prime, then n is prime. Similarly, if 2<sup>m</sup> + 1 is prime, then m is a power of 2.",
+      proof: "If n = ab with 1 < a < n, then 2<sup>a</sup> − 1 is a proper divisor of 2<sup>n</sup> − 1, because x − 1 divides x<sup>b</sup> − 1 for x = 2<sup>a</sup>. If m = ab with an odd b > 1, then 2<sup>a</sup> + 1 divides 2<sup>m</sup> + 1, because x + 1 divides x<sup>b</sup> + 1 for odd b.",
       concepts: ["mersenne-number", "fermat-number", "prime-number"] },
     { id: "bertrand-postulate", name: "Bertrand's postulate", kind: "theorem", area: "11A41", field: [11], msc: ["11A", "11N"], msc5: "11A41",
       premises: ["legendre-formula"],
@@ -608,6 +622,7 @@ window.ENT_THEOREMS = {
     // ------------------------------------------------------------ 11A55 Continued fractions
     { id: "convergent-recurrence", name: "Recurrence for convergents", kind: "lemma", area: "11A55", field: [11], msc: ["11A"], msc5: "11A55",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`p_k = a_k p_{k-1} + p_{k-2},\quad q_k = a_k q_{k-1} + q_{k-2}`,
       text: "The numerators and denominators of the convergents of [a<sub>0</sub>; a<sub>1</sub>, a<sub>2</sub>, …] satisfy the recurrence shown, with p<sub>−1</sub> = 1, q<sub>−1</sub> = 0, p<sub>−2</sub> = 0, q<sub>−2</sub> = 1; and x = (p<sub>k</sub>x<sub>k+1</sub> + p<sub>k−1</sub>)/(q<sub>k</sub>x<sub>k+1</sub> + q<sub>k−1</sub>) for the complete quotient x<sub>k+1</sub>.",
       proof: "Induction on k: replacing a<sub>k</sub> by a<sub>k</sub> + 1/a<sub>k+1</sub> in the formula for p<sub>k</sub>/q<sub>k</sub> gives the formula for k + 1.",
@@ -634,12 +649,12 @@ window.ENT_THEOREMS = {
       proof: "From the complete-quotient formula and the determinant formula, x − p<sub>k</sub>/q<sub>k</sub> = (−1)<sup>k</sup>/(q<sub>k</sub>(q<sub>k</sub>x<sub>k+1</sub> + q<sub>k−1</sub>)), and q<sub>k</sub>x<sub>k+1</sub> + q<sub>k−1</sub> > q<sub>k+1</sub>.",
       concepts: ["convergent", "continued-fraction", "st:real-number"] },
     { id: "dirichlet-approximation", name: "Dirichlet's approximation theorem", kind: "corollary", area: "11A55", field: [11], msc: ["11A", "11J"], msc5: "11A55",
-      premises: [],
+      premises: ["st:supremum-property"],
       proofName: "Pigeonhole principle",
       proofYear: 1842, proofWho: "Dirichlet",
       formula: String.raw`\left| x - \frac{p}{q} \right| < \frac{1}{q^2}`,
       text: "For every irrational real number x there are infinitely many fractions p/q with |x − p/q| < 1/q<sup>2</sup>.",
-      proof: "Among the N + 1 numbers kx − ⌊kx⌋, 0 ≤ k ≤ N, two lie in the same of N intervals of length 1/N, so |qx − p| < 1/N ≤ 1/q for some p and 0 < q ≤ N. Since x is irrational, |qx − p| > 0, so letting N grow gives infinitely many fractions.",
+      proof: "The integer parts ⌊kx⌋ exist because ℕ is unbounded in ℝ (Archimedean property, from the supremum property). Among the N + 1 numbers kx − ⌊kx⌋, 0 ≤ k ≤ N, two lie in the same of N intervals of length 1/N, so |qx − p| < 1/N ≤ 1/q for some p and 0 < q ≤ N. Since x is irrational, |qx − p| > 0, so letting N grow gives infinitely many fractions.",
       alternativeProofs: [
         { name: "Convergents of the continued fraction", premises: ["cf-convergence"], year: 1770, who: "Lagrange",
           idea: "Every convergent qualifies, since |x − p<sub>k</sub>/q<sub>k</sub>| < 1/(q<sub>k</sub>q<sub>k+1</sub>) and q<sub>k+1</sub> > q<sub>k</sub>." },
@@ -710,6 +725,7 @@ window.ENT_THEOREMS = {
     // ------------------------------------------------------------ 11B39 Fibonacci numbers, 11A67 Zeckendorf
     { id: "fibonacci-nonconsecutive-sum", name: "Sums of non-consecutive Fibonacci numbers", kind: "lemma", area: "11B39", field: [11], msc: ["11B"], msc5: "11B39",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`F_{k_1} + \dots + F_{k_r} < F_{k_1 + 1},\quad k_i \ge k_{i+1} + 2,\ k_r \ge 2`,
       text: "A sum of distinct, pairwise non-consecutive Fibonacci numbers F<sub>k</sub> (k ≥ 2) with largest term F<sub>k<sub>1</sub></sub> is less than F<sub>k<sub>1</sub>+1</sub>.",
       proof: "Induction on k<sub>1</sub>: the remaining terms are less than F<sub>k<sub>1</sub>−1</sub>, and F<sub>k<sub>1</sub></sub> + F<sub>k<sub>1</sub>−1</sub> = F<sub>k<sub>1</sub>+1</sub>.",

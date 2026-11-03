@@ -8,6 +8,10 @@ window.CONCEPT_PAGE = {
     "14M": "#f4a261", "14N": "#5c7cfa",
   },
   foreignArea: "basic",
+  // concepts of other areas are not points on an inner circle; their arrows come from outside, shown when needed
+  // (user, 3 November 2026, as in the theorem graphs)
+  foreignOutside: true,
+  words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside algebraic geometry",
   hubs: ["scheme", "morphism"],
   centre: ["locally-ringed-space"],

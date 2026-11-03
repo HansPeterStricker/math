@@ -39,19 +39,23 @@
     <p>Each point is a definition from set theory (MSC 03E, ordered sets 06A), up to the construction of the number systems. An arrow from A to B means that the
       definition of B uses A. Dashed lines mean “every B is an A”.</p>
     <p>Each MSC class has its own sector of the circle. The distance from the centre shows the level within the area:
-      concepts from other areas (prerequisites) are on the innermost circle, and within a sector a concept lies further
+      within a sector a concept lies further
       out than the concepts its definition uses. The colour shows the MSC class; larger points are used, directly or
       indirectly, by more definitions.</p>
-    <p>Concepts with a dashed border are defined in another area; their panel links to the graph of that area.</p>
+    <p>Concepts defined in another area are not points of this graph. When a concept whose definition uses one of them is
+      selected, an arrow comes from outside, from a small point with its name in the colour of that area; a click on the
+      point shows everything here that uses it. The switch “arrows from other areas” shows all these arrows.</p>
     <p>“Is a” relations and arrows from other areas (prerequisites such as ℕ and ℤ) appear when a concept is selected;
-      indirect dependencies (A → C when C also uses B and B depends on A) only with their switch on the left.</p>
+      indirect dependencies (A → C when C also uses B and B depends on A) and edges used only by other definitions only
+      with their switches on the left.</p>
     <p>A click on a concept lays the card of its definition over the dimmed graph: the concept at the bottom with the concepts
       its definition uses directly above it (brown). A click on any box of the card shows or hides the boxes above it; a
       concept with several definitions has a small switch “1/3 ›” for the next one. A right click lays the card of the
       consequences: the concept at the top, below it the concepts that use it in some definition (blue; dashed where not every
       definition uses it); a click on a box shows or hides the boxes below it. The card closes with ×, Escape or a click
-      outside it and starts afresh the next time. A click on another box of the card
-      moves the card to that concept. The panel shows the definition and, in the same drawing, all definitions it
+      outside it and starts afresh the next time. With the switch “click marks in the graph” a click marks instead,
+      in the graph itself, the concepts its definition uses directly, and each further click on it one step more; a right
+      click marks in the same way the concepts that use it. The panel shows the definition and, in the same drawing, all definitions it
       builds on. While a concept is selected, all levels are marked in the dimmed graph. Arrows to other areas lead to
       the concepts of other areas whose definitions use it. Pointing at a concept shows its name at once;
       after half a second only this concept stays lit. Drag a concept to move it, drag the background to move the picture, use the mouse wheel to zoom. The search

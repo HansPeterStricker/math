@@ -19,7 +19,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "existence-of-maximal-ideals"
+    "ideal-correspondence"
   ],
   "sources": {
     "st": {

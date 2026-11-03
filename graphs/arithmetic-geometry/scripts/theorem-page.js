@@ -20,7 +20,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "atkin-lehner"
+    "hecke-operators-normal"
   ],
   "sources": {
     "st": {

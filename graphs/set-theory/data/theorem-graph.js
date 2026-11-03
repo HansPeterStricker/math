@@ -17,6 +17,10 @@
 // Sources: Enderton, Elements of Set Theory (1977); Halmos, Naive Set Theory (1960); Jech, Set Theory (3rd ed. 2003);
 // Kunen, Set Theory (1980 and 2011); Landau, Grundlagen der Analysis (1930). Not checked by a specialist.
 // Checked by ../../tests/check-theorems.js.
+// `fromDefinitions: true` marks a theorem whose usual proof uses only definitions and axioms of its area and no
+// theorem (it has no premises); a theorem without premises that rests on theory outside these graphs carries
+// `foundation: true`, and its `proof` names that theory. tests/check-theorems.js warns about theorems without
+// premises that have neither mark.
 
 window.ST_THEOREMS = {
   title: "Theorems of set theory",
@@ -257,10 +261,10 @@ window.ST_THEOREMS = {
       proof: "Diagonal argument: for f : X → 𝒫(X) the set D = {x ∈ X : x ∉ f(x)} is not a value of f.",
       concepts: ["power-set", "surjective", "equinumerous"], year: 1891, who: "Cantor" },
     { id: "knaster-tarski", name: "Knaster–Tarski fixed-point theorem", kind: "theorem", area: "06B", field: [6], msc: ["06B"], msc5: "06B23",
-      premises: [],
+      premises: ["ax-separation"],
       formula: String.raw`f(a) = a,\quad a = \sup\{x : x \le f(x)\}`,
       text: "Every order-preserving map f of a complete lattice into itself has a fixed point, indeed a greatest one.",
-      proof: "For a = sup{x : x ≤ f(x)} one shows a ≤ f(a), then f(a) ≤ f(f(a)), so f(a) belongs to the set and f(a) ≤ a.",
+      proof: "The set {x : x ≤ f(x)} is formed by separation. For its supremum a one shows a ≤ f(a), then f(a) ≤ f(f(a)), so f(a) belongs to the set and f(a) ≤ a.",
       concepts: ["lattice", "supremum"], year: 1928, who: "Knaster, Tarski" },
     { id: "schroeder-bernstein", name: "Schröder–Bernstein theorem", kind: "theorem", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10",
       premises: ["knaster-tarski"],

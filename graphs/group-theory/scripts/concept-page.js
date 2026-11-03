@@ -6,6 +6,10 @@ window.CONCEPT_PAGE = {
     basic: "#d9d4ca", "20A": "#e9c46a", "20B": "#8ab17d", "20D": "#c0392b", "20E": "#4f86c6", "20F": "#9b5de5", "20K": "#e76f51", "20G": "#2a9d8f",
   },
   foreignArea: "basic",
+  // concepts of other areas are not points on an inner circle; their arrows come from outside, shown when needed
+  // (user, 3 November 2026, as in the theorem graphs)
+  foreignOutside: true,
+  words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside group theory",
   hubs: ["group"],
   centre: ["group"],

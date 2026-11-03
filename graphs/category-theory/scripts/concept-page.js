@@ -7,6 +7,10 @@ window.CONCEPT_PAGE = {
     "18F": "#2a9d8f", "18G": "#4f86c6", "18M": "#e76f51", "18N": "#9b5de5",
   },
   foreignArea: "basic",
+  // concepts of other areas are not points on an inner circle; their arrows come from outside, shown when needed
+  // (user, 3 November 2026, as in the theorem graphs)
+  foreignOutside: true,
+  words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside category theory",
   hubs: ["category"],
   centre: ["category"],

@@ -15,6 +15,10 @@
 // Cyclotomic Fields (2nd ed. 1997); Cassels and Fröhlich, Algebraic Number Theory (1967); Serre, Local Fields (1979);
 // Milne, Class Field Theory (notes, 2020); Cox, Primes of the Form x² + ny² (1989). Not checked by a specialist.
 // Checked by ../../tests/check-theorems.js.
+// `fromDefinitions: true` marks a theorem whose usual proof uses only definitions and axioms of its area and no
+// theorem (it has no premises); a theorem without premises that rests on theory outside these graphs carries
+// `foundation: true`, and its `proof` names that theory. tests/check-theorems.js warns about theorems without
+// premises that have neither mark.
 
 window.ANT_THEOREMS = {
   title: "Theorems of algebraic number theory",
@@ -43,8 +47,10 @@ window.ANT_THEOREMS = {
   theorems: [
     // ------------------------------------------------------------ Results from other areas without a home folder yet
     { id: "minkowski-convex-body", name: "Minkowski's convex body theorem", kind: "theorem", foundation: true, area: "basic", field: [11], msc: ["11H"],
+      premises: [],
       formula: String.raw`\operatorname{vol}(C) > 2^n \operatorname{covol}(\Lambda) \;\Rightarrow\; C \cap \Lambda \ne \{0\}`,
       text: "A convex, centrally symmetric set C in ℝ<sup>n</sup> whose volume exceeds 2<sup>n</sup> times the covolume of a lattice Λ contains a non-zero point of Λ.",
+      proof: "The set ½C has volume greater than covol(Λ), so two of its translates by distinct lattice points overlap: x − y = λ with x, y in ½C and λ ≠ 0 in Λ. By symmetry and convexity λ = ½(2x) + ½(−2y) lies in C. The volume argument rests on Lebesgue measure, outside these graphs.",
       concepts: ["euclidean-lattice"],
       year: 1889, who: "Minkowski" },
 
@@ -113,6 +119,7 @@ window.ANT_THEOREMS = {
       year: 1882, who: "Dedekind" },
     { id: "discriminant-sign", name: "Brill's theorem on the sign of the discriminant", kind: "lemma", area: "11R04", field: [11], msc: ["11R"], msc5: "11R04",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`\operatorname{sign}(d_K) = (-1)^{r_2}`,
       text: "The discriminant of a number field with r<sub>2</sub> pairs of complex embeddings has the sign (−1)<sup>r<sub>2</sub></sup>.",
       proof: "d<sub>K</sub> = det(σ<sub>i</sub>(ω<sub>j</sub>))<sup>2</sup>. Complex conjugation permutes the rows of the matrix by r<sub>2</sub> transpositions, so the determinant is real for even r<sub>2</sub> and purely imaginary for odd r<sub>2</sub>.",
@@ -127,19 +134,19 @@ window.ANT_THEOREMS = {
       concepts: ["minkowski-embedding", "euclidean-lattice", "discriminant", "ideal-norm"],
       year: 1891, who: "Minkowski" },
     { id: "kronecker-roots-of-unity", name: "Kronecker's theorem on roots of unity", kind: "lemma", area: "11R04", field: [11], msc: ["11R"], msc5: "11R04",
-      premises: [],
+      premises: ["ca:integral-closure-is-ring"],
       formula: String.raw`|\sigma_1(\alpha)| = \dots = |\sigma_n(\alpha)| = 1 \;\Rightarrow\; \alpha^m = 1`,
       text: "An algebraic integer α whose conjugates σ<sub>1</sub>(α), …, σ<sub>n</sub>(α) all have absolute value 1 is a root of unity.",
-      proof: "The powers α<sup>k</sup> are algebraic integers of degree at most n whose conjugates have absolute value 1, so the coefficients of their characteristic polynomials are integers bounded in terms of n; there are only finitely many such polynomials, hence α<sup>k</sup> = α<sup>l</sup> for some k < l.",
+      proof: "The powers α<sup>k</sup> are algebraic integers, because integral elements form a ring, and their conjugates σ<sub>i</sub>(α)<sup>k</sup> have absolute value 1. The coefficients of ∏(X − σ<sub>i</sub>(α)<sup>k</sup>) are rational algebraic integers, hence integers, and they are bounded in terms of n; there are only finitely many such polynomials, so α<sup>k</sup> = α<sup>l</sup> for some k < l.",
       concepts: ["algebraic-integer", "root-of-unity", "embedding"],
       year: 1857, who: "Kronecker" },
 
     // ------------------------------------------------------------ 11R11 Quadratic fields
     { id: "quadratic-integers", name: "Integers of quadratic fields", kind: "lemma", area: "11R11", field: [11], msc: ["11R"], msc5: "11R11",
-      premises: [],
+      premises: ["ca:integral-closure-is-ring"],
       formula: String.raw`\mathcal O_{\mathbb Q(\sqrt d)} = \mathbb Z\Big[\tfrac{1 + \sqrt d}{2}\Big]\ (d \equiv 1 \bmod 4),\qquad \mathbb Z[\sqrt d]\ (d \equiv 2, 3 \bmod 4)`,
       text: "For a squarefree integer d ≠ 0, 1 the ring of integers of ℚ(√d) is ℤ[(1 + √d)/2] if d ≡ 1 mod 4 and ℤ[√d] otherwise; the discriminant is d or 4d.",
-      proof: "a + b√d is integral exactly when its trace 2a and its norm a<sup>2</sup> − db<sup>2</sup> are integers; since d is squarefree this forces 2a and 2b to be integers, and the norm condition modulo 4 decides when half-integers occur.",
+      proof: "If a + b√d is integral, so is its conjugate a − b√d, and since integral elements form a ring, the trace 2a and the norm a<sup>2</sup> − db<sup>2</sup> are rational algebraic integers, hence integers; conversely they are the coefficients of a monic equation. Since d is squarefree this forces 2a and 2b to be integers, and the norm condition modulo 4 decides when half-integers occur.",
       concepts: ["quadratic-field", "ring-of-integers", "fundamental-discriminant"],
       who: "Dedekind" },
     { id: "quadratic-decomposition-law", name: "Decomposition law in quadratic fields", kind: "theorem", area: "11R11", field: [11], msc: ["11R"], msc5: "11R11",
@@ -315,7 +322,7 @@ window.ANT_THEOREMS = {
       proof: "Every class contains an integral ideal of bounded norm, and only finitely many integral ideals have a given norm.",
       proofName: "Minkowski's bound",
       alternativeProofs: [
-        { name: "Hurwitz's elementary bound", premises: [], idea: "For an integral basis ω<sub>1</sub>, …, ω<sub>n</sub> a pigeonhole argument finds in every non-zero ideal 𝔞 an element α ≠ 0 with |N(α)| ≤ C · N𝔞, where C = ∏<sub>i</sub> Σ<sub>j</sub> |σ<sub>i</sub>(ω<sub>j</sub>)|; hence every ideal class contains an integral ideal of norm at most C.", who: "Dedekind, Hurwitz" },
+        { name: "Hurwitz's elementary bound", premises: ["integral-basis-existence", "ideal-norm-multiplicative"], idea: "For an integral basis ω<sub>1</sub>, …, ω<sub>n</sub> a pigeonhole argument finds in every non-zero ideal 𝔞 an element α ≠ 0 with |N(α)| ≤ C · N𝔞, where C = ∏<sub>i</sub> Σ<sub>j</sub> |σ<sub>i</sub>(ω<sub>j</sub>)|; hence every ideal class contains an integral ideal of norm at most C.", who: "Dedekind, Hurwitz" },
       ],
       concepts: ["class-group"],
       who: "Dedekind" },
@@ -619,6 +626,7 @@ window.ANT_THEOREMS = {
       concepts: ["place", "ar:absolute-value", "ideal-norm"] },
     { id: "weak-approximation", name: "Weak approximation theorem", kind: "theorem", foundation: true, area: "11R56", field: [11, 12], msc: ["11R", "12J"], msc5: "11R56",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`|x - a_i|_i < \varepsilon,\quad i = 1, \dots, n`,
       text: "For pairwise inequivalent non-trivial absolute values |·|<sub>1</sub>, …, |·|<sub>n</sub> of a field K, elements a<sub>1</sub>, …, a<sub>n</sub> of K and ε > 0 there is an x in K as shown: K is dense in the product of its completions at finitely many places.",
       proof: "Inequivalence gives elements z<sub>j</sub> with |z<sub>j</sub>|<sub>j</sub> > 1 and |z<sub>j</sub>|<sub>i</sub> < 1 for i ≠ j; the quotients z<sub>j</sub><sup>r</sup>/(1 + z<sub>j</sub><sup>r</sup>) tend to 1 at j and to 0 at the other places, and x = Σ a<sub>j</sub>z<sub>j</sub><sup>r</sup>/(1 + z<sub>j</sub><sup>r</sup>) works for large r.",
@@ -653,10 +661,10 @@ window.ANT_THEOREMS = {
 
     // ------------------------------------------------------------ 11S Local fields
     { id: "ostrowski-theorem", name: "Ostrowski's theorem", kind: "theorem", area: "11S", field: [11, 12], msc: ["11S", "12J"], msc5: "11S99",
-      premises: [],
+      premises: ["ent:base-representation-theorem", "ent:division-with-remainder"],
       formula: String.raw`|x| = |x|_\infty^t \quad\text{or}\quad |x| = |x|_p^t`,
       text: "Every non-trivial absolute value on ℚ is equivalent to the ordinary absolute value or to the p-adic absolute value |·|<sub>p</sub> for exactly one prime p.",
-      proof: "If |n| > 1 for some integer n, writing powers of an integer m in base n shows |m| = m<sup>t</sup> for a fixed t > 0. Otherwise |·| ≤ 1 on ℤ, the integers of absolute value < 1 form a prime ideal pℤ, and |x| = |x|<sub>p</sub><sup>t</sup>.",
+      proof: "If |n| > 1 for some integer n, writing the powers of an integer m in base n and letting the exponent grow shows |m| = m<sup>t</sup> for a fixed t > 0. Otherwise |·| ≤ 1 on ℤ, and the integers of absolute value < 1 form a non-zero prime ideal; by division with remainder it is generated by its least positive element, a prime p, and |x| = |x|<sub>p</sub><sup>t</sup>.",
       concepts: ["ar:absolute-value", "p-adic-numbers", "place"],
       year: 1916, who: "Ostrowski" },
     { id: "extension-of-absolute-values", name: "Unique extension of absolute values", kind: "theorem", area: "11S", field: [11, 12], msc: ["11S", "12J"], msc5: "11S99",
@@ -690,15 +698,21 @@ window.ANT_THEOREMS = {
       proof: "Tate's theorem: the fundamental class in H<sup>2</sup>(Gal(L/K), L<sup>×</sup>), the class with invariant 1/[L : K] in the Brauer group, induces the isomorphism by cup product, because H<sup>1</sup>(Gal(L/K), L<sup>×</sup>) = 1 by Hilbert 90.",
       proofName: "Tate's fundamental class", proofYear: 1952, proofWho: "Tate",
       alternativeProofs: [
-        { name: "Lubin–Tate formal groups", premises: [], idea: "For a prime element π of K the torsion points of the Lubin–Tate formal group generate totally ramified abelian extensions on which the units of K act; together with the unramified extensions this defines the reciprocity map explicitly, and the local Kronecker–Weber theorem shows that it covers all abelian extensions (Iwasawa's presentation avoids cohomology).", year: 1965, who: "Lubin, Tate" },
+        { name: "Lubin–Tate formal groups", premises: ["lubin-tate-theory", "unramified-extensions-local", "ar:hilbert-90"], idea: "For a prime element π of K the torsion points of the Lubin–Tate formal groups for π generate totally ramified abelian extensions on which the units of K act; together with the unramified extensions this defines the reciprocity map explicitly on K<sup>×</sup> = π<sup>ℤ</sup> × 𝒪<sub>K</sub><sup>×</sup>. That it does not depend on π, and that it induces an isomorphism K<sup>×</sup>/N<sub>L/K</sub>L<sup>×</sup> → Gal(L/K) for every finite abelian L, is shown with Hazewinkel's norm map and Hilbert 90 for cyclic extensions, without the Brauer group (Iwasawa, Neukirch).", year: 1965, who: "Lubin, Tate" },
       ],
       concepts: ["norm-residue-symbol", "local-field", "ar:abelian-extension"],
       year: 1930, who: "Hasse" },
+    { id: "eisenstein-totally-ramified", name: "Eisenstein polynomials and total ramification", kind: "lemma", area: "11S", field: [11], msc: ["11S"], msc5: "11S15",
+      premises: ["extension-of-absolute-values"],
+      formula: String.raw`v(\alpha) = \tfrac1n,\quad e = [K(\alpha) : K] = n`,
+      text: "Let K be a field that is complete for a discrete valuation v with v(π) = 1. An Eisenstein polynomial of degree n over 𝒪<sub>K</sub> is irreducible, and a root α generates a totally ramified extension of degree n in which α is a uniformizer.",
+      proof: "The valuation of K extends uniquely to K(α). In the equation α<sup>n</sup> = −(a<sub>n−1</sub>α<sup>n−1</sup> + … + a<sub>0</sub>) only the terms α<sup>n</sup> and a<sub>0</sub> can have the smallest valuation, so n·v(α) = v(a<sub>0</sub>) = 1. Hence the ramification index of K(α)/K is at least n, while the degree is at most n; this gives irreducibility and total ramification.",
+      concepts: ["local-field", "ramification-index"] },
     { id: "lubin-tate-theory", name: "Lubin–Tate extensions", kind: "theorem", area: "11S", field: [11], msc: ["11S"], msc5: "11S31",
-      premises: [],
+      premises: ["eisenstein-totally-ramified"],
       formula: String.raw`\operatorname{Gal}(K_{\pi, n}/K) \cong (\mathcal O_K/\mathfrak p^n)^\times`,
       text: "For a uniformizer π of a non-archimedean local field K, the field K<sub>π,n</sub> generated by the π<sup>n</sup>-torsion points of a Lubin–Tate formal group for π is a totally ramified abelian extension of K with Galois group (𝒪<sub>K</sub>/𝔭<sup>n</sup>)<sup>×</sup>; it does not depend on the choice of the formal group.",
-      proof: "A power series [π](X) ≡ πX + X<sup>q</sup> defines, by successive approximation, a formal group with an action of 𝒪<sub>K</sub>; the primitive π<sup>n</sup>-torsion points are the roots of an Eisenstein polynomial of degree (q − 1)q<sup>n−1</sup>, which gives total ramification and the degree, and 𝒪<sub>K</sub><sup>×</sup> acts on them through (𝒪<sub>K</sub>/𝔭<sup>n</sup>)<sup>×</sup>.",
+      proof: "A power series [π](X) ≡ πX + X<sup>q</sup> defines, by successive approximation, a formal group with an action of 𝒪<sub>K</sub>. The primitive π<sup>n</sup>-torsion points are the roots of the Eisenstein polynomial [π<sup>n</sup>](X)/[π<sup>n−1</sup>](X) of degree (q − 1)q<sup>n−1</sup>, so K<sub>π,n</sub> is totally ramified of this degree. The π<sup>n</sup>-torsion points form a free 𝒪<sub>K</sub>/𝔭<sup>n</sup>-module of rank 1 on which the Galois group acts 𝒪<sub>K</sub>-linearly, so it embeds into (𝒪<sub>K</sub>/𝔭<sup>n</sup>)<sup>×</sup>; comparing orders gives equality.",
       concepts: ["local-field", "unramified-extension", "ar:abelian-extension"],
       year: 1965, who: "Lubin, Tate" },
     { id: "local-existence-theorem", name: "Local existence theorem", kind: "theorem", area: "11S", field: [11], msc: ["11S"], msc5: "11S31",

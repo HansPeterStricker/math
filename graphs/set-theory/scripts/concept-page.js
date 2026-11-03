@@ -7,6 +7,10 @@ window.CONCEPT_PAGE = {
     "03E30": "#b08968", numbers: "#c0392b", "03E40": "#9b5de5", "03E35": "#7f8c3a", "06E": "#5c7cfa",
   },
   foreignArea: "basic",
+  // concepts of other areas are not points on an inner circle; their arrows come from outside, shown when needed
+  // (user, 3 November 2026, as in the theorem graphs)
+  foreignOutside: true,
+  words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside set theory",
   hubs: ["set"],
   centre: ["set"],

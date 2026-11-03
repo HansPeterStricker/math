@@ -15,6 +15,10 @@
 // Sources: Rotman, An Introduction to the Theory of Groups (4th ed. 1995); Dummit and Foote, Abstract Algebra (3rd ed.
 // 2004); Robinson, A Course in the Theory of Groups (2nd ed. 1996). Not checked by a specialist.
 // Checked by ../../tests/check-theorems.js.
+// `fromDefinitions: true` marks a theorem whose usual proof uses only definitions and axioms of its area and no
+// theorem (it has no premises); a theorem without premises that rests on theory outside these graphs carries
+// `foundation: true`, and its `proof` names that theory. tests/check-theorems.js warns about theorems without
+// premises that have neither mark.
 
 window.GT_THEOREMS = {
   title: "Theorems of group theory",
@@ -34,25 +38,33 @@ window.GT_THEOREMS = {
     // ------------------------------------------------------------ 20A Elementary lemmas
     { id: "uniqueness-of-identity", name: "Uniqueness of the neutral element", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`e = e e' = e'`,
       text: "A group has exactly one neutral element: if e and e′ are both neutral, then e = e′.",
+      proof: "Since e′ is neutral, e = ee′; since e is neutral, ee′ = e′.",
       concepts: ["group"] },
     { id: "uniqueness-of-inverses", name: "Uniqueness of inverses", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`b = b(ac) = (ba)c = c`,
       text: "Every element a of a group has exactly one inverse: if ba = e and ac = e, then b = c.",
+      proof: "By associativity b = be = b(ac) = (ba)c = ec = c.",
       concepts: ["group"] },
     { id: "cancellation-law", name: "Cancellation law", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
-      foundation: true,
       premises: [],
+      fromDefinitions: true,
+      foundation: true,
       formula: String.raw`ab = ac \;\Rightarrow\; b = c`,
       text: "In a group, ab = ac implies b = c, and ba = ca implies b = c. In particular left multiplication by a is a bijection of G.",
+      proof: "Multiplying ab = ac on the left by a<sup>−1</sup> and using associativity gives b = c; the same works on the right. The map x ↦ ax has the inverse x ↦ a<sup>−1</sup>x.",
       concepts: ["group"] },
     { id: "subgroup-criterion", name: "Subgroup criterion", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
-      foundation: true,
       premises: [],
+      fromDefinitions: true,
+      foundation: true,
       formula: String.raw`H \ne \emptyset,\ ab^{-1} \in H \;\Rightarrow\; H \le G`,
       text: "A nonempty subset H of a group G is a subgroup if and only if ab<sup>−1</sup> lies in H for all a, b in H.",
+      proof: "For a in H, e = aa<sup>−1</sup> lies in H, then a<sup>−1</sup> = ea<sup>−1</sup>, and for a, b in H also ab = a(b<sup>−1</sup>)<sup>−1</sup>; associativity is inherited from G. The converse is clear.",
       concepts: ["subgroup"] },
     { id: "generated-subgroup-description", name: "Description of the generated subgroup", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
       premises: ["subgroup-criterion"],
@@ -86,10 +98,11 @@ window.GT_THEOREMS = {
 
     // ------------------------------------------------------------ 20A Cosets and Lagrange
     { id: "cosets-partition", name: "Cosets partition the group", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
+      premises: ["st:equivalence-classes-partition"],
       foundation: true,
-      premises: [],
       formula: String.raw`aH = bH \iff a^{-1}b \in H`,
       text: "For a subgroup H of G, the relation a<sup>−1</sup>b ∈ H is an equivalence relation whose classes are the left cosets. Hence two left cosets are equal or disjoint, and they cover G.",
+      proof: "The relation a<sup>−1</sup>b ∈ H is reflexive, symmetric and transitive because H contains e, inverses and products; the class of a is aH. Equivalence classes form a partition.",
       concepts: ["coset", "subgroup", "st:partition"] },
     { id: "cosets-equal-size", name: "All cosets have the same size", kind: "lemma", area: "20A", field: [20], msc: ["20A"], msc5: "20A05",
       premises: ["cancellation-law"],
@@ -166,10 +179,11 @@ window.GT_THEOREMS = {
       proof: "The inverse map takes the preimage under the projection G → G/N; images and preimages of subgroups are subgroups by the subgroup criterion.",
       concepts: ["subgroup", "normal-subgroup", "quotient-group", "index"] },
     { id: "cyclic-quotient-by-centre", name: "Cyclic quotient by the centre", kind: "lemma", area: "20A", field: [20], msc: ["20A", "20E"], msc5: "20A05",
-      premises: [],
+      premises: ["cosets-partition"],
+      proofName: "Elements as powers times central elements",
       formula: String.raw`G/Z(G) \text{ cyclic} \;\Rightarrow\; G \text{ abelian}`,
       text: "If the quotient of a group G by its centre is cyclic, then G is abelian.",
-      proof: "If gZ(G) generates G/Z(G), every element has the form g<sup>i</sup>z with z central, and two such elements commute.",
+      proof: "If gZ(G) generates G/Z(G), every element lies in one of the cosets g<sup>i</sup>Z(G), so it has the form g<sup>i</sup>z with z central, and two such elements commute.",
       concepts: ["centre", "quotient-group", "cyclic-group", "abelian-group"] },
 
     // ------------------------------------------------------------ 20A Cyclic groups
@@ -197,10 +211,11 @@ window.GT_THEOREMS = {
 
     // ------------------------------------------------------------ 20B Group actions
     { id: "orbits-partition", name: "Orbits partition the set", kind: "lemma", area: "20B", field: [20], msc: ["20B"], msc5: "20B05",
+      premises: ["st:equivalence-classes-partition"],
       foundation: true,
-      premises: [],
       formula: String.raw`Gx \cap Gy \ne \emptyset \;\Rightarrow\; Gx = Gy`,
       text: "For an action of a group G on a set X, the relation \"y = g · x for some g\" is an equivalence relation; its classes are the orbits, so X is the disjoint union of the orbits.",
+      proof: "The relation is reflexive (x = e · x), symmetric (x = g<sup>−1</sup> · y) and transitive (h · (g · x) = (hg) · x); its classes are the orbits, and equivalence classes form a partition.",
       concepts: ["orbit", "group-action", "st:partition"] },
     { id: "stabilizer-is-subgroup", name: "Stabilizers are subgroups", kind: "lemma", area: "20B", field: [20], msc: ["20B"], msc5: "20B05",
       premises: ["subgroup-criterion"],
@@ -251,6 +266,7 @@ window.GT_THEOREMS = {
       concepts: ["transposition", "permutation", "symmetric-group"] },
     { id: "sign-homomorphism", name: "The sign is a homomorphism", kind: "theorem", area: "20B", field: [20], msc: ["20B"], msc5: "20B30",
       premises: [],
+      fromDefinitions: true,
       formula: String.raw`\operatorname{sgn}(\sigma\tau) = \operatorname{sgn}(\sigma)\operatorname{sgn}(\tau),\quad \operatorname{sgn}(a\ b) = -1`,
       text: "The sign is a homomorphism from S<sub>n</sub> to {±1}, and every transposition has sign −1.",
       proof: "Write sgn(σ) = ∏<sub>i<j</sub> (σ(j) − σ(i))/(j − i); this product is multiplicative, and a transposition has an odd number of inversions.",
@@ -299,8 +315,8 @@ window.GT_THEOREMS = {
       text: "For n ≥ 5 the symmetric group S<sub>n</sub> is not solvable. This is the group-theoretic part of the unsolvability of the general quintic by radicals.",
       proof: "A subgroup of a solvable group is solvable, but A<sub>n</sub> is simple and not abelian, hence not solvable.",
       alternativeProofs: [
-        { name: "Commutators of 3-cycles", premises: [],
-          idea: "For n ≥ 5 every 3-cycle is a commutator of two 3-cycles, (a b c) = [(a b d), (a c e)] with [x, y] = xyx<sup>−1</sup>y<sup>−1</sup>. Hence if a subgroup contains all 3-cycles, so does its commutator subgroup, and every term of the derived series of S<sub>n</sub> contains all 3-cycles." },
+        { name: "Commutators of 3-cycles", premises: ["commutator-quotient-abelian"],
+          idea: "For n ≥ 5 every 3-cycle is a commutator of two 3-cycles, (a b c) = [(a b d), (a c e)] with [x, y] = xyx<sup>−1</sup>y<sup>−1</sup>. Hence if a subgroup contains all 3-cycles, so does its commutator subgroup, and every term of the derived series of S<sub>n</sub> contains all 3-cycles. Since the commutator subgroup lies in every normal subgroup with abelian quotient (abelianization), a normal series with abelian quotients would force the derived series to reach the trivial group." },
       ],
       concepts: ["symmetric-group", "solvable-group"],
       year: 1831, who: "Galois" },
@@ -321,16 +337,18 @@ window.GT_THEOREMS = {
       proof: "G is the disjoint union of its conjugacy classes; the one-element classes are the central elements, and the other classes have size [G : C<sub>G</sub>(x<sub>i</sub>)].",
       concepts: ["conjugacy-class", "centre", "centralizer", "index", "finite-group"] },
     { id: "internal-direct-product", name: "Recognition of direct products", kind: "lemma", area: "20E", field: [20], msc: ["20E"], msc5: "20E22",
-      premises: [],
+      premises: ["injective-iff-trivial-kernel"],
+      proofName: "Commuting factors and trivial kernel",
       formula: String.raw`H, K \trianglelefteq G,\ H \cap K = 1,\ HK = G \;\Rightarrow\; G \cong H \times K`,
       text: "If H and K are normal subgroups of G with trivial intersection and HK = G, then (h, k) ↦ hk is an isomorphism H × K → G.",
-      proof: "The commutator hkh<sup>−1</sup>k<sup>−1</sup> lies in H ∩ K = 1, so elements of H and K commute and the map is a homomorphism; it is injective because H ∩ K = 1.",
+      proof: "The commutator hkh<sup>−1</sup>k<sup>−1</sup> lies in H ∩ K = 1, so elements of H and K commute and the map is a homomorphism; its kernel {(h, h<sup>−1</sup>) : h ∈ H ∩ K} is trivial, so it is injective, and it is surjective because HK = G.",
       concepts: ["direct-product", "normal-subgroup", "isomorphism"] },
     { id: "semidirect-product-recognition", name: "Recognition of semidirect products", kind: "lemma", area: "20E", field: [20], msc: ["20E"], msc5: "20E22",
-      premises: [],
+      premises: ["injective-iff-trivial-kernel"],
+      proofName: "Twisted product and trivial kernel",
       formula: String.raw`N \trianglelefteq G,\ H \le G,\ N \cap H = 1,\ NH = G \;\Rightarrow\; G \cong N \rtimes_\theta H`,
       text: "If N is a normal subgroup and H a subgroup of G with N ∩ H = 1 and NH = G, then G is isomorphic to the semidirect product of N and H for the action θ<sub>h</sub>(n) = hnh<sup>−1</sup>.",
-      proof: "Every element is uniquely nh, and (nh)(n′h′) = n(hn′h<sup>−1</sup>)hh′ is the twisted product.",
+      proof: "The map (n, h) ↦ nh from the semidirect product to G is a homomorphism because (nh)(n′h′) = n(hn′h<sup>−1</sup>)hh′ is the twisted product; its kernel is trivial because N ∩ H = 1, so it is injective, and it is surjective because NH = G.",
       concepts: ["semidirect-product", "normal-subgroup", "conjugation", "automorphism"] },
     { id: "zassenhaus-lemma", name: "Zassenhaus lemma (butterfly lemma)", kind: "lemma", area: "20E", field: [20], msc: ["20E"], msc5: "20E15",
       premises: ["second-isomorphism-theorem"],

@@ -7,6 +7,10 @@ window.CONCEPT_PAGE = {
     "11A41": "#c0392b", "11A51": "#9b5de5", "11A55": "#4f86c6", "11A63": "#b08968", "11A67": "#7f8c3a", "11B39": "#d4a017",
   },
   foreignArea: "basic",
+  // concepts of other areas are not points on an inner circle; their arrows come from outside, shown when needed
+  // (user, 3 November 2026, as in the theorem graphs)
+  foreignOutside: true,
+  words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside 11A",
   hubs: [],
   centre: ["divisibility"],

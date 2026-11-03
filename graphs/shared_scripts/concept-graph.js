@@ -188,10 +188,14 @@
   usesEdges.forEach((e) => {
     const uses = allUses.get(e.to);
     e.transitive = uses.some((u) => u !== e.from && ancestors(u).has(e.from) && !ancestors(e.from).has(u));
-    e.pre = isPre(e.from) && !isPre(e.to); // edges among the prerequisites stay visible
+    // edges among the prerequisites stay visible on the inner circle; on the outer ring (foreignOutside) they are
+    // hidden like the other edges from other areas
+    e.pre = isPre(e.from) && (!isPre(e.to) || !!CFG.foreignOutside);
     e.hub = !e.pre && e.from in HUBS;
   });
-  const layoutEdges = usesEdges.filter((e) => !e.transitive && !e.hub && !e.pre);
+  // edges only of alternative proofs or definitions are hidden by default and do not shape the layout (user,
+  // 3 November 2026: fewer crossings); a switch shows them, a selection shows those of its card
+  const layoutEdges = usesEdges.filter((e) => !e.transitive && !e.hub && !e.pre && !e.alt);
 
   // ------------------------------------------------------------ layout: sectors by class, rows by level within a sector
   // Radius (user, 2 November 2026): the centre concept (first of `centre` with level 1) in the middle, the
@@ -249,11 +253,20 @@
     return c;
   };
   let bestOrder = sectorAreas.slice(), bestCost = orderCost(bestOrder);
+  // the best few orders by angle are candidates; among them the one with the fewest crossings is chosen below
+  const CANDIDATES = 12, candidates = [];
+  const offer = (arr, c) => {
+    if (candidates.length === CANDIDATES && c >= candidates[CANDIDATES - 1].c) return;
+    candidates.push({ order: arr.slice(), c });
+    candidates.sort((x, y) => x.c - y.c);
+    if (candidates.length > CANDIDATES) candidates.pop();
+  };
   if (sectorAreas.length <= 9) {
     // up to 9 sectors: all orders (the first sector fixed, since turning the circle changes nothing)
     (function permute(arr, k) {
       if (k === arr.length) {
         const c = orderCost(arr);
+        offer(arr, c);
         if (c < bestCost) { bestCost = c; bestOrder = arr.slice(); }
         return;
       }
@@ -275,8 +288,16 @@
         if (c < bestCost - 1e-9) { bestCost = c; bestOrder = arr; improved = true; }
       }
     }
+    // candidates: the result and every order one exchange of two sectors away from it
+    offer(bestOrder, bestCost);
+    for (let i = 1; i < bestOrder.length; i++) for (let j = i + 1; j < bestOrder.length; j++) {
+      const arr = bestOrder.slice();
+      [arr[i], arr[j]] = [arr[j], arr[i]];
+      offer(arr, orderCost(arr));
+    }
   }
-  const sectors = sectorsFor(bestOrder);
+  if (!candidates.length) offer(bestOrder, bestCost);
+  let sectors = sectorsFor(bestOrder);
 
   const angle = new Map();
   const levelsSorted = [...new Set(level.values())].sort((a, b) => a - b);
@@ -284,7 +305,7 @@
   // many prerequisites need a larger circle (circumference = sum of their sizes and gaps); the rows move out with it
   {
     const need = conceptsAt(0).reduce((s, c) => s + 2 * (6 + 2.4 * Math.sqrt(descendants(c.id).size)) + RING.gap, 0) / TAU;
-    if (need > RING.pre) { RING.inner += need - RING.pre; RING.pre = need; }
+    if (need > RING.pre && !CFG.foreignOutside) { RING.inner += need - RING.pre; RING.pre = need; }
   }
   const R_OUT = RING.inner + RING.spread * Math.sqrt(ringConcepts.length);
   sectorAreas.forEach((k) => {
@@ -296,7 +317,10 @@
       acc += weights[j];
     });
   });
-  const radiusFor = (c) => (c.id === CENTRE_ID ? 0 : level.get(c.id) === 0 ? RING.pre : rowRadius.get(secKey(c) + "|" + level.get(c.id)));
+  // foreignOutside (user, 3 November 2026): results and concepts of other areas always visible on a ring outside the
+  // sectors, each near the nodes that use it; their arrows hidden until selected or switched on
+  const R_FOREIGN = R_OUT + 175;
+  const radiusFor = (c) => (c.id === CENTRE_ID ? 0 : level.get(c.id) === 0 ? (CFG.foreignOutside ? R_FOREIGN : RING.pre) : rowRadius.get(secKey(c) + "|" + level.get(c.id)));
   const inner = (id) => layoutEdges.filter((e) => e.to === id).map((e) => e.from);
   const outer = (id) => layoutEdges.filter((e) => e.from === id).map((e) => e.to);
   // position of an angle inside a sector, for sorting; angles outside go to the nearer end
@@ -317,11 +341,71 @@
     });
   }
   const ringLevels = levelsSorted.filter((l) => l >= 1);
-  ringLevels.forEach((l) => placeRing(l, inner));
-  for (let sweep = 0; sweep < 2; sweep++) {
-    ringLevels.slice().reverse().forEach((l) => placeRing(l, (id) => outer(id).concat(inner(id))));
-    ringLevels.forEach((l) => placeRing(l, (id) => inner(id).concat(outer(id))));
+  // Fewer crossings (user, 3 November 2026). Crossings are counted between the straight edges of the layout among
+  // own concepts, at the radius of their row (before the small shifts below); edges with a common end do not count.
+  const optEdges = layoutEdges.filter((e) => level.get(e.from) >= 1 && level.get(e.to) >= 1);
+  // numbers instead of maps, since this runs often: node index, coordinates, edge ends, edges at each node
+  const optIds = [...new Set(optEdges.flatMap((e) => [e.from, e.to]))], idx = new Map(optIds.map((id, i) => [id, i]));
+  const X = new Float64Array(optIds.length), Y = new Float64Array(optIds.length);
+  const EA = Int32Array.from(optEdges, (e) => idx.get(e.from)), EB = Int32Array.from(optEdges, (e) => idx.get(e.to));
+  const incident = optIds.map(() => []);
+  optEdges.forEach((e, k) => { incident[EA[k]].push(k); incident[EB[k]].push(k); });
+  const place = (i) => { const id = optIds[i], R = radiusFor(byId.get(id)), a = angle.get(id) || 0; X[i] = R * Math.cos(a); Y[i] = R * Math.sin(a); };
+  const orient = (p, q, r) => Math.sign((X[q] - X[p]) * (Y[r] - Y[p]) - (Y[q] - Y[p]) * (X[r] - X[p]));
+  const crosses = (e, f) => {
+    const a = EA[e], b = EB[e], c = EA[f], d = EB[f];
+    if (a === c || a === d || b === c || b === d) return false;
+    if (Math.max(X[a], X[b]) < Math.min(X[c], X[d]) || Math.max(X[c], X[d]) < Math.min(X[a], X[b])
+      || Math.max(Y[a], Y[b]) < Math.min(Y[c], Y[d]) || Math.max(Y[c], Y[d]) < Math.min(Y[a], Y[b])) return false;
+    return orient(a, b, c) * orient(a, b, d) < 0 && orient(c, d, a) * orient(c, d, b) < 0;
+  };
+  const crossingsAt = (list) => { let n = 0; for (const e of list) for (let f = 0; f < EA.length; f++) if (e !== f && crosses(e, f)) n++; return n; };
+  const totalCrossings = () => { let n = 0; for (let e = 0; e < EA.length; e++) for (let f = e + 1; f < EA.length; f++) if (crosses(e, f)) n++; return n; };
+  // after the barycentre sweeps: exchange two concepts of the same row of a sector (their places on the row) as long
+  // as that lowers the number of crossings of their edges
+  const rows = [];
+  sectorAreas.forEach((k) => ringLevels.forEach((l) => {
+    const row = conceptsAt(l).filter((c) => secKey(c) === k && idx.has(c.id)).map((c) => idx.get(c.id));
+    if (row.length > 1) rows.push(row);
+  }));
+  function untangle() {
+    optIds.forEach((_, i) => place(i));
+    for (let round = 0; round < 8; round++) {
+      let improved = false;
+      rows.forEach((row) => {
+        for (let i = 0; i < row.length; i++) for (let j = i + 1; j < row.length; j++) {
+          const u = row[i], v = row[j], S = [...new Set(incident[u].concat(incident[v]))];
+          const before = crossingsAt(S);
+          if (!before) continue;
+          const U = optIds[u], V = optIds[v], au = angle.get(U);
+          angle.set(U, angle.get(V)); angle.set(V, au); place(u); place(v);
+          if (crossingsAt(S) < before) improved = true;
+          else { angle.set(V, angle.get(U)); angle.set(U, au); place(u); place(v); }
+        }
+      });
+      if (!improved) break;
+    }
+    return totalCrossings();
   }
+  function placeAll(order) {
+    sectors = sectorsFor(order);
+    angle.clear();
+    ringLevels.forEach((l) => placeRing(l, inner));
+    for (let sweep = 0; sweep < 2; sweep++) {
+      ringLevels.slice().reverse().forEach((l) => placeRing(l, (id) => outer(id).concat(inner(id))));
+      ringLevels.forEach((l) => placeRing(l, (id) => inner(id).concat(outer(id))));
+    }
+    return untangle();
+  }
+  // order of the sectors: among the candidates by angle the one with the fewest crossings
+  let best = null;
+  candidates.forEach((cand) => {
+    const n = placeAll(cand.order);
+    if (!best || n < best.n) best = { n, order: cand.order, angle: new Map(angle) };
+  });
+  sectors = sectorsFor(best.order);
+  angle.clear();
+  best.angle.forEach((a, id) => angle.set(id, a));
   // prerequisites: evenly around their circle, so that chains among them such as ℕ → ℤ → ℚ → ℝ → ℂ stand next to each
   // other (user, 2 November 2026). Connected prerequisites form a block in the order of a depth-first walk along their
   // edges, starting from those without predecessors; blocks are ordered by the mean angle of the concepts using them.
@@ -365,8 +449,11 @@
     if (!bestFit || cost < bestFit.cost) bestFit = { cost, slot };
   }));
   sequence.forEach((id, i) => angle.set(id, bestFit.slot(i)));
+  // on the outer ring each stands at the mean angle of its users (pushed apart below)
+  if (CFG.foreignOutside) sequence.forEach((id) => { if (userMean.get(id) != null) angle.set(id, userMean.get(id)); });
 
-  const radiusOf = (c) => 6 + 2.4 * Math.sqrt(descendants(c.id).size);
+  // on the outer ring the points of other areas are small: their size would only repeat how much uses them here
+  const radiusOf = (c) => (CFG.foreignOutside && isPre(c.id) ? 6 : 6 + 2.4 * Math.sqrt(descendants(c.id).size));
   // Concepts stay inside their sector (user, 2 November 2026): on a ring they are already spread evenly over the
   // sector. Where the arc per concept is too short for the concepts and the gap, every second concept moves outward
   // by a part of the ring distance (staggered), instead of being pushed into the neighbouring sector.
@@ -383,18 +470,32 @@
       if (arc < need) list.forEach((c, j) => { if (j % 2) radialShift.set(c.id, 0.4 * stepOut); });
     });
   });
-  // prerequisites (no sectors): push apart concepts that are too close on their circle (keeps the order)
+  // prerequisites (no sectors): push apart concepts that are too close on their circle (keeps the order). On the outer
+  // ring the names (horizontal) need room where the ring runs horizontally (top and bottom); where one ring is too
+  // narrow for all of them, they are dealt out to up to three rings further out (55 apart), counted per ring.
   [0].filter((l) => levelsSorted.includes(l)).forEach((l) => {
-    const R = RING.pre;
+    const R = CFG.foreignOutside ? R_FOREIGN : RING.pre;
     const list = conceptsAt(l).map((c) => ({ id: c.id, a: angle.get(c.id), r: radiusOf(c) })).sort((x, y) => x.a - y.a);
-    for (let it = 0; it < 200; it++) {
+    const wid = (x) => 6.2 * plainName(byId.get(x.id).name).length;
+    const needOf = (p, q) => (CFG.foreignOutside
+      ? Math.max(p.r + q.r + 14, ((wid(p) + wid(q)) / 2 + 8) * Math.abs(Math.sin((p.a + q.a) / 2)), 22) / R
+      : (p.r + q.r + RING.gap) / R);
+    const total = list.reduce((sum, p, i) => sum + needOf(p, list[(i + 1) % list.length]), 0);
+    const rows = CFG.foreignOutside ? Math.min(3, Math.max(1, Math.ceil(total / (0.9 * TAU)))) : 1;
+    const STEP = 55;
+    if (rows > 1) list.forEach((x, i) => { if (i % rows) radialShift.set(x.id, STEP * (i % rows)); });
+    for (let it = 0; it < 400; it++) {
       let changed = false;
-      for (let i = 0; i < list.length && list.length > 1; i++) {
-        const p = list[i], q = list[(i + 1) % list.length];
-        let gapA = q.a - p.a;
-        if (i === list.length - 1) gapA += TAU;
-        const need = (p.r + q.r + RING.gap) / R;
-        if (gapA < need) { const d = (need - gapA) / 2; p.a -= d; q.a += d; changed = true; }
+      for (let i = 0; i < list.length && list.length > rows; i++) {
+        for (let k = 1; k <= rows; k++) {
+          const j = (i + k) % list.length, p = list[i], q = list[j];
+          let gapA = q.a - p.a;
+          if (j <= i) gapA += TAU;
+          const dr = STEP * Math.abs((i % rows) - (j % rows));
+          // same ring: room for the names; other ring: only the points must not overlap
+          const need = dr === 0 ? needOf(p, q) : Math.sqrt(Math.max(0, (p.r + q.r + 6) ** 2 - dr * dr)) / R;
+          if (gapA < need) { const d = (need - gapA) / 2; p.a -= d; q.a += d; changed = true; }
+        }
       }
       if (!changed) break;
     }
@@ -466,7 +567,8 @@
 
   edges.forEach((e) => {
     e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : "") + (e.alt ? " alternativ" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
-    if (OUTSIDE && e.pre && e.kind === "uses") {
+    // edges among results or concepts of other areas have no points to join when those are drawn outside
+    if (false && OUTSIDE && e.pre && e.kind === "uses") { // former small points outside (replaced by the outer ring)
       // arrow from outside: a small point in the colour of the origin next to the target, with the name of the result
       const c = byId.get(e.from);
       e.stub = el("g", { class: "stub" }, gStubs);
@@ -534,7 +636,7 @@
   let nodeDrag = null; // { p, moved }
   concepts.forEach((c) => {
     const p = pos.get(c.id);
-    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" + (OUTSIDE ? " aussen" : "") : ""), "data-id": c.id }, gNodes);
+    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" : ""), "data-id": c.id }, gNodes);
     // prerequisites: light fill with a thick border in the colour of their origin, unlike the filled own concepts
     shape(g, c.kind, p.r, c.area === FOREIGN ? "#fbfaf6" : colorOf(c));
     if (c.area === FOREIGN) g.style.setProperty("--herkunft", colorOf(c));
@@ -551,7 +653,7 @@
       ev.stopPropagation();
       nodeDrag = { p, moved: false, x: ev.clientX, y: ev.clientY };
     });
-    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1) return; step(c.id, "back"); });
+    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1 && clickMode !== "graph") return; step(c.id, "back"); });
     g.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); if (justDragged) { justDragged = false; return; } step(c.id, "fwd"); });
     nodeEls.set(c.id, g);
   });
@@ -712,7 +814,18 @@
     }
     return shown;
   }
+  // Two modes for the click (user, 3 November 2026): "card" lays the card over the graph (above); "graph" marks in the
+  // graph itself, one step per click: the first click marks the direct premises (right click: the direct consequences),
+  // every further click on the same node one step more. Foundations are not expanded, as on the card.
+  let clickMode = "card", graphDepth = 1, graphFor = null;
+  try { if (localStorage.getItem("concept-graph-click") === "graph") clickMode = "graph"; } catch (err) { /* no storage */ }
   function step(id, dir) {
+    if (clickMode === "graph") {
+      if (id === selected && dir === cardMode && graphFor === id) graphDepth = Math.min(graphDepth + 1, Math.max(1, maxDepth(id, dir)));
+      else { cardMode = dir; graphDepth = 1; graphFor = id; proofChoice.clear(); }
+      select(id);
+      return;
+    }
     if (id === selected && dir === cardMode) toggle(id);
     else { cardMode = dir; expanded = new Set([id]); proofChoice.clear(); cardFor = null; select(id); }
   }
@@ -842,9 +955,13 @@
     const anc = (x) => closure(x, (y) => (back ? usesOf(y) : allUses.get(y)));
     let fEdges = ids.flatMap((x) => {
       const P = prem(x);
-      return P.filter((a) => !P.some((b) => b !== a && anc(b).has(a) && !anc(a).has(b)))
-        .map((a) => ({ from: a, to: x, kind: "uses", dashed: !back && !usesEdges.some((e) => e.from === a && e.to === x && e.essential) }));
-    }).concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to)).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
+      // indirect edges are kept with the intermediate premises (`via`): the card hides them only while a path through
+      // such a premise is visible, so that no box is left without its edge (user, 3 November 2026)
+      return P.map((a) => ({ from: a, to: x, kind: "uses", via: P.filter((b) => b !== a && anc(b).has(a) && !anc(a).has(b)),
+        dashed: !back && !usesEdges.some((e) => e.from === a && e.to === x && e.essential) }));
+    });
+    // "is a" only where no use already joins the two
+    fEdges = fEdges.concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to) && !fEdges.some((u) => u.from === e.to && u.to === e.from)).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
     // rows: longest path from the selected node (cycles of alternative proofs broken by leaving out back edges)
     const out = new Map(ids.map((x) => [x, []]));
     fEdges.forEach((e) => (back ? out.get(e.to).push(e) : out.get(e.from).push(e)));
@@ -895,7 +1012,7 @@
         const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2;
         d += `C${x0},${m} ${x1},${m} ${x1},${y1 - (i === pts.length - 1 ? 2 : 0)}`;
       }
-      el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to }, s);
+      el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
     });
     ids.forEach((x) => {
       const it = lay.item[x], c = byId.get(x);
@@ -941,7 +1058,13 @@
   function showCard(id) {
     const box = svg.parentNode;
     // closing a card, however, resets it completely (user, 3 November 2026): opened again it starts from scratch
-    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); return; }
+    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); graphFor = null; return; }
+    if (clickMode === "graph") {
+      card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardIds = null;
+      if (graphFor !== id) { graphFor = id; graphDepth = 1; }
+      cardShown = new Set([id, ...within(id, cardMode === "fwd" ? fwdOf : backFrom(id), graphDepth)]);
+      return;
+    }
     const c = byId.get(id);
     if (cardFor !== id) {
       cardFor = id;
@@ -982,7 +1105,20 @@
       g.classList.toggle("hat-mehr", !expanded.has(g.dataset.id) && cardNext(id, g.dataset.id).length > 0);
     });
     card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => { g.style.visibility = shown.has(g.dataset.id) ? "" : "hidden"; });
-    card.querySelectorAll(".karte-bild .fokus-kante").forEach((p) => { p.style.visibility = shown.has(p.dataset.from) && shown.has(p.dataset.to) ? "" : "hidden"; });
+    // an indirect edge a → x is hidden while a visible path leads from a to x through one of its intermediate premises
+    const reach = (start) => {
+      const seen = new Set([start]), stack = [start];
+      while (stack.length) { const y = stack.pop(); if (!expanded.has(y)) continue; cardNext(id, y).forEach((z) => { if (shown.has(z) && !seen.has(z)) { seen.add(z); stack.push(z); } }); }
+      return seen;
+    };
+    const pathVia = (a, x, b) => (cardMode === "fwd" ? reach(a).has(b) && reach(b).has(x) : reach(x).has(b) && reach(b).has(a));
+    card.querySelectorAll(".karte-bild .fokus-kante").forEach((p) => {
+      const a = p.dataset.from, x = p.dataset.to, via = (p.dataset.via || "").split(" ").filter(Boolean);
+      // only edges of opened boxes: into an opened box (proof) or out of an opened box (consequences)
+      const opened = cardMode === "fwd" ? expanded.has(a) : expanded.has(x);
+      const on = opened && shown.has(a) && shown.has(x) && !via.some((b) => shown.has(b) && pathVia(a, x, b));
+      p.style.visibility = on ? "" : "hidden";
+    });
   }
   card.addEventListener("click", (ev) => { ev.stopPropagation();
     const w = ev.target.closest("[data-proof-of]");
@@ -1034,16 +1170,18 @@
       isaEdges.length ? `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>` : "",
       `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${CFG.foreignLabel}</span>`,
       `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
-      `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
+      `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges only of other ${WORDS.proofWord.toLowerCase()}s (dashed), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
   document.getElementById("controls").innerHTML =
     block("Display", [
       `<label class="toggle"${isaEdges.length ? "" : ' style="display:none"'}><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
       `<label class="toggle"><input type="checkbox" id="c-trans"><span class="regler"></span>indirect dependencies</label>`,
+      ...(usesEdges.some((e) => e.alt) ? [`<label class="toggle"><input type="checkbox" id="c-alt"><span class="regler"></span>edges of other ${WORDS.proofWord.toLowerCase()}s</label>`] : []),
       `<label class="toggle"><input type="checkbox" id="c-basis"><span class="regler"></span>arrows from other areas</label>`,
       ...(outsOf.size ? [`<label class="toggle"><input type="checkbox" id="c-aus"><span class="regler"></span>arrows to other areas</label>`] : []),
       ...Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => `<label class="toggle"><input type="checkbox" class="c-hub"><span class="regler"></span>edges from ${byId.get(h).name}</label>`),
       `<label class="toggle"><input type="checkbox" id="c-names" checked><span class="regler"></span>names</label>`,
+      `<label class="toggle" title="Off: a click opens the card of the proof, a right click the card of the consequences. On: a click marks the ${WORDS.many} it builds on in the graph, a right click those building on it; each further click one step more."><input type="checkbox" id="c-mark"${clickMode === "graph" ? " checked" : ""}><span class="regler"></span>click marks in the graph</label>`,
       `<button id="c-home">Reset view</button>`,
     ]) +
     // levels in two columns, filled column by column (1 … 5 left, 6 … 10 right)
@@ -1076,10 +1214,18 @@
   }));
   document.getElementById("c-isa").addEventListener("change", (ev) => svg.classList.toggle("zeige-isa", ev.target.checked));
   document.getElementById("c-trans").addEventListener("change", (ev) => svg.classList.toggle("zeige-transitiv", ev.target.checked));
+  if (document.getElementById("c-alt")) document.getElementById("c-alt").addEventListener("change", (ev) => svg.classList.toggle("zeige-alt", ev.target.checked));
   document.getElementById("c-basis").addEventListener("change", (ev) => svg.classList.toggle("zeige-basis", ev.target.checked));
   if (document.getElementById("c-aus")) document.getElementById("c-aus").addEventListener("change", (ev) => svg.classList.toggle("zeige-aus", ev.target.checked));
   document.querySelectorAll("#controls .c-hub").forEach((box) => box.addEventListener("change", () => svg.classList.toggle("zeige-hub", box.checked)));
   document.getElementById("c-names").addEventListener("change", (ev) => svg.classList.toggle("ohne-namen", !ev.target.checked));
+  document.getElementById("c-mark").addEventListener("change", (ev) => {
+    clickMode = ev.target.checked ? "graph" : "card";
+    try { localStorage.setItem("concept-graph-click", clickMode); } catch (err) { /* no storage */ }
+    const id = selected;
+    select(null);
+    if (id) step(id, cardMode);
+  });
   document.getElementById("c-home").addEventListener("click", () => { view = fit(); applyView(); });
 
   // ------------------------------------------------------------ search

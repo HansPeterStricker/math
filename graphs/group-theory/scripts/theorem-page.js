@@ -17,7 +17,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "subgroup-criterion"
+    "cancellation-law"
   ],
   "sources": {
     "st": {
