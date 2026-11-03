@@ -871,6 +871,8 @@
     set.forEach((x) => nodeEls.get(x).classList.add("hell", back ? "vorfahr" : "nachfahr"));
     const inSet = (x) => x === id || set.has(x);
     const light = (e) => {
+      // premises of nodes of other areas are not followed, as on the card (user, 3 November 2026)
+      if (e.kind === "uses" && back && e.to !== id && isPre(e.to)) return false;
       if (e.kind === "uses" && back && usesOf(e.to).includes(e.from)) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); return true; }
       if (e.kind === "uses" && !back) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); return true; }
       if (e.kind === "isa") e.line.classList.add("hell");
@@ -1291,11 +1293,11 @@
   // The card opens at once in the size of the fully expanded neighbourhood (all prerequisites above, all consequences
   // below) with the selected node in the horizontal middle; it stays where it is. Only one step in each direction is
   // shown at first; clicks and right clicks show further boxes at their fixed places (user, 3 November 2026).
-  let cardFor = null;
+  let cardFor = null, cardMoved = false; // cardMoved: the card was moved by hand
   function showCard(id) {
     const box = svg.parentNode;
     // closing a card, however, resets it completely (user, 3 November 2026): opened again it starts from scratch
-    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); graphFor = null; jumpStack.length = 0; return; }
+    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); graphFor = null; jumpStack.length = 0; cardMoved = false; return; }
     if (clickMode === "graph") {
       card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardIds = null;
       if (graphFor !== id) { graphFor = id; graphDepth = 1; }
@@ -1329,12 +1331,15 @@
       box.classList.add("mit-karte");
       card.querySelector(".karte-zu").addEventListener("click", (ev) => { ev.stopPropagation(); select(null); });
       // the card as large as the drawing needs (at most the picture), over the node; scrolled so that the node is visible
-      card.style.left = "10px"; card.style.top = "10px";
-      const r = box.getBoundingClientRect(), n = nodeEls.get(id).getBoundingClientRect();
-      const w = Math.min(card.offsetWidth, r.width - 20), h = Math.min(card.offsetHeight, r.height - 20);
-      const x = Math.max(10, Math.min(r.width - w - 10, n.left + n.width / 2 - r.left - w / 2));
-      const y = Math.max(10, Math.min(r.height - h - 10, n.top + n.height / 2 - r.top - h / 2));
-      card.style.left = x + "px"; card.style.top = y + "px";
+      // a card moved by hand keeps its place for the following cards until it is closed
+      if (!cardMoved) {
+        card.style.left = "10px"; card.style.top = "10px";
+        const r = box.getBoundingClientRect(), n = nodeEls.get(id).getBoundingClientRect();
+        const w = Math.min(card.offsetWidth, r.width - 20), h = Math.min(card.offsetHeight, r.height - 20);
+        const x = Math.max(10, Math.min(r.width - w - 10, n.left + n.width / 2 - r.left - w / 2));
+        const y = Math.max(10, Math.min(r.height - h - 10, n.top + n.height / 2 - r.top - h / 2));
+        card.style.left = x + "px"; card.style.top = y + "px";
+      }
       const z = card.querySelector(".fokus-knoten.ziel").getBoundingClientRect(), k = card.getBoundingClientRect();
       card.scrollLeft += z.left + z.width / 2 - (k.left + k.width / 2);
       card.scrollTop += z.top + z.height / 2 - (k.top + k.height / 2);
@@ -1382,6 +1387,22 @@
     const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
   card.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); const t = ev.target.closest("[data-id]"); if (t) toggle(t.dataset.id); });
   card.addEventListener("pointerdown", (ev) => ev.stopPropagation());
+  // the card can be moved by its head (user, 3 November 2026)
+  let cardDrag = null;
+  card.addEventListener("pointerdown", (ev) => {
+    const head = ev.target.closest(".karte-kopf");
+    if (!head || ev.target.closest("button") || ev.button !== 0) return;
+    cardDrag = { x: ev.clientX, y: ev.clientY, left: card.offsetLeft, top: card.offsetTop };
+    head.setPointerCapture(ev.pointerId);
+    ev.preventDefault();
+  });
+  card.addEventListener("pointermove", (ev) => {
+    if (!cardDrag) return;
+    card.style.left = cardDrag.left + ev.clientX - cardDrag.x + "px";
+    card.style.top = cardDrag.top + ev.clientY - cardDrag.y + "px";
+    cardMoved = true;
+  });
+  card.addEventListener("pointerup", () => { cardDrag = null; });
   card.addEventListener("wheel", (ev) => ev.stopPropagation());
   document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && selected) select(null); });
 
