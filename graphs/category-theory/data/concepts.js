@@ -44,14 +44,6 @@ window.CT_CONCEPTS = {
   },
 
   concepts: [
-    // ------------------------------------------------------------ Defined elsewhere
-    { id: "topological-space", name: "Topological space", kind: "objekt", area: "basic", field: [54], msc: ["54A"], uses: ["st:set", "st:subset", "st:empty-set", "st:intersection", "st:union"],
-      formula: String.raw`(X, \mathcal T)`,
-      text: "A set with a family of open subsets that contains the empty set and the whole set and is closed under finite intersections and arbitrary unions. Needed here for sheaves on a space." },
-    { id: "open-cover", name: "Open cover", kind: "konstruktion", area: "basic", field: [54], msc: ["54D"], uses: ["topological-space", "st:union", "st:subset"],
-      formula: String.raw`U = \bigcup_i U_i`,
-      text: "A family of open subsets U<sub>i</sub> of an open set U of a topological space whose union is U. Placeholder until topology has a folder of its own." },
-
     // ------------------------------------------------------------ 18A General theory
     { id: "category", name: "Category", kind: "objekt", area: "18A", field: [18], msc: ["18A"], msc5: "18A05", uses: ["st:class", "st:set", "st:map"],
       formula: String.raw`\operatorname{Hom}(X, Y),\quad g \circ f,\quad \mathrm{id}_X`,
@@ -290,15 +282,15 @@ window.CT_CONCEPTS = {
     { id: "presheaf", name: "Presheaf", kind: "objekt", area: "18F", field: [18], msc: ["18F"], msc5: "18F20", uses: ["contravariant-functor", "category-of-sets"], isA: ["contravariant-functor"],
       formula: String.raw`F : \mathcal C^{\mathrm{op}} \to \mathbf{Set}`,
       text: "A contravariant functor from a category to sets. On the open sets of a space: sections over each open set with restriction maps." },
-    { id: "sheaf", name: "Sheaf", kind: "eigenschaft", area: "18F", field: [18, 14], msc: ["18F", "14F", "54B"], msc5: "18F20", uses: ["presheaf", "topological-space", "product", "equalizer", "open-cover"], isA: ["presheaf"],
+    { id: "sheaf", name: "Sheaf", kind: "eigenschaft", area: "18F", field: [18, 14], msc: ["18F", "14F", "54B"], msc5: "18F20", uses: ["presheaf", "top:topological-space", "product", "equalizer", "top:open-cover"], isA: ["presheaf"],
       formula: String.raw`F(U) \to \prod_i F(U_i) \rightrightarrows \prod_{i,j} F(U_i \cap U_j)`,
       text: "A presheaf on the open sets of a topological space whose sections are determined locally and can be glued: the diagram of products shown is an equalizer for every open cover of U by open sets U<sub>i</sub>.",
       definitionName: "Equalizer condition",
       alternativeDefinitions: [
-        { name: "Locality and gluing", uses: ["presheaf", "topological-space", "open-cover"], formula: String.raw`s|_{U_i} = t|_{U_i} \Rightarrow s = t`,
+        { name: "Locality and gluing", uses: ["presheaf", "top:topological-space", "top:open-cover"], formula: String.raw`s|_{U_i} = t|_{U_i} \Rightarrow s = t`,
           text: "A presheaf on the open sets of a topological space such that for every open cover of U by open sets U<sub>i</sub> two sections over U that agree on every U<sub>i</sub> are equal (locality), and sections s<sub>i</sub> over the U<sub>i</sub> that agree on all overlaps U<sub>i</sub> ∩ U<sub>j</sub> come from a section over U (gluing)." },
       ], },
-    { id: "local-system", name: "Local system", kind: "eigenschaft", area: "18F", field: [18, 55], msc: ["18F", "55N"], msc5: "18F20", uses: ["sheaf", "open-cover", "st:map"], isA: ["sheaf"],
+    { id: "local-system", name: "Local system", kind: "eigenschaft", area: "18F", field: [18, 55], msc: ["18F", "55N"], msc5: "18F20", uses: ["sheaf", "top:open-cover", "st:map"], isA: ["sheaf"],
       formula: String.raw`\mathcal L|_{U_i} \cong \underline{A}`,
       text: "A locally constant sheaf ℒ on a topological space X: X has an open cover by open sets U<sub>i</sub> such that ℒ restricted to each U<sub>i</sub> is isomorphic to the constant sheaf A, whose sections over V are the locally constant maps from V to a fixed set or abelian group A. On a connected, locally simply connected space local systems correspond to representations of the fundamental group (monodromy)." },
     { id: "sieve", name: "Sieve", kind: "objekt", area: "18F", field: [18], msc: ["18F"], msc5: "18F10", uses: ["hom-functor"],

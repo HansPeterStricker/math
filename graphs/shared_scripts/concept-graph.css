@@ -10,7 +10,7 @@ body.vollbild { overflow: hidden; height: 100vh; }
 .gebiete .gebiet { margin: 0 0 9px; }
 .gebiete .gebiet-name { color: var(--tinte); }
 .gebiete .gebiet.hier .gebiet-name { font-weight: 600; }
-.gebiete .gebiet-links { display: flex; gap: 8px; font-size: 12px; }
+.gebiete .gebiet-links { display: flex; flex-wrap: wrap; column-gap: 8px; font-size: 12px; }
 .gebiete a { color: #5a6f8f; text-decoration: none; }
 .gebiete a:hover { text-decoration: underline; }
 .gebiete a.hier { color: var(--tinte); font-weight: 600; text-decoration: underline; }

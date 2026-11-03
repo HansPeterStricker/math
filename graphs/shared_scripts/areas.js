@@ -22,4 +22,10 @@ window.GRAPH_AREAS = [
     text: "Graphs, colourings, matchings and spectra, extremal and probabilistic combinatorics, designs and matroids, partitions, tableaux and symmetric functions, polytopes." },
   { folder: "representation-theory", name: "Representation theory", msc: "20C, 22, 17B", concepts: "RT_CONCEPTS", theorems: "RT_THEOREMS",
     text: "Representations and characters of finite groups, blocks, Hecke algebras, Lie algebras and their highest weights, Kac–Moody and vertex algebras, Lie groups and their unitary representations." },
+  { folder: "topology", name: "Topology", msc: "54, 55, 57, 58A", concepts: "TOP_CONCEPTS", theorems: "TOP_THEOREMS",
+    text: "Topological and metric spaces, compactness and connectedness, homotopy, the fundamental group and coverings, homology, degree and fixed points, manifolds and surfaces, knots, smooth manifolds and differential forms." },
+  { folder: "analysis", name: "Analysis", msc: "26, 28, 30, 31, 33, 40, 42, 46, 47", concepts: "ANA_CONCEPTS", theorems: "ANA_THEOREMS",
+    text: "Limits, derivatives and integrals, measure and Lebesgue integration, series, complex functions, special functions, Fourier analysis, Banach and Hilbert spaces and their operators." },
+  { folder: "geometry", name: "Geometry", msc: "51, 52A, 53", concepts: "GEO_CONCEPTS", theorems: "GEO_THEOREMS",
+    text: "Euclid's geometry in Hilbert's axioms, isometries, projective planes and conics, hyperbolic geometry, convex bodies, curves and surfaces, Riemannian geometry and curvature, symplectic manifolds." },
 ];

@@ -17,7 +17,7 @@
   .gebiete h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); margin: 0 0 10px; }
   .gebiete .gebiet { margin: 0 0 10px; }
   .gebiete .gebiet-name a { color: var(--tinte); text-decoration: none; }
-  .gebiete .gebiet-links { display: flex; gap: 10px; font-size: 12.5px; }
+  .gebiete .gebiet-links { display: flex; flex-wrap: wrap; column-gap: 10px; font-size: 12.5px; }
   .gebiete a { color: #5a6f8f; text-decoration: none; }
   .gebiete a:hover { text-decoration: underline; }
   main { max-width: 1100px; padding: 24px 24px 40px; }
@@ -26,7 +26,7 @@
   .eintrag .msc { color: var(--leise); font-size: 12.5px; text-transform: uppercase; letter-spacing: .05em; }
   .eintrag h2 { font-size: 19px; margin: 2px 0 4px; }
   .eintrag p { margin: 0 0 8px; font-size: 14.5px; }
-  .paar { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .paar { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; }
   .paar a { color: inherit; text-decoration: none; display: block; border: 1px solid transparent; border-radius: 4px; padding: 4px; }
   .paar a:hover { border-color: var(--tinte); }
   .paar img { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 3px; background: #fbfaf6; }
@@ -47,16 +47,19 @@
 <div class="seite">
   <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2>
     <!-- areas:start -->
-    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div><div class="gebiet-links"><a href="set-theory/concepts.html">Concepts</a><a href="set-theory/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div><div class="gebiet-links"><a href="elementary-number-theory/concepts.html">Concepts</a><a href="elementary-number-theory/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div><div class="gebiet-links"><a href="group-theory/concepts.html">Concepts</a><a href="group-theory/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div><div class="gebiet-links"><a href="commutative-algebra/concepts.html">Concepts</a><a href="commutative-algebra/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div><div class="gebiet-links"><a href="category-theory/concepts.html">Concepts</a><a href="category-theory/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div><div class="gebiet-links"><a href="algebraic-geometry/concepts.html">Concepts</a><a href="algebraic-geometry/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div><div class="gebiet-links"><a href="arithmetic-geometry/concepts.html">Concepts</a><a href="arithmetic-geometry/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div><div class="gebiet-links"><a href="algebraic-number-theory/concepts.html">Concepts</a><a href="algebraic-number-theory/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#combinatorics">Combinatorics</a></div><div class="gebiet-links"><a href="combinatorics/concepts.html">Concepts</a><a href="combinatorics/theorems.html">Theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#representation-theory">Representation theory</a></div><div class="gebiet-links"><a href="representation-theory/concepts.html">Concepts</a><a href="representation-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div><div class="gebiet-links"><a href="set-theory/concepts.html">Concepts</a><a href="set-theory/theorems.html">Theorems</a><a href="set-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div><div class="gebiet-links"><a href="elementary-number-theory/concepts.html">Concepts</a><a href="elementary-number-theory/theorems.html">Theorems</a><a href="elementary-number-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div><div class="gebiet-links"><a href="group-theory/concepts.html">Concepts</a><a href="group-theory/theorems.html">Theorems</a><a href="group-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div><div class="gebiet-links"><a href="commutative-algebra/concepts.html">Concepts</a><a href="commutative-algebra/theorems.html">Theorems</a><a href="commutative-algebra/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div><div class="gebiet-links"><a href="category-theory/concepts.html">Concepts</a><a href="category-theory/theorems.html">Theorems</a><a href="category-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div><div class="gebiet-links"><a href="algebraic-geometry/concepts.html">Concepts</a><a href="algebraic-geometry/theorems.html">Theorems</a><a href="algebraic-geometry/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div><div class="gebiet-links"><a href="arithmetic-geometry/concepts.html">Concepts</a><a href="arithmetic-geometry/theorems.html">Theorems</a><a href="arithmetic-geometry/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div><div class="gebiet-links"><a href="algebraic-number-theory/concepts.html">Concepts</a><a href="algebraic-number-theory/theorems.html">Theorems</a><a href="algebraic-number-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#combinatorics">Combinatorics</a></div><div class="gebiet-links"><a href="combinatorics/concepts.html">Concepts</a><a href="combinatorics/theorems.html">Theorems</a><a href="combinatorics/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#representation-theory">Representation theory</a></div><div class="gebiet-links"><a href="representation-theory/concepts.html">Concepts</a><a href="representation-theory/theorems.html">Theorems</a><a href="representation-theory/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#topology">Topology</a></div><div class="gebiet-links"><a href="topology/concepts.html">Concepts</a><a href="topology/theorems.html">Theorems</a><a href="topology/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#analysis">Analysis</a></div><div class="gebiet-links"><a href="analysis/concepts.html">Concepts</a><a href="analysis/theorems.html">Theorems</a><a href="analysis/bipartite.html">Bipartite</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#geometry">Geometry</a></div><div class="gebiet-links"><a href="geometry/concepts.html">Concepts</a><a href="geometry/theorems.html">Theorems</a><a href="geometry/bipartite.html">Bipartite</a></div></div>
     <!-- areas:end -->
   </nav>
   <main>
@@ -117,7 +120,7 @@
       <h2>Arithmetic geometry</h2>
       <p>L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
       <div class="paar einzeln">
-        <a href="arithmetic-geometry/theorems.html"><img src="previews/arithmetic-geometry-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">78 theorems, 104 premises</div></a>
+        <a href="arithmetic-geometry/theorems.html"><img src="previews/arithmetic-geometry-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">78 theorems, 103 premises</div></a>
       </div>
     </section>
     <section class="eintrag" id="algebraic-number-theory">
@@ -141,7 +144,31 @@
       <h2>Representation theory</h2>
       <p>Representations and characters of finite groups, blocks, Hecke algebras, Lie algebras and their highest weights, Kac–Moody and vertex algebras, Lie groups and their unitary representations.</p>
       <div class="paar einzeln">
-        <a href="representation-theory/theorems.html"><img src="previews/representation-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">85 theorems, 142 premises</div></a>
+        <a href="representation-theory/theorems.html"><img src="previews/representation-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">85 theorems, 141 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="topology">
+      <div class="msc">MSC 54, 55, 57, 58A</div>
+      <h2>Topology</h2>
+      <p>Topological and metric spaces, compactness and connectedness, homotopy, the fundamental group and coverings, homology, degree and fixed points, manifolds and surfaces, knots, smooth manifolds and differential forms.</p>
+      <div class="paar einzeln">
+        <a href="topology/theorems.html"><img src="previews/topology-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">103 theorems, 137 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="analysis">
+      <div class="msc">MSC 26, 28, 30, 31, 33, 40, 42, 46, 47</div>
+      <h2>Analysis</h2>
+      <p>Limits, derivatives and integrals, measure and Lebesgue integration, series, complex functions, special functions, Fourier analysis, Banach and Hilbert spaces and their operators.</p>
+      <div class="paar einzeln">
+        <a href="analysis/theorems.html"><img src="previews/analysis-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">99 theorems, 142 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="geometry">
+      <div class="msc">MSC 51, 52A, 53</div>
+      <h2>Geometry</h2>
+      <p>Euclid's geometry in Hilbert's axioms, isometries, projective planes and conics, hyperbolic geometry, convex bodies, curves and surfaces, Riemannian geometry and curvature, symplectic manifolds.</p>
+      <div class="paar einzeln">
+        <a href="geometry/theorems.html"><img src="previews/geometry-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">99 theorems, 127 premises</div></a>
       </div>
     </section>
     <!-- entries:end -->

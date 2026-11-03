@@ -1,0 +1,61 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Concepts and theorems of category theory</title>
+<link rel="icon" href="../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../scripts/site-icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared_scripts/style.css">
+<link rel="stylesheet" href="../shared_scripts/concept-graph.css">
+<link rel="stylesheet" href="../shared_scripts/bipartite-graph.css">
+</head>
+<body class="vollbild">
+<div class="app">
+  <aside id="side">
+    <div class="kopf">
+      <h1>Concepts and theorems of category theory</h1>
+      <div class="einleitung">
+        <p>Left: the concepts of category theory (MSC 18); right: its theorems, lemmas and conjectures. A line joins a
+          concept to a theorem when the concept occurs in the statement of the theorem. Both columns are grouped by MSC class;
+          concepts of other areas stand at the bottom on the left.</p>
+        <p id="b-missing"></p>
+      </div>
+      <div class="knoepfe"><a class="klein-knopf" href="concepts.html">Concepts</a><a class="klein-knopf" href="theorems.html">Theorems</a></div>
+    </div>
+    <div class="suche">
+      <input id="search" type="search" placeholder="Search concept or theorem …" autocomplete="off" aria-label="Search concept or theorem">
+      <ul id="search-results" role="listbox"></ul>
+    </div>
+    <div id="controls"></div>
+    <div id="legend"></div>
+  </aside>
+  <div class="graph bip"><svg id="bipartite" role="img" aria-label="Concepts and theorems of category theory"></svg></div>
+  <aside id="panel"></aside>
+</div>
+
+<script src="data/concepts.js"></script>
+<script src="data/theorem-graph.js"></script>
+<script src="../set-theory/data/concepts.js"></script>
+<script src="../elementary-number-theory/data/concepts.js"></script>
+<script src="../group-theory/data/concepts.js"></script>
+<script src="../commutative-algebra/data/concepts.js"></script>
+<script src="../algebraic-geometry/data/concept-graph.js"></script>
+<script src="../arithmetic-geometry/data/concept-graph.js"></script>
+<script src="../algebraic-number-theory/data/concepts.js"></script>
+<script src="../combinatorics/data/concepts.js"></script>
+<script src="../representation-theory/data/concepts.js"></script>
+<script src="../topology/data/concepts.js"></script>
+<script src="../analysis/data/concepts.js"></script>
+<script src="../geometry/data/concepts.js"></script>
+<script src="scripts/bipartite-page.js"></script>
+<script src="../shared_scripts/areas.js"></script>
+<script src="../shared_scripts/area-nav.js"></script>
+<script src="../shared_scripts/bipartite-graph.js"></script>
+<a href="../../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>
+</body>
+</html>

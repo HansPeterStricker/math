@@ -5,8 +5,8 @@
 //
 // Same model as ../../elementary-number-theory/data/concepts.js (see its header comment). `area` is the
 // three-character class (05A, 05B, 05C, 05D, 05E, 11B, 11P, 52B, 52C); `msc5` the five-character class. Concepts used
-// here without a home folder (formal power series, eigenvalue of a matrix, probability space, expectation, projective
-// plane) have the area "basic" and their own MSC class. Every concept that a definition (name, formula, defining
+// here without a home folder (formal power series, eigenvalue of a matrix, probability space, expectation) have the
+// area "basic" and their own MSC class. The finite projective plane moved to ../../geometry/ (51E, 3 November 2026). Every concept that a definition (name, formula, defining
 // prose) uses explicitly is in `uses`.
 //
 // References: set theory "st:" (sets, maps, orders, the Möbius function of a poset), elementary number theory "ent:",
@@ -58,9 +58,6 @@ window.CO_CONCEPTS = {
     { id: "expectation", name: "Expectation of a random variable", kind: "invariante", area: "basic", field: [60], msc: ["60A"], uses: ["probability-space", "st:real-number"],
       formula: String.raw`\mathbb E X = \sum_{\omega \in \Omega} X(\omega) \Pr(\{\omega\})`,
       text: "For a real-valued random variable X on a probability space, the integral of X against the probability; on a finite space the weighted sum shown. Placeholder until probability theory has a folder of its own." },
-    { id: "projective-plane", name: "Finite projective plane", kind: "objekt", area: "basic", field: [51], msc: ["51E"], uses: ["st:finite-set", "st:subset"],
-      formula: String.raw`|P| = |\mathcal L| = n^2 + n + 1`,
-      text: "A finite set P of points with a family 𝓛 of subsets, the lines, such that any two points lie on exactly one line, any two lines meet in exactly one point, and there are four points no three on a line. Every line then has n + 1 points; n is the order of the plane. Placeholder until finite geometry (51E) has a folder of its own." },
 
     // ------------------------------------------------------------ 05A Enumerative combinatorics
     { id: "binomial-coefficient", name: "Binomial coefficient", kind: "invariante", area: "05A", field: [5], msc: ["05A"], msc5: "05A10", uses: ["st:subset", "st:cardinality", "ent:natural-number"],
@@ -187,7 +184,7 @@ window.CO_CONCEPTS = {
     { id: "perfect-graph", name: "Perfect graph", kind: "eigenschaft", area: "05C", field: [5], msc: ["05C"], msc5: "05C17", uses: ["graph-colouring", "clique"], isA: ["graph"],
       formula: String.raw`\chi(H) = \omega(H)`,
       text: "A graph G such that every induced subgraph H, including G itself, has chromatic number equal to the size of its largest clique." },
-    { id: "planar-graph", name: "Planar graph", kind: "eigenschaft", area: "05C", field: [5], msc: ["05C"], msc5: "05C10", uses: ["graph", "st:real-number", "ct:topological-space"], isA: ["graph"],
+    { id: "planar-graph", name: "Planar graph", kind: "eigenschaft", area: "05C", field: [5], msc: ["05C"], msc5: "05C10", uses: ["graph", "st:real-number", "top:topological-space"], isA: ["graph"],
       formula: String.raw`G \hookrightarrow \mathbb R^2`,
       text: "A graph that can be drawn in the plane ℝ<sup>2</sup> with vertices as points and edges as arcs that meet only at common end vertices; such a drawing is a plane graph, and the connected regions of the complement of the drawing are its faces. Drawing on another closed surface is an embedding into that surface." },
     { id: "crossing-number", name: "Crossing number", kind: "invariante", area: "05C", field: [5], msc: ["05C"], msc5: "05C10", uses: ["graph", "st:real-number"],

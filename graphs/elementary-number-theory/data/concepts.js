@@ -71,9 +71,6 @@ window.ENT_CONCEPTS = {
     { id: "integer-part", name: "Integer part", kind: "konstruktion", area: "basic", field: [11], msc: ["11A"], uses: ["st:real-number", "integer"],
       formula: String.raw`\lfloor x \rfloor \le x < \lfloor x \rfloor + 1`,
       text: "For a real number x the largest integer ⌊x⌋ that is at most x." },
-    { id: "logarithm", name: "Natural logarithm", kind: "konstruktion", area: "basic", field: [33], msc: ["33B"], uses: ["st:real-number"],
-      formula: String.raw`\log x = \int_1^x \frac{dt}{t}`,
-      text: "For a positive real number x the integral of 1/t from 1 to x; the inverse of the exponential function. Placeholder until analysis has a folder of its own." },
 
     // ------------------------------------------------------------ 11A05 Multiplicative structure
     { id: "divisibility", name: "Divisibility", kind: "morphismus", area: "11A05", field: [11], msc: ["11A"], msc5: "11A05", uses: ["integer"],
@@ -253,7 +250,7 @@ window.ENT_CONCEPTS = {
     { id: "liouville", name: "Liouville function", kind: "invariante", area: "11A25", field: [11], msc: ["11A"], msc5: "11A25", uses: ["prime-omega"], isA: ["arithmetic-function"],
       formula: String.raw`\lambda(n) = (-1)^{\Omega(n)}`,
       text: "Sign given by the number Ω(n) of prime factors of n counted with multiplicity." },
-    { id: "von-mangoldt", name: "Von Mangoldt function", kind: "invariante", area: "11A25", field: [11], msc: ["11A", "11N"], msc5: "11A25", uses: ["prime-number", "logarithm"], isA: ["arithmetic-function"],
+    { id: "von-mangoldt", name: "Von Mangoldt function", kind: "invariante", area: "11A25", field: [11], msc: ["11A", "11N"], msc5: "11A25", uses: ["prime-number", "ana:logarithm"], isA: ["arithmetic-function"],
       formula: String.raw`\Lambda(n) = \begin{cases} \log p & n = p^k,\ k \ge 1 \\ 0 & \text{otherwise} \end{cases}`,
       text: "log p, the natural logarithm of p, at the powers of a prime p and 0 elsewhere. Its partial sums count primes with weights, which simplifies the prime number theorem." },
     { id: "carmichael-lambda", name: "Carmichael function", kind: "invariante", area: "11A25", field: [11], msc: ["11A"], msc5: "11A25", uses: ["unit-group-mod-n", "gt:group-exponent", "congruence", "coprime"], isA: ["arithmetic-function"],

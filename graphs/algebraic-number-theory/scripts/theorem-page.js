@@ -72,6 +72,21 @@ window.CONCEPT_PAGE = {
       "data": "RT_THEOREMS",
       "page": "../representation-theory/theorems.html",
       "title": "the theorem graph of representation theory"
+    },
+    "top": {
+      "data": "TOP_THEOREMS",
+      "page": "../topology/theorems.html",
+      "title": "the theorem graph of topology"
+    },
+    "ana": {
+      "data": "ANA_THEOREMS",
+      "page": "../analysis/theorems.html",
+      "title": "the theorem graph of analysis"
+    },
+    "geo": {
+      "data": "GEO_THEOREMS",
+      "page": "../geometry/theorems.html",
+      "title": "the theorem graph of geometry"
     }
   },
   "conceptSources": {
@@ -114,6 +129,18 @@ window.CONCEPT_PAGE = {
     "rt": {
       "data": "RT_CONCEPTS",
       "page": "../representation-theory/concepts.html"
+    },
+    "top": {
+      "data": "TOP_CONCEPTS",
+      "page": "../topology/concepts.html"
+    },
+    "ana": {
+      "data": "ANA_CONCEPTS",
+      "page": "../analysis/concepts.html"
+    },
+    "geo": {
+      "data": "GEO_CONCEPTS",
+      "page": "../geometry/concepts.html"
     }
   },
   "shapes": {

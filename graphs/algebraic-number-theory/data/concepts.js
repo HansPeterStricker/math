@@ -203,7 +203,7 @@ window.ANT_CONCEPTS = {
     { id: "fundamental-unit", name: "System of fundamental units", kind: "konstruktion", area: "11R27", field: [11], msc: ["11R"], msc5: "11R27", uses: ["unit-group", "root-of-unity", "gt:free-abelian-group", "gt:quotient-group", "ent:integer", "embedding", "real-quadratic-field"],
       formula: String.raw`\varepsilon = \zeta\, \varepsilon_1^{a_1} \cdots \varepsilon_r^{a_r},\quad a_i \in \mathbb Z,\quad r = r_1 + r_2 - 1`,
       text: "Units ε<sub>1</sub>, …, ε<sub>r</sub> of 𝒪<sub>K</sub> such that every unit is, in exactly one way, a root of unity ζ times a product of their powers, that is, a basis of the free abelian group 𝒪<sub>K</sub><sup>×</sup>/μ(K); r = r<sub>1</sub> + r<sub>2</sub> − 1 with the numbers of real and complex embeddings. For a real quadratic field the fundamental unit ε > 1, such as 1 + √2 for ℚ(√2)." },
-    { id: "number-field-regulator", name: "Regulator of a number field", kind: "invariante", area: "11R27", field: [11], msc: ["11R"], msc5: "11R27", uses: ["fundamental-unit", "embedding", "determinant", "gt:matrix-ring", "ent:logarithm", "ar:absolute-value"],
+    { id: "number-field-regulator", name: "Regulator of a number field", kind: "invariante", area: "11R27", field: [11], msc: ["11R"], msc5: "11R27", uses: ["fundamental-unit", "embedding", "determinant", "gt:matrix-ring", "ana:logarithm", "ar:absolute-value"],
       formula: String.raw`R_K = \big|\det\big(d_i \log|\sigma_i(\varepsilon_j)|\big)_{1 \le i, j \le r}\big|`,
       text: "The absolute value of the determinant of the r × r matrix of the d<sub>i</sub> log|σ<sub>i</sub>(ε<sub>j</sub>)| for a system of fundamental units ε<sub>1</sub>, …, ε<sub>r</sub>, where σ<sub>1</sub>, …, σ<sub>r</sub> are r of the r + 1 embeddings taken up to complex conjugation and d<sub>i</sub> is 1 for a real and 2 for a complex σ<sub>i</sub>; the covolume of the unit lattice, independent of the choices." },
     { id: "s-unit-group", name: "S-unit group", kind: "konstruktion", area: "11R27", field: [11], msc: ["11R"], msc5: "11R27", uses: ["number-field", "place", "ar:absolute-value", "unit-group", "ca:prime-ideal"],
@@ -292,7 +292,7 @@ window.ANT_CONCEPTS = {
       text: "For a Galois extension L/K of number fields and a homomorphism ρ from Gal(L/K) to the general linear group of a finite-dimensional complex vector space V, the Euler product over the prime ideals 𝔭 of K of the inverse characteristic polynomials of the Frobenius elements on the vectors fixed by the inertia group I<sub>𝔭</sub>; for one-dimensional ρ it is a Hecke L-function (by Artin reciprocity)." },
 
     // ------------------------------------------------------------ 11R45 Density
-    { id: "dirichlet-density", name: "Dirichlet density", kind: "invariante", area: "11R45", field: [11], msc: ["11R"], msc5: "11R45", uses: ["number-field", "ca:prime-ideal", "ideal-norm", "ent:logarithm", "st:real-number"],
+    { id: "dirichlet-density", name: "Dirichlet density", kind: "invariante", area: "11R45", field: [11], msc: ["11R"], msc5: "11R45", uses: ["number-field", "ca:prime-ideal", "ideal-norm", "ana:logarithm", "st:real-number"],
       formula: String.raw`\delta(S) = \lim_{s \to 1^+} \frac{\sum_{\mathfrak p \in S} N\mathfrak p^{-s}}{\log \frac{1}{s - 1}}`,
       text: "For a set S of prime ideals of a number field K, the limit shown, if it exists; a set with a natural density has the same Dirichlet density." },
 

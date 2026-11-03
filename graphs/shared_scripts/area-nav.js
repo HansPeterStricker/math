@@ -1,5 +1,5 @@
-// Column of areas at the far left of every graph page (user, 3 November 2026): each area with two links, Concepts and
-// Theorems; the page shown is marked. Needs shared_scripts/areas.js. Loaded as a classic script at the end of the page.
+// Column of areas at the far left of every graph page (user, 3 November 2026): each area with three links, Concepts,
+// Theorems and Bipartite (concepts and theorems side by side, since 3 November 2026); the page shown is marked. Needs shared_scripts/areas.js. Loaded as a classic script at the end of the page.
 (function () {
   const app = document.querySelector(".app");
   if (!app || !window.GRAPH_AREAS) return;
@@ -14,7 +14,7 @@
   };
   nav.innerHTML = `<a class="alle" href="../index.html">All graphs</a>` + window.GRAPH_AREAS.map((a) =>
     `<div class="gebiet${a.folder === here ? " hier" : ""}"><div class="gebiet-name" title="MSC ${a.msc}">${a.name}</div>` +
-    `<div class="gebiet-links">${link(a, "concepts.html", "Concepts")}${link(a, "theorems.html", "Theorems")}</div></div>`).join("");
+    `<div class="gebiet-links">${link(a, "concepts.html", "Concepts")}${link(a, "theorems.html", "Theorems")}${link(a, "bipartite.html", "Bipartite")}</div></div>`).join("");
   app.insertBefore(nav, app.firstChild);
   app.classList.add("mit-gebieten");
 })();

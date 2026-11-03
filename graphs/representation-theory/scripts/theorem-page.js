@@ -63,6 +63,21 @@ window.CONCEPT_PAGE = {
       "data": "CO_THEOREMS",
       "page": "../combinatorics/theorems.html",
       "title": "the theorem graph of combinatorics"
+    },
+    "top": {
+      "data": "TOP_THEOREMS",
+      "page": "../topology/theorems.html",
+      "title": "the theorem graph of topology"
+    },
+    "ana": {
+      "data": "ANA_THEOREMS",
+      "page": "../analysis/theorems.html",
+      "title": "the theorem graph of analysis"
+    },
+    "geo": {
+      "data": "GEO_THEOREMS",
+      "page": "../geometry/theorems.html",
+      "title": "the theorem graph of geometry"
     }
   },
   "conceptSources": {
@@ -105,6 +120,18 @@ window.CONCEPT_PAGE = {
     "co": {
       "data": "CO_CONCEPTS",
       "page": "../combinatorics/concepts.html"
+    },
+    "top": {
+      "data": "TOP_CONCEPTS",
+      "page": "../topology/concepts.html"
+    },
+    "ana": {
+      "data": "ANA_CONCEPTS",
+      "page": "../analysis/concepts.html"
+    },
+    "geo": {
+      "data": "GEO_CONCEPTS",
+      "page": "../geometry/concepts.html"
     }
   },
   "shapes": {

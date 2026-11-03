@@ -1,0 +1,45 @@
+/* Styling of the bipartite graphs (bipartite.html in the folders of graphs/, shared_scripts/bipartite-graph.js). Loaded
+   after style.css and concept-graph.css, whose sidebar, panel, switches, tooltip and column of areas it uses. The
+   picture is as tall as its columns; it scrolls inside its area of the window. */
+.app .graph.bip { overflow: auto; cursor: default; background: #fbfaf6; }
+#bipartite { display: block; user-select: none; -webkit-user-select: none; }
+#side .einleitung { font-size: 12.5px; line-height: 1.35; color: var(--tinte); margin: 4px 0 6px; }
+#side .einleitung p { margin: 0 0 5px; }
+#side .kopf .knoepfe { display: flex; gap: 4px; flex-wrap: wrap; }
+#side .kopf .knoepfe .klein-knopf { margin-left: 0; }
+
+.bip-graph .kante { fill: none; stroke: #a99e8c; stroke-width: 1; stroke-opacity: .6; }
+.bip-graph .knoten { cursor: pointer; }
+.bip-graph .knoten .form { stroke: #4b443b; stroke-width: 1; }
+.bip-graph .knoten text { font-size: 13px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; stroke-linejoin: round; }
+/* concepts of other areas: light, dashed border in the colour of their home area (set as --herkunft on the node) */
+.bip-graph .knoten.fremd .form { fill: #fbfaf6; stroke: var(--herkunft, #8a7f6e); stroke-width: 2.4; stroke-dasharray: 3 2; }
+.bip-graph.ohne-namen .knoten:not(.hell) text { display: none; }
+
+/* blocks of the MSC classes: pale bands with the name of the class above them */
+.bip-graph .band { fill-opacity: .09; stroke: none; }
+.bip-graph .block-name { font-size: 14.5px; font-weight: 600; fill: #6d655a; paint-order: stroke; stroke: #fbfaf6; stroke-width: 4px; stroke-linejoin: round; }
+.bip-graph .block-name.unter { font-size: 13px; font-weight: 400; font-style: italic; }
+.bip-graph .gruppe-name { font-size: 14.5px; font-weight: 600; fill: #6d655a; letter-spacing: .02em; }
+
+/* selection and pointing, as in the circle graphs */
+.bip-graph.fokus .knoten, .bip-graph.fokus .kante { opacity: .16; }
+.bip-graph.fokus .knoten.hell, .bip-graph.fokus .kante.hell { opacity: 1; }
+.bip-graph.fokus .baender { opacity: .55; }
+.bip-graph .knoten.gewaehlt .form { stroke: var(--tinte); stroke-width: 3; }
+.bip-graph .knoten.gewaehlt text { font-weight: 600; }
+.bip-graph .knoten.vorfahr .form { stroke: var(--vorfahr); stroke-width: 2.4; }
+.bip-graph .knoten.nachfahr .form { stroke: var(--nachfahr); stroke-width: 2.4; }
+.bip-graph .knoten.fremd.vorfahr .form, .bip-graph .knoten.fremd.nachfahr .form { stroke: var(--herkunft, #8a7f6e); stroke-width: 3.2; }
+.bip-graph .kante.vorfahr { stroke: var(--vorfahr); stroke-width: 1.7; stroke-opacity: 1; }
+.bip-graph .kante.nachfahr { stroke: var(--nachfahr); stroke-width: 1.7; stroke-opacity: 1; }
+.bip-graph.suchend .knoten:not(.treffer) { opacity: .2; }
+.bip-graph .knoten.treffer .form { stroke: #d4a017; stroke-width: 3; }
+
+/* small square of the colour in the chips of the panel */
+#panel .chip i { display: inline-block; width: 8px; height: 8px; margin-right: 4px; border: 1.5px solid #6d655a; vertical-align: 0; }
+
+/* preview images (BIPARTITE.preview): no names */
+.bip-graph.vorschau .block-name, .bip-graph.vorschau .gruppe-name { display: none; }
+.bip-graph.vorschau .kante { stroke-width: .7; stroke-opacity: .55; }
+.bip-graph.vorschau .band { fill-opacity: .22; }

@@ -141,7 +141,7 @@
   // Prerequisites are coloured by their origin (user, 2 November 2026): the home folder of a referenced concept, or
   // "local" for the placeholders of this folder. Colours fixed per prefix, so that an area has the same colour in
   // every graph; the names come from the settings (title of the source).
-  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", ar: "#3f8f8a", ant: "#b5651d", local: "#d9d4ca" };
+  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", ar: "#3f8f8a", ant: "#b5651d", co: "#c77dba", rt: "#7a6fb0", top: "#4f7f9f", ana: "#b04a5a", geo: "#8a9a3a", local: "#d9d4ca" };
   const originOf = (c) => (c.foreign ? c.foreign.prefix : "local");
   const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).title || o).replace(/^the (concept|theorem) graph of /, ""));
   const colorOf = (c) => (c.area === FOREIGN ? ORIGIN_COLORS[originOf(c)] || "#d9d4ca" : COLORS[c.area] || "#ccc");
