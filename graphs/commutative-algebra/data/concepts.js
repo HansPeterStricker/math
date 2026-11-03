@@ -27,8 +27,6 @@ window.CA_CONCEPTS = {
     "13H": "13H Local rings",
     "13J": "13J Topological rings, completion",
     "13N": "13N Differentials",
-    "12E": "12E Fields",
-    "12F": "12F Field extensions",
   },
 
   kinds: {
@@ -40,13 +38,8 @@ window.CA_CONCEPTS = {
   },
 
   concepts: [
-    // ------------------------------------------------------------ Defined elsewhere
-    { id: "vector-space-dimension", name: "Dimension of a vector space", kind: "invariante", area: "basic", field: [15], msc: ["15A"], uses: ["field", "module", "free-module", "st:cardinality"],
-      formula: String.raw`\dim_K V = |B|`,
-      text: "For a vector space V over a field K (a module over K): the cardinality of a basis B, a set of elements of V such that every element of V is uniquely a finite linear combination of them. Every vector space is a free module, and all its bases have the same cardinality. Placeholder until linear algebra has a folder of its own." },
-
     // ------------------------------------------------------------ 13A Rings and ideals
-    { id: "commutative-ring", name: "Commutative ring", kind: "objekt", area: "13A", field: [13], msc: ["13A"], msc5: "13A99", uses: ["gt:abelian-group", "st:binary-operation"],
+    { id: "commutative-ring", name: "Commutative ring", kind: "objekt", area: "13A", field: [13], msc: ["13A"], msc5: "13A99", uses: ["gt:abelian-group", "st:binary-operation"], isA: ["aa:ring"],
       formula: String.raw`(R, +, \cdot, 0, 1),\quad ab = ba,\quad a(b + c) = ab + ac`,
       text: "An abelian group under addition with a second binary operation, an associative, commutative multiplication that has a unit element 1 and distributes over addition. Examples: ℤ, ℤ/nℤ, polynomial rings, rings of functions." },
     { id: "ring-homomorphism", name: "Ring homomorphism", kind: "morphismus", area: "13A", field: [13], msc: ["13A"], msc5: "13A99", uses: ["commutative-ring", "st:map"], isA: ["st:map"],
@@ -110,18 +103,9 @@ window.CA_CONCEPTS = {
     { id: "fractional-ideal", name: "Fractional ideal", kind: "objekt", area: "13A", field: [13], msc: ["13A", "13F"], msc5: "13A15", uses: ["integral-domain", "fraction-field", "submodule"],
       formula: String.raw`I \subseteq K,\quad dI \subseteq R,\quad d \ne 0`,
       text: "For an integral domain R with fraction field K: a non-zero R-submodule I of K such that dI ⊆ R for some non-zero d in R. For noetherian R these are the non-zero finitely generated R-submodules of K; in a Dedekind domain they form a group under multiplication." },
-    { id: "discrete-valuation", name: "Discrete valuation", kind: "morphismus", area: "13A", field: [13, 12], msc: ["13A", "12J"], msc5: "13A18", uses: ["field", "unit", "gt:homomorphism", "ent:integer", "st:surjective"],
+    { id: "discrete-valuation", name: "Discrete valuation", kind: "morphismus", area: "13A", field: [13, 12], msc: ["13A", "12J"], msc5: "13A18", uses: ["ft:field", "unit", "gt:homomorphism", "ent:integer", "st:surjective"],
       formula: String.raw`v : K^\times \to \mathbb Z,\quad v(xy) = v(x) + v(y),\quad v(x + y) \ge \min(v(x), v(y))`,
       text: "A surjective group homomorphism v from the group of units K<sup>×</sup> of a field K (its non-zero elements) to the integers ℤ with v(x + y) ≥ min(v(x), v(y)); one sets v(0) = ∞. Its valuation ring, the elements x with v(x) ≥ 0, is a discrete valuation ring. Example: the p-adic valuation on ℚ." },
-
-    // ------------------------------------------------------------ 12E Fields
-    { id: "field", name: "Field", kind: "eigenschaft", area: "12E", field: [12, 13], msc: ["12E", "13A"], msc5: "12E99", uses: ["unit"], isA: ["commutative-ring"],
-      formula: String.raw`a \ne 0 \Rightarrow a \in R^\times`,
-      text: "A commutative ring with 1 ≠ 0 in which every non-zero element is a unit: ℚ, ℝ, ℂ, 𝔽<sub>p</sub>. Kept here until there is a folder for field theory." },
-
-    { id: "algebraic-closure", name: "Algebraic closure", kind: "konstruktion", area: "12F", field: [12], msc: ["12F"], msc5: "12F05", uses: ["field", "integral-extension", "polynomial-ring"],
-      formula: String.raw`K \subseteq \bar K\ \text{algebraic},\quad \bar K\ \text{algebraically closed}`,
-      text: "A field K̄ containing the field K that is algebraic over K (an integral extension: every element is a root of a non-zero polynomial over K) and algebraically closed: every non-constant polynomial in the polynomial ring K̄[x] has a root in K̄. It exists and is unique up to isomorphism over K (Steinitz). Kept here until there is a folder for field theory." },
 
     // ------------------------------------------------------------ 13B Ring extensions, localization
     { id: "algebra", name: "Algebra over a ring", kind: "objekt", area: "13B", field: [13], msc: ["13B"], msc5: "13B02", uses: ["ring-homomorphism"], isA: ["commutative-ring"],
@@ -152,7 +136,7 @@ window.CA_CONCEPTS = {
     { id: "localization", name: "Localization", kind: "konstruktion", area: "13B", field: [13], msc: ["13B"], msc5: "13B30", uses: ["multiplicative-subset", "st:cartesian-product", "st:quotient-set"], isA: ["commutative-ring"],
       formula: String.raw`S^{-1}R = \{a/s\},\quad a/s = b/t \iff u(at - bs) = 0`,
       text: "Fractions a/s with denominators in a multiplicative subset S: the quotient set of the cartesian product R × S by the relation in the formula, with the usual operations on fractions. At a prime ideal 𝔭 (S = R ∖ 𝔭) the local ring R<sub>𝔭</sub>." },
-    { id: "fraction-field", name: "Field of fractions", kind: "konstruktion", area: "13B", field: [13], msc: ["13B", "12E"], msc5: "13B30", uses: ["localization", "integral-domain"], isA: ["field"],
+    { id: "fraction-field", name: "Field of fractions", kind: "konstruktion", area: "13B", field: [13], msc: ["13B", "12E"], msc5: "13B30", uses: ["localization", "integral-domain"], isA: ["ft:field"],
       formula: String.raw`\operatorname{Frac}(A) = (A \setminus \{0\})^{-1} A`,
       text: "The localization of an integral domain at all non-zero elements; ℚ = Frac(ℤ)." },
 
@@ -276,22 +260,22 @@ window.CA_CONCEPTS = {
       text: "A noetherian integrally closed domain of dimension 1; its non-zero ideals factor uniquely into prime ideals. Rings of integers of number fields are Dedekind domains.",
       definitionName: "Noetherian, integrally closed, dimension 1",
       alternativeDefinitions: [
-        { name: "Invertible fractional ideals", uses: ["integral-domain", "fractional-ideal", "fraction-field", "field"], formula: String.raw`I I^{-1} = R,\quad I^{-1} = \{x \in K : xI \subseteq R\}`,
+        { name: "Invertible fractional ideals", uses: ["integral-domain", "fractional-ideal", "fraction-field", "ft:field"], formula: String.raw`I I^{-1} = R,\quad I^{-1} = \{x \in K : xI \subseteq R\}`,
           text: "An integral domain R, not a field, in which every fractional ideal I is invertible: II<sup>−1</sup> = R, where I<sup>−1</sup> is the set of x in the fraction field K with xI ⊆ R." },
-        { name: "Products of prime ideals", uses: ["integral-domain", "ideal", "prime-ideal", "field"], formula: String.raw`I = \mathfrak p_1 \cdots \mathfrak p_k`,
+        { name: "Products of prime ideals", uses: ["integral-domain", "ideal", "prime-ideal", "ft:field"], formula: String.raw`I = \mathfrak p_1 \cdots \mathfrak p_k`,
           text: "An integral domain, not a field, in which every non-zero proper ideal is a product of prime ideals; the uniqueness of the factorization then follows." },
-        { name: "Local rings are discrete valuation rings", uses: ["noetherian-ring", "integral-domain", "localization", "prime-ideal", "dvr", "field"], formula: String.raw`R_{\mathfrak p}\ \text{DVR}\ (\mathfrak p \ne 0)`,
+        { name: "Local rings are discrete valuation rings", uses: ["noetherian-ring", "integral-domain", "localization", "prime-ideal", "dvr", "ft:field"], formula: String.raw`R_{\mathfrak p}\ \text{DVR}\ (\mathfrak p \ne 0)`,
           text: "A noetherian integral domain, not a field, whose localization R<sub>𝔭</sub> at every non-zero prime ideal 𝔭 is a discrete valuation ring." },
       ], },
     { id: "valuation-ring", name: "Valuation ring", kind: "eigenschaft", area: "13F", field: [13], msc: ["13F"], msc5: "13F30", uses: ["fraction-field", "integral-domain"], isA: ["integral-domain"],
       formula: String.raw`x \in K^\times \Rightarrow x \in A \ \text{or}\ x^{-1} \in A`,
       text: "A domain A such that for every non-zero x of its fraction field x or x<sup>−1</sup> lies in A; it is local." },
-    { id: "dvr", name: "Discrete valuation ring", kind: "eigenschaft", area: "13F", field: [13], msc: ["13F", "13H"], msc5: "13F30", uses: ["valuation-ring", "pid", "local-ring", "field", "principal-ideal", "unit", "discrete-valuation", "fraction-field"], isA: ["valuation-ring", "pid"],
+    { id: "dvr", name: "Discrete valuation ring", kind: "eigenschaft", area: "13F", field: [13], msc: ["13F", "13H"], msc5: "13F30", uses: ["valuation-ring", "pid", "local-ring", "ft:field", "principal-ideal", "unit", "discrete-valuation", "fraction-field"], isA: ["valuation-ring", "pid"],
       formula: String.raw`\mathfrak m = (\pi),\quad v(\pi^n u) = n`,
       text: "A local principal ideal domain that is not a field. Its maximal ideal is a principal ideal (π), every non-zero element is π<sup>n</sup>u with a unit u, and v(π<sup>n</sup>u) = n defines a discrete valuation v of its fraction field. Examples: ℤ<sub>(p)</sub> or k[[t]]; the local rings of smooth curves.",
       definitionName: "Local principal ideal domain",
       alternativeDefinitions: [
-        { name: "Valuation ring of a discrete valuation", uses: ["discrete-valuation", "field", "st:subset"], formula: String.raw`A = \{x \in K : v(x) \ge 0\}`,
+        { name: "Valuation ring of a discrete valuation", uses: ["discrete-valuation", "ft:field", "st:subset"], formula: String.raw`A = \{x \in K : v(x) \ge 0\}`,
           text: "For a field K with a discrete valuation v: the subset of the elements x of K with v(x) ≥ 0 (including 0, with v(0) = ∞), a subring of K." },
         { name: "Integrally closed local domain of dimension 1", uses: ["noetherian-ring", "local-ring", "integral-domain", "integral-closure", "krull-dimension"], formula: String.raw`\dim R = 1,\quad R = \bar R`,
           text: "A noetherian local integral domain of Krull dimension 1 that is integrally closed in its fraction field." },
@@ -308,10 +292,10 @@ window.CA_CONCEPTS = {
         { name: "Non-units form an ideal", uses: ["commutative-ring", "unit", "ideal"], formula: String.raw`R \setminus R^\times\ \text{ideal}`,
           text: "A non-zero ring in which the non-units form an ideal; this ideal is then the unique maximal ideal." },
       ], },
-    { id: "residue-field", name: "Residue field", kind: "konstruktion", area: "13H", field: [13], msc: ["13H"], msc5: "13H99", uses: ["local-ring", "quotient-ring"], isA: ["field"],
+    { id: "residue-field", name: "Residue field", kind: "konstruktion", area: "13H", field: [13], msc: ["13H"], msc5: "13H99", uses: ["local-ring", "quotient-ring"], isA: ["ft:field"],
       formula: String.raw`\kappa = R/\mathfrak m`,
       text: "The quotient of a local ring by its maximal ideal." },
-    { id: "regular-local-ring", name: "Regular local ring", kind: "eigenschaft", area: "13H", field: [13], msc: ["13H"], msc5: "13H05", uses: ["local-ring", "krull-dimension", "noetherian-ring", "residue-field", "quotient-module", "vector-space-dimension"], isA: ["local-ring"],
+    { id: "regular-local-ring", name: "Regular local ring", kind: "eigenschaft", area: "13H", field: [13], msc: ["13H"], msc5: "13H05", uses: ["local-ring", "krull-dimension", "noetherian-ring", "residue-field", "quotient-module", "la:vector-space-dimension"], isA: ["local-ring"],
       formula: String.raw`\dim_\kappa \mathfrak m/\mathfrak m^2 = \dim R`,
       text: "A noetherian local ring whose cotangent space 𝔪/𝔪<sup>2</sup>, a vector space over the residue field κ, has dimension equal to the Krull dimension dim R. These are the local rings of smooth points.",
       definitionName: "Cotangent space",
@@ -350,6 +334,12 @@ window.CA_CONCEPTS = {
         { name: "Universal derivation", uses: ["algebra", "module", "derivation", "module-homomorphism"], formula: String.raw`\operatorname{Hom}_B(\Omega_{B/A}, M) \cong \operatorname{Der}_A(B, M)`,
           text: "For an A-algebra B: a B-module Ω<sub>B/A</sub> with a derivation d : B → Ω<sub>B/A</sub> such that for every B-module M every derivation B → M is f ∘ d for exactly one module homomorphism f : Ω<sub>B/A</sub> → M." },
       ], },
+    { id: "invariant-ring", name: "Ring of invariants", kind: "konstruktion", area: "13A", field: [13], msc: ["13A"], msc5: "13A50", uses: ["algebra", "gt:group-action"],
+      formula: String.raw`A^G = \{a \in A : g \cdot a = a\}`,
+      text: "The elements of an algebra A fixed by an action of a group G on A. Finitely generated for reductive groups (Hilbert, Nagata)." },
+    { id: "formal-power-series", name: "Formal power series", kind: "konstruktion", area: "13F", field: [13], msc: ["13F"], msc5: "13F25", uses: ["commutative-ring", "ent:natural-number"],
+      formula: String.raw`R[[q]] \ni \sum_{n \ge 0} a_n q^n`,
+      text: "For a commutative ring R, a sequence (a<sub>0</sub>, a<sub>1</sub>, …) of elements of R, written as a series in a variable q and added and multiplied like polynomials; no convergence is required." },
   ],
 
   theoremConcepts: {},

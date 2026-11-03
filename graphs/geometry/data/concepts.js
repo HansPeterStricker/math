@@ -49,11 +49,6 @@ window.GEO_CONCEPTS = {
   },
 
   concepts: [
-    // ------------------------------------------------------------ Defined elsewhere, no home folder yet
-    { id: "division-ring", name: "Division ring", kind: "objekt", area: "basic", field: [16], msc: ["16K"], uses: ["gt:abelian-group", "gt:group", "st:binary-operation"],
-      formula: String.raw`a \ne 0 \;\Rightarrow\; a a^{-1} = a^{-1} a = 1`,
-      text: "A set with two binary operations, addition and multiplication, forming an abelian group under addition, whose non-zero elements form a group under multiplication, with both distributive laws; a field when multiplication is commutative. Example: the quaternions. Placeholder until ring theory (16K) has a folder of its own." },
-
     // ------------------------------------------------------------ 51F Metric geometry
     { id: "absolute-plane", name: "Absolute (neutral) plane", kind: "objekt", area: "51F", field: [51], msc: ["51F"], msc5: "51F05", uses: ["st:set", "st:subset", "st:relation", "ent:natural-number"],
       formula: String.raw`(P, \mathcal L, \text{between}, \cong)`,
@@ -150,19 +145,19 @@ window.GEO_CONCEPTS = {
       text: "A projective plane with finitely many points. Every line then has n + 1 points for one natural number n ≥ 2, the order of the plane." },
 
     // ------------------------------------------------------------ 51N Analytic geometry
-    { id: "affine-space", name: "Affine space", kind: "objekt", area: "51N", field: [51], msc: ["51N"], msc5: "51N10", uses: ["ca:module", "ca:field", "gt:group-action", "gt:transitive-action"],
+    { id: "affine-space", name: "Affine space", kind: "objekt", area: "51N", field: [51], msc: ["51N"], msc5: "51N10", uses: ["ca:module", "ft:field", "gt:group-action", "gt:transitive-action"],
       formula: String.raw`A \times V \to A,\ (P, v) \mapsto P + v`,
       text: "A set A with a free and transitive action of the additive group of a vector space V over a field K (a K-module): for any two points P, Q there is exactly one vector v with Q = P + v. ℝ<sup>n</sup> acting on itself by translations is the affine space underlying Euclidean space." },
-    { id: "hyperplane", name: "Hyperplane", kind: "objekt", area: "51N", field: [51], msc: ["51N"], msc5: "51N10", uses: ["affine-space", "ca:vector-space-dimension"],
+    { id: "hyperplane", name: "Hyperplane", kind: "objekt", area: "51N", field: [51], msc: ["51N"], msc5: "51N10", uses: ["affine-space", "la:vector-space-dimension"],
       formula: String.raw`H = P + W,\quad \dim W = n - 1`,
       text: "An affine subspace P + W of an n-dimensional affine space whose direction W is a linear subspace of dimension n − 1; in ℝ<sup>n</sup> the set {x : ⟨u, x⟩ = c} for a vector u ≠ 0. In the plane the hyperplanes are the lines." },
-    { id: "projective-space", name: "Projective space of a vector space", kind: "konstruktion", area: "51N", field: [51], msc: ["51N"], msc5: "51N15", uses: ["ca:module", "ca:field", "st:quotient-set", "ca:vector-space-dimension"],
+    { id: "projective-space", name: "Projective space of a vector space", kind: "konstruktion", area: "51N", field: [51], msc: ["51N"], msc5: "51N15", uses: ["ca:module", "ft:field", "st:quotient-set", "la:vector-space-dimension"],
       formula: String.raw`\mathbb P(V) = (V \setminus \{0\}) / K^\times,\quad \mathbb P^n(K) = \mathbb P(K^{n+1})`,
       text: "For a vector space V over a field K, the set of one-dimensional subspaces of V; its lines are the two-dimensional subspaces. Points of P<sup>n</sup>(K) are written in homogeneous coordinates (x<sub>0</sub> : … : x<sub>n</sub>). P<sup>2</sup>(K) is a projective plane." },
     { id: "projectivity", name: "Projective transformation", kind: "morphismus", area: "51N", field: [51], msc: ["51N"], msc5: "51N15", uses: ["projective-space", "gt:general-linear-group"],
       formula: String.raw`[x] \mapsto [Ax],\quad A \in \mathrm{GL}_{n+1}(K)`,
       text: "The map of P<sup>n</sup>(K) to itself induced by an invertible linear map A of K<sup>n+1</sup>; two matrices induce the same map exactly when they differ by a non-zero scalar, so the projective transformations form the group PGL<sub>n+1</sub>(K)." },
-    { id: "cross-ratio", name: "Cross-ratio", kind: "invariante", area: "51N", field: [51], msc: ["51N"], msc5: "51N15", uses: ["projective-space", "ca:field"],
+    { id: "cross-ratio", name: "Cross-ratio", kind: "invariante", area: "51N", field: [51], msc: ["51N"], msc5: "51N15", uses: ["projective-space", "ft:field"],
       formula: String.raw`(a, b; c, d) = \frac{(c - a)(d - b)}{(c - b)(d - a)}`,
       text: "For four distinct points a, b, c, d of the projective line P<sup>1</sup>(K), written in an affine coordinate, the element of K shown (with the usual conventions when one point is ∞)." },
     { id: "conic-section", name: "Conic section", kind: "objekt", area: "51N", field: [51], msc: ["51N"], msc5: "51N20", uses: ["euclidean-space", "ca:polynomial-ring"],
@@ -250,7 +245,7 @@ window.GEO_CONCEPTS = {
     { id: "principal-curvatures", name: "Principal curvatures", kind: "invariante", area: "53A", field: [53], msc: ["53A"], msc5: "53A05", uses: ["shape-operator"],
       formula: String.raw`S_p e_i = \kappa_i e_i`,
       text: "The eigenvalues κ<sub>1</sub>, κ<sub>2</sub> of the shape operator at a point of a surface; eigenvectors give the principal directions." },
-    { id: "gaussian-curvature", name: "Gaussian curvature", kind: "invariante", area: "53A", field: [53], msc: ["53A"], msc5: "53A05", uses: ["shape-operator", "ant:determinant"],
+    { id: "gaussian-curvature", name: "Gaussian curvature", kind: "invariante", area: "53A", field: [53], msc: ["53A"], msc5: "53A05", uses: ["shape-operator", "la:determinant"],
       formula: String.raw`K = \det S_p = \kappa_1 \kappa_2 = \frac{LN - M^2}{EG - F^2}`,
       text: "The determinant of the shape operator, the product of the principal curvatures; in a parametrization the quotient of the determinants of the second and the first fundamental form." },
     { id: "mean-curvature", name: "Mean curvature", kind: "invariante", area: "53A", field: [53], msc: ["53A"], msc5: "53A05", uses: ["principal-curvatures"],
@@ -334,6 +329,9 @@ window.GEO_CONCEPTS = {
     { id: "hamiltonian-vector-field", name: "Hamiltonian vector field", kind: "konstruktion", area: "53D", field: [53], msc: ["53D"], msc5: "53D05", uses: ["symplectic-manifold", "top:vector-field", "top:exterior-derivative"],
       formula: String.raw`\iota_{X_H} \omega = dH`,
       text: "For a smooth function H, the Hamiltonian, on a symplectic manifold, the vector field X<sub>H</sub> with ω(X<sub>H</sub>, ·) = dH; in Darboux coordinates its flow solves Hamilton's equations q̇ = ∂H/∂p, ṗ = −∂H/∂q." },
+    { id: "hamiltonian-diffeomorphism", name: "Hamiltonian diffeomorphism", kind: "morphismus", area: "53D", field: [53], msc: ["53D"], msc5: "53D22", uses: ["symplectic-manifold", "hamiltonian-vector-field", "ds:flow-of-vector-field"], isA: ["top:diffeomorphism"],
+      formula: String.raw`\varphi = \varphi^1_H,\quad \tfrac{d}{dt}\varphi^t_H = X_{H_t} \circ \varphi^t_H,\quad \varphi^0_H = \mathrm{id}`,
+      text: "A diffeomorphism of a symplectic manifold that is the time-1 map of the flow of a time-dependent Hamiltonian vector field X<sub>H<sub>t</sub></sub>, H : [0, 1] × M → ℝ. It is non-degenerate if 1 is not an eigenvalue of its differential at any fixed point." },
     { id: "lagrangian-submanifold", name: "Lagrangian submanifold", kind: "objekt", area: "53D", field: [53], msc: ["53D"], msc5: "53D12", uses: ["symplectic-manifold", "top:submanifold"],
       formula: String.raw`\omega|_L = 0,\quad \dim L = \tfrac12 \dim M`,
       text: "A submanifold L of a symplectic manifold, of half its dimension, on which the symplectic form vanishes: the zero section and the fibres of a cotangent bundle, graphs of symplectomorphisms." },
@@ -345,5 +343,8 @@ window.GEO_CONCEPTS = {
     { id: "ricci-flow", name: "Ricci flow", kind: "konstruktion", area: "53E", field: [53], msc: ["53E"], msc5: "53E20", uses: ["ricci-curvature", "riemannian-manifold"],
       formula: String.raw`\frac{\partial g}{\partial t} = -2 \operatorname{Ric}(g)`,
       text: "A family g(t) of Riemannian metrics on a manifold evolving by the equation shown (Hamilton 1982); it shrinks positively curved directions and expands negatively curved ones." },
+    { id: "lorentzian-manifold", name: "Lorentzian manifold", kind: "objekt", area: "53C", field: [53], msc: ["53C"], msc5: "53C50", uses: ["top:manifold", "top:tangent-space", "la:symmetric-bilinear-form"],
+      formula: String.raw`g_p \text{ of signature } (-, +, \dots, +)`,
+      text: "A smooth manifold with a smooth field g of nondegenerate symmetric bilinear forms on the tangent spaces of signature (−, +, …, +). Tangent vectors are timelike, null or spacelike according to the sign of g(v, v)." },
   ],
 };

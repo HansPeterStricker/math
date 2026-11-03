@@ -55,15 +55,6 @@ window.AG_THEOREMS = {
   kinds: { axiom: "Axiom", theorem: "Theorem", lemma: "Lemma", corollary: "Corollary", conjecture: "Conjecture" },
 
   theorems: [
-    // ------------------------------------------------------------ Results from other areas
-    { id: "hodge-decomposition", name: "Hodge decomposition", kind: "theorem", area: "basic", field: [32, 14], msc: ["32Q", "14C"],
-      premises: ["top:hodge-theorem"],
-      formula: String.raw`H^k(X,\mathbb C) = \bigoplus_{p+q=k} H^{p,q}(X),\qquad \overline{H^{p,q}} = H^{q,p},\qquad H^{p,q} \cong H^q(X,\Omega^p_X)`,
-      text: "For every compact Kähler manifold X, in particular every smooth complex projective variety, the complex cohomology splits into the classes of type (p, q). The Kähler identities used in the proof are also the source of the Lefschetz and vanishing theorems.",
-      proof: "Every class has a unique harmonic representative; on a Kähler manifold the Laplace operator commutes with the decomposition of forms by type (p, q).",
-      concepts: ["kaehler-manifold", "top:singular-cohomology", "hodge-structure"],
-      year: 1941, who: "Hodge" },
-
     // ------------------------------------------------------------ 14A Foundations
     { id: "zariski-topology", name: "The Zariski topology on Spec A", kind: "lemma", fromDefinitions: true, area: "14A", field: [14, 13], msc: ["14A", "13A"], msc5: "14A15",
       premises: [],
@@ -255,7 +246,7 @@ window.AG_THEOREMS = {
       premises: ["riemann-roch-surfaces"],
       proofName: "Riemann–Roch on the surface (Hartshorne V.1.9)", proofYear: 1958, proofWho: "Grothendieck",
       alternativeProofs: [
-        { name: "Hodge–Riemann bilinear relations", premises: ["hodge-decomposition", "lefschetz-11-theorem"],
+        { name: "Hodge–Riemann bilinear relations", premises: ["scv:hodge-decomposition", "lefschetz-11-theorem"],
           idea: "Over ℂ: by the Hodge–Riemann bilinear relations, the cup product on the real classes of type (1, 1) has signature (1, h<sup>1,1</sup> − 1), positive on the Kähler class. The Lefschetz (1,1) theorem embeds the Néron–Severi group into these classes, so the intersection form on it has exactly one positive direction.",
           year: 1937, who: "Hodge" },
       ],
@@ -265,7 +256,7 @@ window.AG_THEOREMS = {
       concepts: ["intersection-number", "neron-severi", "ample", "surface"],
       year: 1937, who: "Hodge; Segre" },
     { id: "lefschetz-11-theorem", name: "Lefschetz (1,1) theorem", kind: "theorem", area: "14C", field: [14, 32], msc: ["14C", "32Q"], msc5: "14C30",
-      premises: ["hodge-decomposition", "gaga"],
+      premises: ["scv:hodge-decomposition", "gaga"],
       proofName: "Exponential sequence (Kodaira–Spencer)", proofYear: 1953, proofWho: "Kodaira; Spencer",
       formula: String.raw`c_1: \operatorname{Pic}(X) \twoheadrightarrow H^2(X,\mathbb Z) \cap H^{1,1}(X)`,
       text: "For every smooth complex projective variety X, every integral cohomology class of type (1, 1) is the first Chern class of a line bundle, hence a combination of classes of divisors. This is the Hodge conjecture in degree 2.",
@@ -281,7 +272,7 @@ window.AG_THEOREMS = {
       concepts: ["neron-severi", "picard-group"],
       year: 1952, who: "Néron; Severi" },
     { id: "hard-lefschetz", name: "Hard Lefschetz theorem", kind: "theorem", area: "14C", field: [14, 32], msc: ["14C", "32Q"], msc5: "14C30",
-      premises: ["hodge-decomposition"],
+      premises: ["scv:hodge-decomposition"],
       proofName: "sl<sub>2</sub>-representation on harmonic forms", proofWho: "Hodge; Chern",
       alternativeProofs: [
         { name: "Deligne's ℓ-adic proof (Weil II)", premises: ["deligne-riemann-hypothesis", "lefschetz-pencils"],
@@ -513,10 +504,10 @@ window.AG_THEOREMS = {
       formula: String.raw`\operatorname{Coh}(X) \simeq \operatorname{Coh}(X^{\mathrm{an}}),\qquad H^i(X,\mathcal F) \cong H^i(X^{\mathrm{an}},\mathcal F^{\mathrm{an}})`,
       text: "For every complex projective scheme X, analytification is an equivalence between coherent algebraic and coherent analytic sheaves that preserves cohomology.",
       proof: "One compares the cohomology of 𝒪(m) on ℙ<sup>n</sup> algebraically and analytically; with Serre's theorem (and the analytic finiteness theorem of Cartan and Serre) the comparison carries over to all coherent sheaves by resolving them by sums of 𝒪(−q).",
-      concepts: ["analytic-space", "coherent-sheaf", "sheaf-cohomology"],
+      concepts: ["scv:analytic-space", "coherent-sheaf", "sheaf-cohomology"],
       year: 1956, who: "Serre" },
     { id: "kodaira-vanishing", name: "Kodaira vanishing theorem", kind: "theorem", area: "14F", field: [14, 32], msc: ["14F", "32L"], msc5: "14F17",
-      premises: ["hodge-decomposition", "gaga"],
+      premises: ["scv:hodge-decomposition", "gaga"],
       proofName: "Bochner technique", proofYear: 1953, proofWho: "Kodaira",
       alternativeProofs: [
         { name: "Deligne–Illusie: reduction to characteristic p", premises: ["serre-vanishing", "serre-duality"],
@@ -664,7 +655,7 @@ window.AG_THEOREMS = {
       premises: ["canonical-divisor-degree"],
       proofName: "Pullback of differentials (Hartshorne IV.2.4)", proofYear: 1891, proofWho: "Hurwitz",
       alternativeProofs: [
-        { name: "Euler characteristic of a triangulation", premises: ["hodge-decomposition", "gaga"],
+        { name: "Euler characteristic of a triangulation", premises: ["scv:hodge-decomposition", "gaga"],
           idea: "Over ℂ one triangulates Y with the branch points among the vertices and lifts the triangulation to X; each simplex has n preimages except at ramification points, so χ<sub>top</sub>(X) = n χ<sub>top</sub>(Y) − Σ (e<sub>P</sub> − 1). The Hodge decomposition H<sup>1</sup> = H<sup>1,0</sup> ⊕ H<sup>0,1</sup> and GAGA give b<sub>1</sub> = 2g for the algebraic genus g, so χ<sub>top</sub> = 2 − 2g.",
           year: 1857, who: "Riemann; Hurwitz" },
       ],
@@ -803,7 +794,7 @@ window.AG_THEOREMS = {
       formula: String.raw`X /\!\!/ G = \operatorname{Proj}\Big(\bigoplus_{m} H^0(X, L^m)^G\Big)`,
       text: "For every reductive group G acting linearly on a projective variety X, the ring of invariant sections is finitely generated; its Proj is a projective good quotient of the semistable locus, which is a geometric quotient on the stable locus.",
       proof: "Hilbert's argument: the ideal generated by the invariants of positive degree is finitely generated by the basis theorem, and the Reynolds operator (or Haboush's theorem in positive characteristic) shows that its generators generate the invariant ring (Mumford, Geometric Invariant Theory).",
-      concepts: ["git-quotient", "reductive-group", "invariant-ring"],
+      concepts: ["git-quotient", "reductive-group", "ca:invariant-ring"],
       year: 1965, who: "Hilbert (1890); Mumford" },
 
     // ------------------------------------------------------------ 14M Special varieties
@@ -814,7 +805,7 @@ window.AG_THEOREMS = {
       proof: "The intersections F<sub>i</sub> ∩ F<sub>j</sub> are represented by open subschemes X<sub>ij</sub> of X<sub>i</sub>. By the Yoneda lemma the isomorphisms between these functors come from unique isomorphisms X<sub>ij</sub> ≅ X<sub>ji</sub> of schemes, and uniqueness gives the cocycle condition. Gluing the X<sub>i</sub> along them gives a scheme X, and the sheaf property of F identifies F with Hom(−, X) (EGA I, 0.4.5).",
       concepts: ["scheme", "points", "ct:representable-functor"] },
     { id: "grassmannian-representable", name: "The Grassmannian is a fine moduli space", kind: "theorem", area: "14M", field: [14], msc: ["14M"], msc5: "14M15",
-      premises: ["representable-open-cover", "ca:nakayama-generators", "ca:cramer-rule"],
+      premises: ["representable-open-cover", "ca:nakayama-generators", "la:cramer-rule"],
       formula: String.raw`\operatorname{Hom}(T, G(k,n)) = \{\mathcal O_T^n \twoheadrightarrow Q,\ Q \ \text{locally free of rank } n-k\}`,
       text: "The functor of locally free quotients of rank n − k of the trivial bundle of rank n is represented by a smooth projective scheme G(k, n), embedded in projective space by the Plücker coordinates.",
       proof: "For each set I of n − k indices let G<sub>I</sub> be the subfunctor of the quotients in which the images of the e<sub>i</sub> with i in I form a basis of Q. It is represented by the affine space of dimension k(n − k) of the coordinates of the other k images in this basis, and it is open, because the condition is the invertibility of a minor. The G<sub>I</sub> cover the functor: at a point t of T some n − k of the e<sub>i</sub> give a basis of Q ⊗ k(t); by Nakayama's lemma they generate the stalk Q<sub>t</sub>, and the resulting surjection between free modules of rank n − k is an isomorphism, because its determinant is a unit and the adjugate gives an inverse. The functor is a Zariski sheaf, so it is represented by the scheme G(k, n) glued from the affine spaces, which is therefore smooth; on each chart the Plücker embedding restricts to a closed immersion into the affine chart of projective space where the Plücker coordinate p<sub>I</sub> is non-zero, which shows projectivity.",

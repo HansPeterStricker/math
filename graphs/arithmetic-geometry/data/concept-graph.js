@@ -28,6 +28,9 @@
 // Diamond and Shurman, A First Course in Modular Forms (2005); Silverman, The Arithmetic of Elliptic Curves (2nd ed.
 // 2009); Cassels and Fröhlich, Algebraic Number Theory (1967); Serre, Local Fields (1979). Not checked by a specialist.
 // Checked by ../../tests/check-concepts.js.
+// Merged on 3 November 2026: the field theory (12E, 12F, 12J) now lives in ../../field-theory/ ("ft:"); Fermat, abc and
+// Hasse–Minkowski in ../../diophantine-number-theory/ ("dio:"), Mason–Stothers in ../../further-number-theory/ ("fnt:").
+// Report: reports/2026-11-03 Zusammenfuehren Daten/bericht.md.
 
 window.AR_CG = {
   title: "Concepts of arithmetic geometry",
@@ -38,9 +41,6 @@ window.AR_CG = {
     "11N": "11N Multiplicative number theory",
     "11F": "11F Modular forms, automorphic forms",
     "11G": "11G Arithmetic algebraic geometry",
-    "12E": "12E Fields",
-    "12F": "12F Field extensions",
-    "12J": "12J Topological fields, valuations",
   },
 
   kinds: {
@@ -52,64 +52,6 @@ window.AR_CG = {
   },
 
   concepts: [
-    // ------------------------------------------------------------ Defined elsewhere
-
-    // ------------------------------------------------------------ 12E, 12F, 12J Fields, field extensions, valuations
-    { id: "finite-field", name: "Finite field", kind: "eigenschaft", area: "12E", field: [12], msc: ["12E", "11T"], msc5: "12E20", uses: ["ca:field", "st:finite-set", "ent:prime-number"], isA: ["ca:field"],
-      formula: String.raw`\mathbb F_q,\quad q = p^n`,
-      text: "A field with finitely many elements, written 𝔽<sub>q</sub> with q the number of elements. q is always a power p<sup>n</sup> of a prime p, and for every prime power there is exactly one finite field up to isomorphism (Galois)." },
-    { id: "irreducible-polynomial", name: "Irreducible polynomial", kind: "eigenschaft", area: "12E", field: [12], msc: ["12E"], msc5: "12E05", uses: ["ca:polynomial-ring", "ca:irreducible-element", "ca:field"], isA: ["ca:irreducible-element"],
-      formula: String.raw`f = gh \Rightarrow \deg g = 0 \ \text{or}\ \deg h = 0`,
-      text: "An irreducible element of the polynomial ring K[x] over a field K: a non-constant polynomial that is not a product of two polynomials of smaller degree." },
-    { id: "field-extension", name: "Field extension and degree", kind: "objekt", area: "12F", field: [12], msc: ["12F"], msc5: "12F05", uses: ["ca:field", "ca:module", "ca:vector-space-dimension"],
-      formula: String.raw`L/K,\quad [L : K] = \dim_K L`,
-      text: "A field L containing a field K as a subfield; its degree [L : K] is the dimension of L as a vector space (a module) over K." },
-    { id: "field-norm", name: "Norm of a field extension", kind: "konstruktion", area: "12F", field: [12, 11], msc: ["12F", "11R"], msc5: "12F05", uses: ["field-extension", "ant:determinant"],
-      formula: String.raw`N_{L/K}(\alpha) = \det(x \mapsto \alpha x)`,
-      text: "For a finite field extension L/K and α in L, the determinant of multiplication by α as a K-linear map of L. It is multiplicative.",
-      definitionName: "Determinant of multiplication",
-      alternativeDefinitions: [
-        { name: "Product of the conjugates", uses: ["field-extension", "ca:algebraic-closure", "ca:ring-homomorphism"], formula: String.raw`N_{L/K}(\alpha) = \Big(\prod_{\sigma} \sigma(\alpha)\Big)^{[L : K]_i}`,
-          text: "The product of the images σ(α) over all K-embeddings σ (ring homomorphisms over K) of L into an algebraic closure of K, raised to the inseparable degree [L : K]<sub>i</sub>; for a separable extension simply the product of the conjugates (Neukirch I.2)." },
-      ] },
-    { id: "field-trace", name: "Trace of a field extension", kind: "konstruktion", area: "12F", field: [12, 11], msc: ["12F", "11R"], msc5: "12F05", uses: ["field-extension"],
-      formula: String.raw`\operatorname{Tr}_{L/K}(\alpha) = \operatorname{tr}(x \mapsto \alpha x)`,
-      text: "For a finite field extension L/K and α in L, the trace of multiplication by α as a K-linear map of L. It is K-linear, and the trace form (x, y) ↦ Tr<sub>L/K</sub>(xy) is non-degenerate exactly when L/K is separable.",
-      definitionName: "Trace of multiplication",
-      alternativeDefinitions: [
-        { name: "Sum of the conjugates", uses: ["field-extension", "ca:algebraic-closure", "ca:ring-homomorphism"], formula: String.raw`\operatorname{Tr}_{L/K}(\alpha) = [L : K]_i \sum_{\sigma} \sigma(\alpha)`,
-          text: "The sum of the images σ(α) over all K-embeddings σ (ring homomorphisms over K) of L into an algebraic closure of K, multiplied by the inseparable degree [L : K]<sub>i</sub>; for a separable extension simply the sum of the conjugates, and for an inseparable one always 0." },
-      ] },
-    { id: "galois-extension", name: "Galois extension and Galois group", kind: "eigenschaft", area: "12F", field: [12], msc: ["12F"], msc5: "12F10", uses: ["field-extension", "irreducible-polynomial", "ca:ring-homomorphism", "st:bijection", "gt:group", "gt:order-of-group"], isA: ["field-extension"],
-      formula: String.raw`\operatorname{Gal}(L/K) = \operatorname{Aut}_K(L),\quad |\operatorname{Gal}(L/K)| = [L : K]`,
-      text: "An algebraic extension L/K that is normal (every irreducible polynomial over K with a root in L splits into linear factors in L) and separable (these polynomials have no repeated roots). Its Galois group Gal(L/K) is the group of field automorphisms of L over K, the bijective ring homomorphisms L → L that fix K; for a finite extension its order is the degree [L : K]. Its subgroups correspond to the intermediate fields.",
-      definitionName: "Normal and separable",
-      alternativeDefinitions: [
-        { name: "Fixed field of the automorphisms", uses: ["field-extension", "ca:ring-homomorphism", "st:bijection", "gt:group"], formula: String.raw`L^{\operatorname{Aut}_K(L)} = K`,
-          text: "An algebraic extension L/K such that the elements of L fixed by every field automorphism of L over K (every bijective ring homomorphism L → L fixing K) are exactly the elements of K (Artin)." },
-        { name: "Splitting field of a separable polynomial", uses: ["field-extension", "irreducible-polynomial", "ca:polynomial-ring"], formula: String.raw`L = K(\alpha_1, \dots, \alpha_n),\quad f = \prod_i (x - \alpha_i)`,
-          text: "For a finite extension: L is generated over K by all roots α<sub>1</sub>, …, α<sub>n</sub> of a polynomial f in K[x] whose irreducible factors have no repeated roots. An infinite extension is Galois if it is a union of such finite ones." },
-        { name: "As many automorphisms as the degree", uses: ["field-extension", "ca:ring-homomorphism", "st:bijection", "gt:order-of-group"], formula: String.raw`|\operatorname{Aut}_K(L)| = [L : K]`,
-          text: "For a finite extension: the number of field automorphisms of L over K equals the degree [L : K] (it is always at most the degree)." },
-      ] },
-    { id: "abelian-extension", name: "Abelian extension", kind: "eigenschaft", area: "12F", field: [12, 11], msc: ["12F", "11R"], msc5: "12F10", uses: ["galois-extension", "gt:abelian-group"], isA: ["galois-extension"],
-      formula: String.raw`\operatorname{Gal}(L/K) \ \text{abelian}`,
-      text: "A Galois extension with abelian Galois group; class field theory describes all of them." },
-    { id: "radical-extension", name: "Radical extension", kind: "eigenschaft", area: "12F", field: [12], msc: ["12F"], msc5: "12F10", uses: ["field-extension", "ca:polynomial-ring"], isA: ["field-extension"],
-      formula: String.raw`K = K_0 \subset K_1 \subset \dots \subset K_m,\quad K_{i+1} = K_i(\sqrt[n_i]{a_i})`,
-      text: "An extension obtained by a tower of field extensions, each obtained by adjoining an n<sub>i</sub>-th root of an element a<sub>i</sub>, that is a root of the polynomial x<sup>n<sub>i</sub></sup> − a<sub>i</sub>. A polynomial is solvable by radicals if its roots lie in a radical extension; this holds exactly when its Galois group is solvable." },
-    { id: "absolute-galois-group", name: "Absolute Galois group", kind: "konstruktion", area: "12F", field: [12, 11], msc: ["12F", "11R"], msc5: "12F10", uses: ["galois-extension", "ca:algebraic-closure"],
-      formula: String.raw`G_K = \operatorname{Gal}(\bar K / K)`,
-      text: "The Galois group of a separable closure K̄ of K (the separable elements of an algebraic closure) over K, with the Krull topology; a profinite group and the central object of arithmetic.",
-      definitionName: "Galois group of the separable closure",
-      alternativeDefinitions: [
-        { name: "Inverse limit of finite Galois groups", uses: ["galois-extension", "ct:limit"], formula: String.raw`G_K = \varprojlim_L \operatorname{Gal}(L/K)`,
-          text: "The inverse limit (a limit in the sense of category theory) of the Galois groups Gal(L/K) over all finite Galois extensions L/K inside a fixed separable closure, with the restriction maps; this defines the group and its profinite topology at once." },
-      ] },
-    { id: "absolute-value", name: "Absolute value", kind: "invariante", area: "12J", field: [12, 11], msc: ["12J", "11R"], msc5: "12J10", uses: ["ca:field", "st:real-number", "st:map"],
-      formula: String.raw`|xy| = |x|\,|y|,\quad |x + y| \le |x| + |y|`,
-      text: "A map x ↦ |x| from a field K to the non-negative real numbers with |x| = 0 only for x = 0 that is multiplicative and satisfies the triangle inequality; non-archimedean if even |x + y| ≤ max(|x|, |y|). Two absolute values are equivalent if one is a positive power of the other (they define the same topology). Example: |x|<sub>p</sub> = p<sup>−v<sub>p</sub>(x)</sup> on ℚ." },
-
     // ------------------------------------------------------------ 11M Zeta and L-functions
     { id: "dirichlet-series", name: "Dirichlet series", kind: "konstruktion", area: "11M", field: [11], msc: ["11M"], msc5: "11M41", uses: ["ana:holomorphic-function", "ent:arithmetic-function", "st:complex-number"],
       formula: String.raw`\sum_{n \ge 1} \frac{a_n}{n^s}`,
@@ -199,7 +141,7 @@ window.AR_CG = {
     { id: "modular-curve", name: "Modular curve X0(N)", kind: "objekt", area: "11F", field: [11, 14], msc: ["11F", "14G"], msc5: "11F03", uses: ["congruence-subgroup", "ag:curve", "modular-group", "ana:riemann-surface"], isA: ["ag:curve"],
       formula: String.raw`X_0(N) = \overline{\Gamma_0(N) \backslash \mathbb H}`,
       text: "The quotient of the upper half-plane ℍ by Γ<sub>0</sub>(N), compactified by adding the cusps: a compact Riemann surface that is an algebraic curve defined over ℚ. It parametrizes elliptic curves with a cyclic subgroup of order N." },
-    { id: "galois-representation", name: "Galois representation", kind: "morphismus", area: "11F", field: [11], msc: ["11F", "11R"], msc5: "11F80", uses: ["absolute-galois-group", "gt:homomorphism", "ant:local-field", "gt:general-linear-group"],
+    { id: "galois-representation", name: "Galois representation", kind: "morphismus", area: "11F", field: [11], msc: ["11F", "11R"], msc5: "11F80", uses: ["ft:absolute-galois-group", "gt:homomorphism", "ant:local-field", "gt:general-linear-group"],
       formula: String.raw`\rho : G_{\mathbb Q} \to \mathrm{GL}_n(\mathbb Q_\ell)`,
       text: "A continuous homomorphism from an absolute Galois group to the general linear group GL<sub>n</sub>(ℚ<sub>ℓ</sub>) of invertible matrices over the local field ℚ<sub>ℓ</sub> of ℓ-adic numbers; elliptic curves and modular forms give 2-dimensional ones." },
     { id: "automorphic-form", name: "Automorphic form", kind: "objekt", area: "11F", field: [11, 22], msc: ["11F", "22E"], msc5: "11F70", uses: ["ant:adele", "ag:reductive-group", "ag:points", "st:complex-number"],
@@ -221,10 +163,10 @@ window.AR_CG = {
       text: "The rank r of the Mordell–Weil group as an abelian group: E(K) is the direct sum of ℤ<sup>r</sup> and its torsion subgroup, and r is the number of independent points of infinite order.",
       definitionName: "Rank of the abelian group",
       alternativeDefinitions: [
-        { name: "Dimension over ℚ", uses: ["mordell-weil-group", "ca:tensor-product", "ca:vector-space-dimension"], formula: String.raw`r = \dim_{\mathbb Q} E(K) \otimes_{\mathbb Z} \mathbb Q`,
+        { name: "Dimension over ℚ", uses: ["mordell-weil-group", "ca:tensor-product", "la:vector-space-dimension"], formula: String.raw`r = \dim_{\mathbb Q} E(K) \otimes_{\mathbb Z} \mathbb Q`,
           text: "The dimension of the rational vector space E(K) ⊗ ℚ, the tensor product of the Mordell–Weil group with ℚ over ℤ; tensoring with ℚ kills the torsion." },
       ] },
-    { id: "reduction-mod-p", name: "Reduction modulo p", kind: "konstruktion", area: "11G", field: [11], msc: ["11G"], msc5: "11G07", uses: ["ag:elliptic-curve", "finite-field", "minimal-discriminant", "ent:prime-number"],
+    { id: "reduction-mod-p", name: "Reduction modulo p", kind: "konstruktion", area: "11G", field: [11], msc: ["11G"], msc5: "11G07", uses: ["ag:elliptic-curve", "ft:finite-field", "minimal-discriminant", "ent:prime-number"],
       formula: String.raw`\tilde E / \mathbb F_p`,
       text: "For a prime p, the curve over 𝔽<sub>p</sub> given by a minimal Weierstrass equation (one with the minimal discriminant) read modulo p: good reduction if it is smooth, multiplicative if it has a node, additive if it has a cusp." },
     { id: "trace-of-frobenius", name: "Trace of Frobenius a_p", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G05", uses: ["reduction-mod-p", "ag:frobenius"],
@@ -232,7 +174,7 @@ window.AR_CG = {
       text: "For a prime p of good reduction, the trace of the Frobenius endomorphism F of the reduced curve Ẽ, the integer a<sub>p</sub> with F<sup>2</sup> − a<sub>p</sub>F + p = 0 in End(Ẽ). |a<sub>p</sub>| ≤ 2√p (Hasse).",
       definitionName: "Trace of the Frobenius endomorphism",
       alternativeDefinitions: [
-        { name: "Point count", uses: ["reduction-mod-p", "ag:points", "finite-field"], formula: String.raw`a_p = p + 1 - |\tilde E(\mathbb F_p)|`,
+        { name: "Point count", uses: ["reduction-mod-p", "ag:points", "ft:finite-field"], formula: String.raw`a_p = p + 1 - |\tilde E(\mathbb F_p)|`,
           text: "p + 1 minus the number of points of the reduced curve Ẽ with coordinates in the finite field 𝔽<sub>p</sub> (Silverman V.2)." },
         { name: "Trace on the Tate module", uses: ["galois-representation", "ag:tate-module", "ant:frobenius-element"], formula: String.raw`a_p = \operatorname{tr}\big(\rho_{E,\ell}(\operatorname{Frob}_p)\big)`,
           text: "For a prime ℓ ≠ p, the trace of a Frobenius element at p acting on the ℓ-adic Tate module of E, a Galois representation that is unramified at p because E has good reduction there." },
@@ -257,7 +199,7 @@ window.AR_CG = {
     { id: "analytic-rank", name: "Analytic rank", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G40", uses: ["elliptic-l-function", "ana:analytic-continuation"],
       formula: String.raw`r_{\mathrm{an}} = \operatorname{ord}_{s=1} L(E, s)`,
       text: "The order of vanishing of the analytic continuation of L(E, s) at s = 1; the Birch–Swinnerton-Dyer conjecture says it equals the rank." },
-    { id: "weil-height", name: "Weil height", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G50", uses: ["ant:number-field", "ant:place", "absolute-value", "ent:coprime", "ag:elliptic-curve"],
+    { id: "weil-height", name: "Weil height", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G50", uses: ["ant:number-field", "ant:place", "ft:absolute-value", "ent:coprime", "ag:elliptic-curve"],
       formula: String.raw`h(x) = \frac{1}{[K : \mathbb Q]} \sum_v [K_v : \mathbb Q_v] \log \max(1, |x|_v)`,
       text: "The logarithmic height of an element x of a number field K, a sum over the places v with the normalized absolute values; for a rational number a/b with a and b coprime it is log max(|a|, |b|). For a point P of an elliptic curve in Weierstrass form, h(P) is the height of its x-coordinate." },
     { id: "neron-tate-height", name: "Néron–Tate height", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G50", uses: ["mordell-weil-group", "weil-height"],
@@ -271,7 +213,7 @@ window.AR_CG = {
     { id: "regulator", name: "Regulator", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G50", uses: ["neron-tate-height", "rank-of-elliptic-curve", "gt:torsion-subgroup"],
       formula: String.raw`R_E = \det\big(\langle P_i, P_j \rangle\big)`,
       text: "The determinant of the height pairing ⟨P, Q⟩ = ĥ(P + Q) − ĥ(P) − ĥ(Q) of the Néron–Tate height on a basis P<sub>1</sub>, …, P<sub>r</sub> of E(K) modulo its torsion subgroup, r the rank; a factor in the BSD formula." },
-    { id: "tate-shafarevich", name: "Tate–Shafarevich group", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G05", uses: ["ag:elliptic-curve", "absolute-galois-group", "ant:place", "ant:galois-cohomology", "gt:kernel"],
+    { id: "tate-shafarevich", name: "Tate–Shafarevich group", kind: "invariante", area: "11G", field: [11], msc: ["11G"], msc5: "11G05", uses: ["ag:elliptic-curve", "ft:absolute-galois-group", "ant:place", "ant:galois-cohomology", "gt:kernel"],
       formula: String.raw`Ш(E) = \ker\Big(H^1(K, E) \to \prod_v H^1(K_v, E)\Big)`,
       text: "The kernel of the restriction map from the Galois cohomology group H<sup>1</sup>(K, E) to the product of the H<sup>1</sup>(K<sub>v</sub>, E) over all places v: the torsors of E that are locally trivial everywhere. It measures the failure of the local-global principle and is conjectured finite." },
     { id: "complex-multiplication", name: "Complex multiplication", kind: "eigenschaft", area: "11G", field: [11], msc: ["11G"], msc5: "11G15", uses: ["ag:elliptic-curve", "ant:imaginary-quadratic", "ag:isogeny", "ant:order", "ent:integer"],

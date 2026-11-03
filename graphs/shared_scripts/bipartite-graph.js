@@ -57,7 +57,8 @@
     try { return '<span class="formel-teil">' + katex.renderToString("\\displaystyle " + p, { throwOnError: false }) + "</span>"; } catch (e) { return p; }
   }).join(" ");
   // colours of the home areas of concepts of other folders: the same fixed colours as in concept-graph.js
-  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", ar: "#3f8f8a", ant: "#b5651d", co: "#c77dba", rt: "#7a6fb0", top: "#4f7f9f", ana: "#b04a5a", geo: "#8a9a3a", local: "#d9d4ca" };
+  // colour of each area from the register (shared_scripts/areas.js, field `color`), "local" for placeholders of this folder
+  const ORIGIN_COLORS = Object.assign({ local: "#d9d4ca" }, ...(window.GRAPH_AREAS || []).map((a) => ({ [a.prefix]: a.color })));
   const originColor = (o) => ORIGIN_COLORS[o] || "#8a7f6e";
   const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).name || o));
 

@@ -387,28 +387,12 @@ window.CT_THEOREMS = {
       premises: ["enough-injectives-grothendieck", "sheafification"],
       proofName: "Abelian sheaves form a Grothendieck category",
       alternativeProofs: [
-        { name: "Godement's construction (topological spaces)", premises: ["enough-injectives-modules"], idea: "For sheaves on a topological space, embed each stalk F<sub>x</sub> into an injective abelian group I<sub>x</sub>; the product over all points x of the skyscraper sheaves with value I<sub>x</sub> is an injective sheaf containing F. This proves the statement only for topological spaces, not for general sites.", year: 1958, who: "Godement" },
+        { name: "Godement's construction (topological spaces)", premises: ["aa:enough-injectives-modules"], idea: "For sheaves on a topological space, embed each stalk F<sub>x</sub> into an injective abelian group I<sub>x</sub>; the product over all points x of the skyscraper sheaves with value I<sub>x</sub> is an injective sheaf containing F. This proves the statement only for topological spaces, not for general sites.", year: 1958, who: "Godement" },
       ],
       text: "The sheaves of abelian groups on a site form a Grothendieck category and therefore have enough injectives. Sheaf cohomology is thus defined as the derived functor of global sections.",
       proof: "Colimits of abelian sheaves are sheafified colimits of presheaves; since sheafification preserves finite limits, filtered colimits are exact, and the sheafified free abelian presheaves on the representables form a generating set.",
       concepts: ["sheaf-on-site", "abelian-category", "injective-object", "derived-functor"],
       year: 1957, who: "Grothendieck" },
-
-    // ------------------------------------------------------------ basic Modules
-    { id: "baer-criterion", name: "Baer's criterion", kind: "lemma", area: "basic", field: [16], msc: ["16D"],
-      premises: ["st:zorn-lemma"],
-      proofName: "Maximal extension by Zorn's lemma", proofYear: 1940, proofWho: "Baer",
-      text: "A module E over a ring R is injective if and only if every module homomorphism from an ideal of R to E extends to R.",
-      proof: "Given a submodule A of B and a map A → E, Zorn's lemma gives a maximal extension; if it were not defined on all of B, the criterion applied to the ideal of r with rb in its domain would extend it further.",
-      concepts: ["injective-object", "ca:module"],
-      year: 1940, who: "Baer" },
-    { id: "enough-injectives-modules", name: "Modules have enough injectives", kind: "theorem", area: "basic", field: [16], msc: ["16D"],
-      premises: ["baer-criterion"],
-      proofName: "Character modules Hom(R, ℚ/ℤ)",
-      text: "Every module over a ring is a submodule of an injective module.",
-      proof: "By Baer's criterion divisible abelian groups such as ℚ/ℤ are injective; the module Hom<sub>ℤ</sub>(R, ℚ/ℤ) and its products are then injective, and every module embeds into such a product.",
-      concepts: ["injective-object", "ca:module"],
-      year: 1940, who: "Baer" },
 
     // ------------------------------------------------------------ 18G35 Chain complexes
     { id: "long-exact-homology-sequence", name: "Long exact homology sequence", kind: "theorem", area: "18G", field: [18], msc: ["18G"], msc5: "18G35",

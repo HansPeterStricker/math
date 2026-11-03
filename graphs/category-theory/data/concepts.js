@@ -390,6 +390,9 @@ window.CT_CONCEPTS = {
     { id: "model-category", name: "Model category", kind: "eigenschaft", area: "18N", field: [18, 55], msc: ["18N", "55U"], msc5: "18N40", uses: ["limit", "colimit"], isA: ["category"],
       formula: String.raw`(\mathcal W, \mathcal C, \mathcal F)`,
       text: "A category with limits and colimits and three classes of morphisms (weak equivalences, cofibrations, fibrations) satisfying lifting and factorisation axioms (Quillen 1967). It allows homotopy theory outside topology." },
+    { id: "exact-category", name: "Exact category", kind: "objekt", area: "18E", field: [18], msc: ["18E"], msc5: "18E10", uses: ["additive-category", "exact-sequence"],
+      formula: String.raw`0 \to A \to B \to C \to 0 \ \text{admissible}`,
+      text: "An additive category with a chosen class of short exact sequences (kernel–cokernel pairs) that is closed under isomorphism and satisfies Quillen's axioms (admissible monomorphisms and epimorphisms are stable under composition, pushout and pullback). Example: finitely generated projective modules over a ring with the split exact sequences." },
   ],
 
   theoremConcepts: {},

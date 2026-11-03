@@ -15,7 +15,11 @@
   .seite { display: grid; grid-template-columns: 190px minmax(0, 1fr); min-height: 100vh; }
   .gebiete { position: sticky; top: 0; align-self: start; max-height: 100vh; overflow: auto; box-sizing: border-box; padding: 18px 12px; border-right: 1px solid var(--linie); background: #efebe1; font-size: 14px; line-height: 1.3; }
   .gebiete h2 { font-size: 13px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); margin: 0 0 10px; }
-  .gebiete .gebiet { margin: 0 0 10px; }
+  .gebiete .gebiet { margin: 0 0 3px; }
+  /* more than thirty areas (3 November 2026): one line per area under the heading of its group */
+  .gebiete .gruppe-name { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; margin: 12px 0 3px; }
+  .gebiete .gruppe-name a { color: var(--leise); }
+  .liste h2.gruppe { grid-column: 1 / -1; font-size: 15px; text-transform: uppercase; letter-spacing: .05em; color: var(--leise); margin: 14px 0 -4px; scroll-margin-top: 12px; }
   .gebiete .gebiet-name a { color: var(--tinte); text-decoration: none; }
   .gebiete .gebiet-links { display: flex; flex-wrap: wrap; column-gap: 10px; font-size: 12.5px; }
   .gebiete a { color: #5a6f8f; text-decoration: none; }
@@ -38,6 +42,7 @@
     .gebiete { position: static; max-height: none; border-right: 0; border-bottom: 1px solid var(--linie); display: flex; flex-wrap: wrap; gap: 4px 16px; }
     .gebiete h2 { width: 100%; }
     .gebiete .gebiet { margin: 0; }
+    .gebiete .gruppe-name { width: 100%; margin: 6px 0 0; }
     main { padding: 16px; }
   }
   .paar.einzeln { grid-template-columns: 1fr; max-width: 320px; }
@@ -48,19 +53,49 @@
   <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2>
     <!-- areas:start -->
     <div class="gebiet"><div class="gebiet-name"><a href="areas.html"><b>Graph of areas</b></a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div><div class="gebiet-links"><a href="set-theory/concepts.html">Concepts</a><a href="set-theory/theorems.html">Theorems</a><a href="set-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div><div class="gebiet-links"><a href="elementary-number-theory/concepts.html">Concepts</a><a href="elementary-number-theory/theorems.html">Theorems</a><a href="elementary-number-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div><div class="gebiet-links"><a href="group-theory/concepts.html">Concepts</a><a href="group-theory/theorems.html">Theorems</a><a href="group-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div><div class="gebiet-links"><a href="commutative-algebra/concepts.html">Concepts</a><a href="commutative-algebra/theorems.html">Theorems</a><a href="commutative-algebra/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div><div class="gebiet-links"><a href="category-theory/concepts.html">Concepts</a><a href="category-theory/theorems.html">Theorems</a><a href="category-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div><div class="gebiet-links"><a href="algebraic-geometry/concepts.html">Concepts</a><a href="algebraic-geometry/theorems.html">Theorems</a><a href="algebraic-geometry/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div><div class="gebiet-links"><a href="arithmetic-geometry/concepts.html">Concepts</a><a href="arithmetic-geometry/theorems.html">Theorems</a><a href="arithmetic-geometry/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div><div class="gebiet-links"><a href="algebraic-number-theory/concepts.html">Concepts</a><a href="algebraic-number-theory/theorems.html">Theorems</a><a href="algebraic-number-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#combinatorics">Combinatorics</a></div><div class="gebiet-links"><a href="combinatorics/concepts.html">Concepts</a><a href="combinatorics/theorems.html">Theorems</a><a href="combinatorics/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#representation-theory">Representation theory</a></div><div class="gebiet-links"><a href="representation-theory/concepts.html">Concepts</a><a href="representation-theory/theorems.html">Theorems</a><a href="representation-theory/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#topology">Topology</a></div><div class="gebiet-links"><a href="topology/concepts.html">Concepts</a><a href="topology/theorems.html">Theorems</a><a href="topology/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#analysis">Analysis</a></div><div class="gebiet-links"><a href="analysis/concepts.html">Concepts</a><a href="analysis/theorems.html">Theorems</a><a href="analysis/bipartite.html">In theorems</a></div></div>
-    <div class="gebiet"><div class="gebiet-name"><a href="#geometry">Geometry</a></div><div class="gebiet-links"><a href="geometry/concepts.html">Concepts</a><a href="geometry/theorems.html">Theorems</a><a href="geometry/bipartite.html">In theorems</a></div></div>
+    <div class="gruppe-name"><a href="#group-foundations">Foundations</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#logic">Mathematical logic</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#general-algebra">General algebra</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div></div>
+    <div class="gruppe-name"><a href="#group-number">Number theory</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#diophantine-number-theory">Diophantine number theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#further-number-theory">Further number theory</a></div></div>
+    <div class="gruppe-name"><a href="#group-algebra">Algebra</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#field-theory">Field theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#linear-algebra">Linear algebra</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#associative-algebras">Associative rings and algebras</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#lie-theory">Lie theory and nonassociative algebras</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#k-theory">K-theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#representation-theory">Representation theory</a></div></div>
+    <div class="gruppe-name"><a href="#group-geometry">Geometry and topology</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#geometry">Geometry</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#topology">Topology</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#global-analysis">Global analysis</a></div></div>
+    <div class="gruppe-name"><a href="#group-analysis">Analysis</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#analysis">Analysis</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#several-complex-variables">Several complex variables</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#differential-equations">Differential equations</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#dynamical-systems">Dynamical systems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#approximation-and-transforms">Approximation and transforms</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#calculus-of-variations">Calculus of variations</a></div></div>
+    <div class="gruppe-name"><a href="#group-discrete">Discrete mathematics and computing</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#combinatorics">Combinatorics</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#numerical-analysis">Numerical analysis</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#computer-science">Theoretical computer science</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#optimization">Optimization, games and control</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#information-theory">Information theory and coding</a></div></div>
+    <div class="gruppe-name"><a href="#group-applied">Probability, statistics and applications</a></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#probability">Probability</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#statistics">Statistics</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#mathematical-physics">Mathematical physics</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#mathematical-biology">Mathematical biology</a></div></div>
     <!-- areas:end -->
   </nav>
   <main>
@@ -68,36 +103,29 @@
     <p>For each area the concepts in a column on the left and the theorems, lemmas and conjectures in a column on the right: a line joins a concept to a theorem when the concept occurs in the statement of the theorem. Both columns are grouped by MSC class and ordered so that few lines cross. <a href="index.html">All kinds of graph side by side</a>.</p>
     <div class="liste" id="liste">
     <!-- entries:start -->
+    <h2 class="gruppe" id="group-foundations">Foundations</h2>
+    <section class="eintrag" id="logic">
+      <div class="msc">MSC 03B, 03C, 03D, 03F, 03G</div>
+      <h2>Mathematical logic</h2>
+      <p>Propositional and first-order logic, completeness and compactness, model theory and stability, o-minimality, computability and undecidability, Gödel's incompleteness theorems, proof theory and ordinal analysis, modal and intuitionistic logic, lambda calculus.</p>
+      <div class="paar einzeln">
+        <a href="logic/bipartite.html"><img src="previews/logic-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">95 concepts, 111 theorems, 278 lines</div></a>
+      </div>
+    </section>
     <section class="eintrag" id="set-theory">
       <div class="msc">MSC 03E, 06A</div>
       <h2>Set theory</h2>
       <p>Sets, relations and maps, orders, ordinals and cardinals, forcing, and the construction of ℚ, ℝ and ℂ.</p>
       <div class="paar einzeln">
-        <a href="set-theory/bipartite.html"><img src="previews/set-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">60 concepts, 61 theorems, 175 lines</div></a>
+        <a href="set-theory/bipartite.html"><img src="previews/set-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">60 concepts, 61 theorems, 174 lines</div></a>
       </div>
     </section>
-    <section class="eintrag" id="elementary-number-theory">
-      <div class="msc">MSC 11A</div>
-      <h2>Elementary number theory</h2>
-      <p>Divisibility, congruences, arithmetic functions, primes, continued fractions.</p>
+    <section class="eintrag" id="general-algebra">
+      <div class="msc">MSC 08, 06B, 06C, 06D, 06E, 06F</div>
+      <h2>General algebra</h2>
+      <p>Universal algebra and varieties, equational logic, lattices, Boolean and Heyting algebras, ordered groups, monoids.</p>
       <div class="paar einzeln">
-        <a href="elementary-number-theory/bipartite.html"><img src="previews/elementary-number-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">49 concepts, 74 theorems, 170 lines</div></a>
-      </div>
-    </section>
-    <section class="eintrag" id="group-theory">
-      <div class="msc">MSC 20</div>
-      <h2>Group theory</h2>
-      <p>Groups and homomorphisms, group actions and permutations, finite and abelian groups.</p>
-      <div class="paar einzeln">
-        <a href="group-theory/bipartite.html"><img src="previews/group-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">73 concepts, 86 theorems, 260 lines</div></a>
-      </div>
-    </section>
-    <section class="eintrag" id="commutative-algebra">
-      <div class="msc">MSC 13</div>
-      <h2>Commutative algebra</h2>
-      <p>Rings and ideals, localization, modules, chain conditions, special and local rings, completion.</p>
-      <div class="paar einzeln">
-        <a href="commutative-algebra/bipartite.html"><img src="previews/commutative-algebra-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">52 concepts, 67 theorems, 204 lines</div></a>
+        <a href="general-algebra/bipartite.html"><img src="previews/general-algebra-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">60 concepts, 60 theorems, 160 lines</div></a>
       </div>
     </section>
     <section class="eintrag" id="category-theory">
@@ -108,20 +136,21 @@
         <a href="category-theory/bipartite.html"><img src="previews/category-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">60 concepts, 65 theorems, 197 lines</div></a>
       </div>
     </section>
-    <section class="eintrag" id="algebraic-geometry">
-      <div class="msc">MSC 14</div>
-      <h2>Algebraic geometry</h2>
-      <p>Schemes and morphisms, sheaves and cohomology, divisors, curves, surfaces, birational geometry, moduli, abelian varieties.</p>
+    <h2 class="gruppe" id="group-number">Number theory</h2>
+    <section class="eintrag" id="elementary-number-theory">
+      <div class="msc">MSC 11A</div>
+      <h2>Elementary number theory</h2>
+      <p>Divisibility, congruences, arithmetic functions, primes, continued fractions.</p>
       <div class="paar einzeln">
-        <a href="algebraic-geometry/bipartite.html"><img src="previews/algebraic-geometry-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">89 concepts, 88 theorems, 260 lines</div></a>
+        <a href="elementary-number-theory/bipartite.html"><img src="previews/elementary-number-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">49 concepts, 74 theorems, 170 lines</div></a>
       </div>
     </section>
-    <section class="eintrag" id="arithmetic-geometry">
-      <div class="msc">MSC 11F, 11G, 11M, 11N</div>
-      <h2>Arithmetic geometry</h2>
-      <p>L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
+    <section class="eintrag" id="diophantine-number-theory">
+      <div class="msc">MSC 11D, 11E, 11H, 11J</div>
+      <h2>Diophantine number theory</h2>
+      <p>Diophantine equations (Pell, Fermat, Catalan, Thue), quadratic forms and sums of squares, geometry of numbers and lattices, Diophantine approximation and transcendence.</p>
       <div class="paar einzeln">
-        <a href="arithmetic-geometry/bipartite.html"><img src="previews/arithmetic-geometry-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">79 concepts, 78 theorems, 179 lines</div></a>
+        <a href="diophantine-number-theory/bipartite.html"><img src="previews/diophantine-number-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">105 concepts, 105 theorems, 228 lines</div></a>
       </div>
     </section>
     <section class="eintrag" id="algebraic-number-theory">
@@ -132,36 +161,94 @@
         <a href="algebraic-number-theory/bipartite.html"><img src="previews/algebraic-number-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">86 concepts, 80 theorems, 226 lines</div></a>
       </div>
     </section>
-    <section class="eintrag" id="combinatorics">
-      <div class="msc">MSC 05, 11B, 11P, 52B, 52C</div>
-      <h2>Combinatorics</h2>
-      <p>Graphs, colourings, matchings and spectra, extremal and probabilistic combinatorics, designs and matroids, partitions, tableaux and symmetric functions, polytopes.</p>
+    <section class="eintrag" id="arithmetic-geometry">
+      <div class="msc">MSC 11F, 11G, 11M, 11N</div>
+      <h2>Arithmetic geometry</h2>
+      <p>L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
       <div class="paar einzeln">
-        <a href="combinatorics/bipartite.html"><img src="previews/combinatorics-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">105 concepts, 113 theorems, 213 lines</div></a>
+        <a href="arithmetic-geometry/bipartite.html"><img src="previews/arithmetic-geometry-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">62 concepts, 64 theorems, 150 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="further-number-theory">
+      <div class="msc">MSC 11C, 11K, 11L, 11Y</div>
+      <h2>Further number theory</h2>
+      <p>Equidistribution modulo 1, Weyl's criterion and discrepancy, normal numbers and the metric theory of continued fractions, the Erdős–Kac theorem; Gauss, Kloosterman and character sums, Weyl sums and van der Corput's method; primality tests, factoring and discrete logarithm algorithms; the Mahler measure, Lehmer's problem and cyclotomic polynomials over ℤ.</p>
+      <div class="paar einzeln">
+        <a href="further-number-theory/bipartite.html"><img src="previews/further-number-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">92 concepts, 91 theorems, 182 lines</div></a>
+      </div>
+    </section>
+    <h2 class="gruppe" id="group-algebra">Algebra</h2>
+    <section class="eintrag" id="field-theory">
+      <div class="msc">MSC 12, 11T</div>
+      <h2>Field theory</h2>
+      <p>Field extensions and Galois theory, finite fields, real closed fields, valued fields, differential algebra, inverse Galois problem.</p>
+      <div class="paar einzeln">
+        <a href="field-theory/bipartite.html"><img src="previews/field-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">114 concepts, 101 theorems, 275 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="commutative-algebra">
+      <div class="msc">MSC 13</div>
+      <h2>Commutative algebra</h2>
+      <p>Rings and ideals, localization, modules, chain conditions, special and local rings, completion.</p>
+      <div class="paar einzeln">
+        <a href="commutative-algebra/bipartite.html"><img src="previews/commutative-algebra-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">52 concepts, 67 theorems, 204 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="linear-algebra">
+      <div class="msc">MSC 15</div>
+      <h2>Linear algebra</h2>
+      <p>Vector spaces, bases and dimension, linear maps and matrices, determinants, eigenvalues and normal forms (Jordan, Frobenius), bilinear and Hermitian forms, spectral theorems and the singular value decomposition, multilinear algebra and special matrices (Perron–Frobenius, Birkhoff–von Neumann).</p>
+      <div class="paar einzeln">
+        <a href="linear-algebra/bipartite.html"><img src="previews/linear-algebra-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">87 concepts, 98 theorems, 240 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="associative-algebras">
+      <div class="msc">MSC 16</div>
+      <h2>Associative rings and algebras</h2>
+      <p>Non-commutative rings, modules and algebras: semisimple rings and Artin–Wedderburn, the Jacobson radical, division rings and central simple algebras, Morita theory, noetherian rings, quivers and Hochschild cohomology.</p>
+      <div class="paar einzeln">
+        <a href="associative-algebras/bipartite.html"><img src="previews/associative-algebras-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">97 concepts, 96 theorems, 272 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="lie-theory">
+      <div class="msc">MSC 17</div>
+      <h2>Lie theory and nonassociative algebras</h2>
+      <p>Lie algebras: solvable, nilpotent and semisimple algebras, Killing form, root systems and the Weyl group, classification, highest weight representations, enveloping algebras, Kac–Moody, Virasoro and vertex algebras, quantum groups; composition algebras and octonions, Jordan and alternative algebras.</p>
+      <div class="paar einzeln">
+        <a href="lie-theory/bipartite.html"><img src="previews/lie-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">81 concepts, 91 theorems, 247 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="k-theory">
+      <div class="msc">MSC 19</div>
+      <h2>K-theory</h2>
+      <p>Grothendieck groups, K₀, K₁ and K₂ of rings, Quillen's higher K-theory, topological K-theory and Bott periodicity, Adams operations, operator K-theory, Baum–Connes and Farrell–Jones.</p>
+      <div class="paar einzeln">
+        <a href="k-theory/bipartite.html"><img src="previews/k-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">86 concepts, 75 theorems, 211 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="group-theory">
+      <div class="msc">MSC 20</div>
+      <h2>Group theory</h2>
+      <p>Groups and homomorphisms, group actions and permutations, finite and abelian groups.</p>
+      <div class="paar einzeln">
+        <a href="group-theory/bipartite.html"><img src="previews/group-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">73 concepts, 86 theorems, 260 lines</div></a>
       </div>
     </section>
     <section class="eintrag" id="representation-theory">
-      <div class="msc">MSC 20C, 22, 17B</div>
+      <div class="msc">MSC 20C, 22</div>
       <h2>Representation theory</h2>
       <p>Representations and characters of finite groups, blocks, Hecke algebras, Lie algebras and their highest weights, Kac–Moody and vertex algebras, Lie groups and their unitary representations.</p>
       <div class="paar einzeln">
-        <a href="representation-theory/bipartite.html"><img src="previews/representation-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">108 concepts, 85 theorems, 231 lines</div></a>
+        <a href="representation-theory/bipartite.html"><img src="previews/representation-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">85 concepts, 57 theorems, 157 lines</div></a>
       </div>
     </section>
-    <section class="eintrag" id="topology">
-      <div class="msc">MSC 54, 55, 57, 58A</div>
-      <h2>Topology</h2>
-      <p>Topological and metric spaces, compactness and connectedness, homotopy, the fundamental group and coverings, homology, degree and fixed points, manifolds and surfaces, knots, smooth manifolds and differential forms.</p>
+    <h2 class="gruppe" id="group-geometry">Geometry and topology</h2>
+    <section class="eintrag" id="algebraic-geometry">
+      <div class="msc">MSC 14</div>
+      <h2>Algebraic geometry</h2>
+      <p>Schemes and morphisms, sheaves and cohomology, divisors, curves, surfaces, birational geometry, moduli, abelian varieties.</p>
       <div class="paar einzeln">
-        <a href="topology/bipartite.html"><img src="previews/topology-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">85 concepts, 103 theorems, 273 lines</div></a>
-      </div>
-    </section>
-    <section class="eintrag" id="analysis">
-      <div class="msc">MSC 26, 28, 30, 31, 33, 40, 42, 46, 47</div>
-      <h2>Analysis</h2>
-      <p>Limits, derivatives and integrals, measure and Lebesgue integration, series, complex functions, special functions, Fourier analysis, Banach and Hilbert spaces and their operators.</p>
-      <div class="paar einzeln">
-        <a href="analysis/bipartite.html"><img src="previews/analysis-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">88 concepts, 99 theorems, 241 lines</div></a>
+        <a href="algebraic-geometry/bipartite.html"><img src="previews/algebraic-geometry-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">89 concepts, 88 theorems, 260 lines</div></a>
       </div>
     </section>
     <section class="eintrag" id="geometry">
@@ -172,9 +259,148 @@
         <a href="geometry/bipartite.html"><img src="previews/geometry-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">100 concepts, 99 theorems, 257 lines</div></a>
       </div>
     </section>
+    <section class="eintrag" id="topology">
+      <div class="msc">MSC 54, 55, 57, 58A</div>
+      <h2>Topology</h2>
+      <p>Topological and metric spaces, compactness and connectedness, homotopy, the fundamental group and coverings, homology, degree and fixed points, manifolds and surfaces, knots, smooth manifolds and differential forms.</p>
+      <div class="paar einzeln">
+        <a href="topology/bipartite.html"><img src="previews/topology-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">85 concepts, 103 theorems, 273 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="global-analysis">
+      <div class="msc">MSC 58B, 58C, 58D, 58E, 58K</div>
+      <h2>Global analysis</h2>
+      <p>Banach, Hilbert and Fréchet manifolds, Nash–Moser, transversality and Sard–Smale, spaces of maps, critical point theory (Palais–Smale, mountain pass, Lusternik–Schnirelmann), Morse theory of loop spaces and closed geodesics, Floer homology and the Arnold conjecture, singularities and stability of smooth maps.</p>
+      <div class="paar einzeln">
+        <a href="global-analysis/bipartite.html"><img src="previews/global-analysis-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">71 concepts, 55 theorems, 164 lines</div></a>
+      </div>
+    </section>
+    <h2 class="gruppe" id="group-analysis">Analysis</h2>
+    <section class="eintrag" id="analysis">
+      <div class="msc">MSC 26, 28, 30, 31, 33, 40, 42, 46, 47</div>
+      <h2>Analysis</h2>
+      <p>Limits, derivatives and integrals, measure and Lebesgue integration, series, complex functions, special functions, Fourier analysis, Banach and Hilbert spaces and their operators.</p>
+      <div class="paar einzeln">
+        <a href="analysis/bipartite.html"><img src="previews/analysis-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">98 concepts, 111 theorems, 264 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="several-complex-variables">
+      <div class="msc">MSC 32</div>
+      <h2>Several complex variables</h2>
+      <p>Holomorphic functions of several variables, Hartogs phenomena, Weierstrass preparation, coherent analytic sheaves, domains of holomorphy and the Levi problem, Stein spaces and Cartan's theorems, Kähler manifolds and Hodge theory, Kodaira's theorems, hyperbolicity.</p>
+      <div class="paar einzeln">
+        <a href="several-complex-variables/bipartite.html"><img src="previews/several-complex-variables-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">56 concepts, 66 theorems, 152 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="differential-equations">
+      <div class="msc">MSC 34, 35, 58J</div>
+      <h2>Differential equations</h2>
+      <p>Ordinary and partial differential equations: existence and uniqueness, linear systems, Sturm–Liouville theory, Laplace, heat and wave equation, weak solutions and Sobolev spaces, elliptic regularity, Navier–Stokes, index theory.</p>
+      <div class="paar einzeln">
+        <a href="differential-equations/bipartite.html"><img src="previews/differential-equations-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">90 concepts, 85 theorems, 195 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="dynamical-systems">
+      <div class="msc">MSC 37</div>
+      <h2>Dynamical systems</h2>
+      <p>Orbits, recurrence, ergodic theorems, entropy, hyperbolic dynamics and chaos, interval and circle maps, Julia and Mandelbrot sets, KAM theory.</p>
+      <div class="paar einzeln">
+        <a href="dynamical-systems/bipartite.html"><img src="previews/dynamical-systems-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">91 concepts, 103 theorems, 274 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="approximation-and-transforms">
+      <div class="msc">MSC 39, 41, 43, 44, 45</div>
+      <h2>Approximation and transforms</h2>
+      <p>Cauchy's and d'Alembert's functional equations and Hyers–Ulam stability, linear recurrences, Weierstrass, Bernstein, Chebyshev, Jackson and Müntz–Szász approximation, Padé approximants, Pontryagin duality and Fourier analysis on locally compact abelian groups, Wiener's Tauberian theorem, amenability, Laplace, Mellin, Hilbert and Radon transforms with their inversion formulas, moment problems, Volterra and Fredholm integral equations.</p>
+      <div class="paar einzeln">
+        <a href="approximation-and-transforms/bipartite.html"><img src="previews/approximation-and-transforms-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">103 concepts, 98 theorems, 216 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="calculus-of-variations">
+      <div class="msc">MSC 49</div>
+      <h2>Calculus of variations</h2>
+      <p>Functionals and their extremals: Euler–Lagrange, Legendre, Jacobi and Weierstrass conditions, Noether's theorem, the direct method, Γ-convergence, minimal surfaces, optimal control and Hamilton–Jacobi–Bellman, optimal transport.</p>
+      <div class="paar einzeln">
+        <a href="calculus-of-variations/bipartite.html"><img src="previews/calculus-of-variations-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">59 concepts, 62 theorems, 170 lines</div></a>
+      </div>
+    </section>
+    <h2 class="gruppe" id="group-discrete">Discrete mathematics and computing</h2>
+    <section class="eintrag" id="combinatorics">
+      <div class="msc">MSC 05, 11B, 11P, 52B, 52C</div>
+      <h2>Combinatorics</h2>
+      <p>Graphs, colourings, matchings and spectra, extremal and probabilistic combinatorics, designs and matroids, partitions, tableaux and symmetric functions, polytopes.</p>
+      <div class="paar einzeln">
+        <a href="combinatorics/bipartite.html"><img src="previews/combinatorics-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">105 concepts, 113 theorems, 213 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="numerical-analysis">
+      <div class="msc">MSC 65</div>
+      <h2>Numerical analysis</h2>
+      <p>Floating-point arithmetic, conditioning and backward stability, interpolation and quadrature, Newton's method, direct and iterative solvers for linear systems, eigenvalue algorithms, the FFT, methods for ordinary and partial differential equations, finite elements.</p>
+      <div class="paar einzeln">
+        <a href="numerical-analysis/bipartite.html"><img src="previews/numerical-analysis-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">107 concepts, 108 theorems, 243 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="computer-science">
+      <div class="msc">MSC 68</div>
+      <h2>Theoretical computer science</h2>
+      <p>Finite automata and regular languages, grammars and pushdown automata, Turing machines and complexity classes, NP-completeness, hierarchy theorems, randomized and interactive computation, the PCP theorem and hardness of approximation, circuit lower bounds, Kolmogorov complexity, analysis of algorithms and the foundations of cryptography.</p>
+      <div class="paar einzeln">
+        <a href="computer-science/bipartite.html"><img src="previews/computer-science-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">98 concepts, 114 theorems, 290 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="optimization">
+      <div class="msc">MSC 90, 91, 93</div>
+      <h2>Optimization, games and control</h2>
+      <p>Linear programming and duality, the simplex, ellipsoid and interior-point methods, convex optimization and KKT conditions, integer programming and network flows, games in normal and extensive form, Nash equilibria and the minimax theorem, cooperative games, social choice, matching and mechanism design, controllability, stability and the Kalman filter.</p>
+      <div class="paar einzeln">
+        <a href="optimization/bipartite.html"><img src="previews/optimization-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">112 concepts, 98 theorems, 241 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="information-theory">
+      <div class="msc">MSC 94A, 94B</div>
+      <h2>Information theory and coding</h2>
+      <p>Entropy, source and channel coding, sampling, cryptography, error-correcting codes and their bounds.</p>
+      <div class="paar einzeln">
+        <a href="information-theory/bipartite.html"><img src="previews/information-theory-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">76 concepts, 78 theorems, 195 lines</div></a>
+      </div>
+    </section>
+    <h2 class="gruppe" id="group-applied">Probability, statistics and applications</h2>
+    <section class="eintrag" id="probability">
+      <div class="msc">MSC 60</div>
+      <h2>Probability</h2>
+      <p>Probability spaces, random variables and independence, conditional expectation, characteristic functions, laws of large numbers and the central limit theorem, large deviations, martingales, Markov chains, Brownian motion and Itô calculus, percolation and random matrices.</p>
+      <div class="paar einzeln">
+        <a href="probability/bipartite.html"><img src="previews/probability-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">84 concepts, 114 theorems, 268 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="statistics">
+      <div class="msc">MSC 62</div>
+      <h2>Statistics</h2>
+      <p>Statistical models, sufficiency and Fisher information, estimation (Cramér–Rao, Rao–Blackwell, maximum likelihood), tests (Neyman–Pearson, Wilks), Bayesian inference, decision theory (Stein's paradox), nonparametrics (Glivenko–Cantelli, Kolmogorov–Smirnov, bootstrap) and linear models.</p>
+      <div class="paar einzeln">
+        <a href="statistics/bipartite.html"><img src="previews/statistics-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">81 concepts, 80 theorems, 218 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="mathematical-physics">
+      <div class="msc">MSC 70, 74, 76, 78, 80, 81, 82, 83, 85, 86</div>
+      <h2>Mathematical physics</h2>
+      <p>Lagrangian and Hamiltonian mechanics, the Kepler and n-body problems, fluids and elasticity, Maxwell's equations, thermodynamics, quantum mechanics and quantum field theory, lattice models of statistical mechanics, general relativity, stellar structure.</p>
+      <div class="paar einzeln">
+        <a href="mathematical-physics/bipartite.html"><img src="previews/mathematical-physics-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">110 concepts, 119 theorems, 267 lines</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="mathematical-biology">
+      <div class="msc">MSC 92</div>
+      <h2>Mathematical biology</h2>
+      <p>Population dynamics, epidemics, population genetics and the coalescent, phylogenetic trees, reaction–diffusion patterns, neuron models and chemical reaction networks.</p>
+      <div class="paar einzeln">
+        <a href="mathematical-biology/bipartite.html"><img src="previews/mathematical-biology-bipartite.jpg" alt="" loading="lazy"><div class="art">In theorems</div><div class="zahlen">84 concepts, 71 theorems, 173 lines</div></a>
+      </div>
+    </section>
     <!-- entries:end -->
     </div>
-    <p class="folgt">Further areas and the graph of the areas will follow.</p>
+    <p class="folgt">Further areas will follow.</p>
   </main>
 </div>
 <a href="../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>

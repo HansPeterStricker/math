@@ -1,0 +1,216 @@
+// Settings of bipartite.html for ../../shared_scripts/bipartite-graph.js (meaning of the fields there). Written by
+// graphs/tests/make-bipartite-pages.js; changes belong there.
+window.BIPARTITE_PAGE = {
+  "folder": "computer-science",
+  "prefix": "cs",
+  "name": "theoretical computer science",
+  "concepts": "CS_CONCEPTS",
+  "theorems": "CS_THEOREMS",
+  "colors": {
+    "basic": "#d9d4ca",
+    "68Q04": "#b08968",
+    "68Q06": "#8ab17d",
+    "68Q11": "#7f8c3a",
+    "68Q12": "#9b5de5",
+    "68Q15": "#e76f51",
+    "68Q17": "#c0392b",
+    "68Q25": "#a3b18a",
+    "68Q30": "#6d597a",
+    "68Q42": "#6c8ebf",
+    "68Q45": "#4f86c6",
+    "68Q70": "#5fa8a0",
+    "68P10": "#d4a017",
+    "68P25": "#2a9d8f",
+    "68R10": "#8d99ae",
+    "68W20": "#c77dba",
+    "68W25": "#e9c46a",
+    "68W40": "#3d5a80",
+    "68Q10": "#c9a227"
+  },
+  "shapes": {
+    "axiom": "konstruktion",
+    "theorem": "objekt",
+    "lemma": "eigenschaft",
+    "corollary": "morphismus",
+    "conjecture": "invariante"
+  },
+  "foreignArea": "basic",
+  "foreignLabel": "defined outside theoretical computer science",
+  "sources": {
+    "lo": {
+      "data": "LO_CONCEPTS",
+      "page": "../logic/concepts.html",
+      "name": "mathematical logic"
+    },
+    "st": {
+      "data": "ST_CONCEPTS",
+      "page": "../set-theory/concepts.html",
+      "name": "set theory"
+    },
+    "ga": {
+      "data": "GA_CONCEPTS",
+      "page": "../general-algebra/concepts.html",
+      "name": "general algebra"
+    },
+    "ct": {
+      "data": "CT_CONCEPTS",
+      "page": "../category-theory/concepts.html",
+      "name": "category theory"
+    },
+    "ent": {
+      "data": "ENT_CONCEPTS",
+      "page": "../elementary-number-theory/concepts.html",
+      "name": "elementary number theory"
+    },
+    "dio": {
+      "data": "DIO_CONCEPTS",
+      "page": "../diophantine-number-theory/concepts.html",
+      "name": "diophantine number theory"
+    },
+    "ant": {
+      "data": "ANT_CONCEPTS",
+      "page": "../algebraic-number-theory/concepts.html",
+      "name": "algebraic number theory"
+    },
+    "ar": {
+      "data": "AR_CG",
+      "page": "../arithmetic-geometry/concepts.html",
+      "name": "arithmetic geometry"
+    },
+    "fnt": {
+      "data": "FNT_CONCEPTS",
+      "page": "../further-number-theory/concepts.html",
+      "name": "further number theory"
+    },
+    "ft": {
+      "data": "FT_CONCEPTS",
+      "page": "../field-theory/concepts.html",
+      "name": "field theory"
+    },
+    "ca": {
+      "data": "CA_CONCEPTS",
+      "page": "../commutative-algebra/concepts.html",
+      "name": "commutative algebra"
+    },
+    "la": {
+      "data": "LA_CONCEPTS",
+      "page": "../linear-algebra/concepts.html",
+      "name": "linear algebra"
+    },
+    "aa": {
+      "data": "AA_CONCEPTS",
+      "page": "../associative-algebras/concepts.html",
+      "name": "associative rings and algebras"
+    },
+    "lie": {
+      "data": "LIE_CONCEPTS",
+      "page": "../lie-theory/concepts.html",
+      "name": "Lie theory and nonassociative algebras"
+    },
+    "kt": {
+      "data": "KT_CONCEPTS",
+      "page": "../k-theory/concepts.html",
+      "name": "K-theory"
+    },
+    "gt": {
+      "data": "GT_CONCEPTS",
+      "page": "../group-theory/concepts.html",
+      "name": "group theory"
+    },
+    "rt": {
+      "data": "RT_CONCEPTS",
+      "page": "../representation-theory/concepts.html",
+      "name": "representation theory"
+    },
+    "ag": {
+      "data": "AG_CG",
+      "page": "../algebraic-geometry/concepts.html",
+      "name": "algebraic geometry"
+    },
+    "geo": {
+      "data": "GEO_CONCEPTS",
+      "page": "../geometry/concepts.html",
+      "name": "geometry"
+    },
+    "top": {
+      "data": "TOP_CONCEPTS",
+      "page": "../topology/concepts.html",
+      "name": "topology"
+    },
+    "gan": {
+      "data": "GAN_CONCEPTS",
+      "page": "../global-analysis/concepts.html",
+      "name": "global analysis"
+    },
+    "ana": {
+      "data": "ANA_CONCEPTS",
+      "page": "../analysis/concepts.html",
+      "name": "analysis"
+    },
+    "scv": {
+      "data": "SCV_CONCEPTS",
+      "page": "../several-complex-variables/concepts.html",
+      "name": "several complex variables"
+    },
+    "de": {
+      "data": "DE_CONCEPTS",
+      "page": "../differential-equations/concepts.html",
+      "name": "differential equations"
+    },
+    "ds": {
+      "data": "DS_CONCEPTS",
+      "page": "../dynamical-systems/concepts.html",
+      "name": "dynamical systems"
+    },
+    "apt": {
+      "data": "APT_CONCEPTS",
+      "page": "../approximation-and-transforms/concepts.html",
+      "name": "approximation and transforms"
+    },
+    "cv": {
+      "data": "CV_CONCEPTS",
+      "page": "../calculus-of-variations/concepts.html",
+      "name": "calculus of variations"
+    },
+    "co": {
+      "data": "CO_CONCEPTS",
+      "page": "../combinatorics/concepts.html",
+      "name": "combinatorics"
+    },
+    "num": {
+      "data": "NUM_CONCEPTS",
+      "page": "../numerical-analysis/concepts.html",
+      "name": "numerical analysis"
+    },
+    "opt": {
+      "data": "OPT_CONCEPTS",
+      "page": "../optimization/concepts.html",
+      "name": "optimization, games and control"
+    },
+    "it": {
+      "data": "IT_CONCEPTS",
+      "page": "../information-theory/concepts.html",
+      "name": "information theory and coding"
+    },
+    "pr": {
+      "data": "PR_CONCEPTS",
+      "page": "../probability/concepts.html",
+      "name": "probability"
+    },
+    "sta": {
+      "data": "STA_CONCEPTS",
+      "page": "../statistics/concepts.html",
+      "name": "statistics"
+    },
+    "mp": {
+      "data": "MP_CONCEPTS",
+      "page": "../mathematical-physics/concepts.html",
+      "name": "mathematical physics"
+    },
+    "bio": {
+      "data": "BIO_CONCEPTS",
+      "page": "../mathematical-biology/concepts.html",
+      "name": "mathematical biology"
+    }
+  }
+};

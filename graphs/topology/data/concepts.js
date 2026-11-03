@@ -51,11 +51,6 @@ window.TOP_CONCEPTS = {
   },
 
   concepts: [
-    // ------------------------------------------------------------ Defined elsewhere, no home folder yet
-    { id: "matrix-trace", name: "Trace of a linear map", kind: "invariante", area: "basic", field: [15], msc: ["15A"], uses: ["gt:matrix-ring", "ca:field"],
-      formula: String.raw`\operatorname{tr}(a_{ij}) = a_{11} + a_{22} + \dots + a_{nn}`,
-      text: "For a square matrix over a field, the sum of its diagonal entries; it does not change under a change of basis, so it is defined for every linear map of a finite-dimensional vector space to itself. Placeholder until linear algebra has a folder of its own." },
-
     // ------------------------------------------------------------ 54A Generalities
     { id: "topological-space", name: "Topological space", kind: "objekt", area: "54A", field: [54], msc: ["54A"], msc5: "54A05", uses: ["st:set", "st:subset", "st:empty-set", "st:intersection", "st:union"],
       formula: String.raw`(X, \mathcal T),\quad \emptyset, X \in \mathcal T,\quad U \cap V \in \mathcal T,\quad \textstyle\bigcup_i U_i \in \mathcal T`,
@@ -166,7 +161,7 @@ window.TOP_CONCEPTS = {
     { id: "degree-of-map", name: "Degree of a map of spheres", kind: "invariante", area: "55M", field: [55], msc: ["55M"], msc5: "55M25", uses: ["singular-homology", "sphere", "continuous-map"],
       formula: String.raw`f_* = \deg(f) \cdot : H_n(S^n) \to H_n(S^n)`,
       text: "For a continuous map f : S<sup>n</sup> → S<sup>n</sup>, the integer deg f such that the induced map on H<sub>n</sub>(S<sup>n</sup>) ≅ ℤ is multiplication by deg f. For n = 1 it counts how often f winds around the circle." },
-    { id: "lefschetz-number", name: "Lefschetz number", kind: "invariante", area: "55M", field: [55], msc: ["55M"], msc5: "55M20", uses: ["singular-homology", "continuous-map", "matrix-trace"],
+    { id: "lefschetz-number", name: "Lefschetz number", kind: "invariante", area: "55M", field: [55], msc: ["55M"], msc5: "55M20", uses: ["singular-homology", "continuous-map", "la:matrix-trace"],
       formula: String.raw`\Lambda(f) = \sum_k (-1)^k \operatorname{tr}\big(f_* : H_k(X; \mathbb Q) \to H_k(X; \mathbb Q)\big)`,
       text: "For a continuous map f of a space X whose rational homology is finite-dimensional, the alternating sum of the traces of the maps f<sub>*</sub> on the homology groups H<sub>k</sub>(X; ℚ). For the identity it is the Euler characteristic." },
 
@@ -254,7 +249,7 @@ window.TOP_CONCEPTS = {
     { id: "seifert-surface", name: "Seifert surface", kind: "objekt", area: "57K", field: [57], msc: ["57K"], msc5: "57K10", uses: ["knot", "surface", "orientation", "embedding"],
       formula: String.raw`\partial \Sigma = K`,
       text: "A compact, connected, oriented surface Σ with boundary embedded in S<sup>3</sup> whose boundary is the knot K. The least genus of such a surface is the genus of the knot." },
-    { id: "alexander-polynomial", name: "Alexander polynomial", kind: "invariante", area: "57K", field: [57], msc: ["57K"], msc5: "57K14", uses: ["seifert-surface", "ant:determinant", "ca:polynomial-ring"],
+    { id: "alexander-polynomial", name: "Alexander polynomial", kind: "invariante", area: "57K", field: [57], msc: ["57K"], msc5: "57K14", uses: ["seifert-surface", "la:determinant", "ca:polynomial-ring"],
       formula: String.raw`\Delta_K(t) = \det\big(V - t\, V^{\mathsf T}\big)`,
       text: "The Laurent polynomial det(V − tV<sup>T</sup>), where V is the Seifert matrix of a Seifert surface of K (linking numbers of the push-offs of a basis of its first homology); well defined up to multiplication by ±t<sup>k</sup>. Alexander 1928, from a knot diagram." },
     { id: "jones-polynomial", name: "Jones polynomial", kind: "invariante", area: "57K", field: [57], msc: ["57K"], msc5: "57K14", uses: ["knot-diagram", "ca:polynomial-ring"],
@@ -284,7 +279,7 @@ window.TOP_CONCEPTS = {
       text: "For an n-manifold M, a choice of generator μ<sub>x</sub> of the local homology group H<sub>n</sub>(M, M ∖ x) ≅ ℤ at every point x, locally consistent: near each point one class of a ball restricts to all μ<sub>x</sub>. M is orientable if an orientation exists.",
       definitionName: "Local homology (Hatcher 3.3)",
       alternativeDefinitions: [
-        { name: "Oriented atlas (smooth manifolds)", uses: ["manifold", "tangent-space", "ant:determinant"],
+        { name: "Oriented atlas (smooth manifolds)", uses: ["manifold", "tangent-space", "la:determinant"],
           formula: String.raw`\det D(\varphi_j \circ \varphi_i^{-1}) > 0`,
           text: "For a smooth manifold, an equivalence class of atlases whose transition maps have Jacobian matrices of positive determinant; equivalently, a consistent choice of orientation of each tangent space." },
       ] },
@@ -360,5 +355,23 @@ window.TOP_CONCEPTS = {
     { id: "integral-of-form", name: "Integral of a differential form", kind: "konstruktion", area: "58A", field: [58], msc: ["58A"], msc5: "58A10", uses: ["differential-form", "orientation", "partition-of-unity", "ana:riemann-integral"],
       formula: String.raw`\int_M \omega = \sum_i \int_{\varphi_i(U_i)} (\varphi_i^{-1})^* (\rho_i\, \omega)`,
       text: "For a compactly supported n-form ω on an oriented smooth n-manifold M, the sum over a partition of unity subordinate to an oriented atlas of the ordinary integrals over open sets of ℝ<sup>n</sup> of the forms pulled back by the charts; it does not depend on the choices." },
+    { id: "classifying-space", name: "Classifying space of a group", kind: "konstruktion", area: "55R", field: [55], msc: ["55R"], msc5: "55R35", uses: ["gt:group", "fibre-bundle", "contractible-space"],
+      formula: String.raw`EG \to BG,\quad EG \simeq *`,
+      text: "For a (discrete or topological) group G, the base BG of a principal G-bundle EG → BG whose total space EG is contractible; BG is unique up to homotopy equivalence, and π<sub>1</sub>(BG) = G for discrete G." },
+    { id: "hopf-invariant", name: "Hopf invariant", kind: "invariante", area: "55Q", field: [55], msc: ["55Q"], msc5: "55Q25", uses: ["sphere", "continuous-map", "cup-product", "singular-cohomology"],
+      formula: String.raw`a^2 = H(f)\, b,\quad a \in H^{2n}(C_f),\ b \in H^{4n}(C_f)`,
+      text: "For a map f : S<sup>4n−1</sup> → S<sup>2n</sup>, attach a 4n-cell to S<sup>2n</sup> along f; the cohomology of the resulting complex C<sub>f</sub> has generators a in degree 2n and b in degree 4n, and the cup square of a is H(f) times b. The Hopf map S<sup>3</sup> → S<sup>2</sup> has Hopf invariant 1." },
+    { id: "generalized-cohomology-theory", name: "Generalized cohomology theory", kind: "objekt", area: "55N", field: [55], msc: ["55N"], msc5: "55N20", uses: ["ct:functor", "topological-space", "homotopy", "ct:exact-sequence", "gt:abelian-group"],
+      formula: String.raw`h^n(X, A),\quad \cdots \to h^n(X, A) \to h^n(X) \to h^n(A) \to h^{n+1}(X, A) \to \cdots`,
+      text: "A sequence of contravariant functors h<sup>n</sup> from pairs of spaces to abelian groups that are homotopy invariant, satisfy excision and have long exact sequences of pairs (Eilenberg–Steenrod axioms without the dimension axiom). Examples: singular cohomology, K-theory, cobordism." },
+    { id: "jet-bundle", name: "Jet bundle", kind: "konstruktion", area: "58A", field: [58], msc: ["58A"], msc5: "58A20", uses: ["smooth-map", "manifold", "ana:partial-derivative"],
+      formula: String.raw`j^k f(p) \in J^k(M, N),\quad j^k f(p) = j^k g(p) \iff \partial^\alpha (\psi f \varphi^{-1}) = \partial^\alpha (\psi g \varphi^{-1}),\ |\alpha| \le k`,
+      text: "The k-jet of a smooth map f : M → N at p is its class under the relation 'same value and same partial derivatives up to order k at p in charts'. The k-jets form a smooth manifold J<sup>k</sup>(M, N), and every f has a k-jet extension j<sup>k</sup>f : M → J<sup>k</sup>(M, N)." },
+    { id: "residual-set", name: "Residual set", kind: "eigenschaft", area: "54E", field: [54], msc: ["54E"], msc5: "54E52", uses: ["dense-subset", "topological-space", "st:intersection"],
+      formula: String.raw`R \supseteq \bigcap_{n \ge 1} U_n,\quad U_n \text{ open and dense}`,
+      text: "A subset of a topological space that contains a countable intersection of open dense sets. A property of maps is generic if it holds on a residual set; in a Baire space residual sets are dense." },
+    { id: "cotangent-bundle", name: "Cotangent bundle", kind: "konstruktion", area: "58A", field: [58], msc: ["58A"], msc5: "58A05", uses: ["manifold", "tangent-space", "ana:dual-space"],
+      formula: String.raw`T^*Q = \textstyle\bigsqcup_{q \in Q} (T_q Q)^*`,
+      text: "For a smooth manifold Q, the disjoint union of the dual spaces of its tangent spaces, a smooth manifold of twice the dimension." },
   ],
 };

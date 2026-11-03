@@ -289,7 +289,7 @@ window.ENT_CONCEPTS = {
           text: "A natural number with exactly two positive divisors, namely 1 and itself; this excludes 1 without a separate condition." },
         { name: "Prime element", uses: ["divisibility", "integer"], formula: String.raw`p > 1,\quad p \mid ab \Rightarrow p \mid a \ \text{or}\ p \mid b`,
           text: "A natural number p > 1 such that for all integers a and b, p | ab implies p | a or p | b (the ring-theoretic notion of a prime element). Equivalent to the standard definition by Euclid's lemma." },
-        { name: "Residue class field", uses: ["residue-class-ring", "ca:field"], formula: String.raw`\mathbb Z/p\mathbb Z \text{ is a field}`,
+        { name: "Residue class field", uses: ["residue-class-ring", "ft:field"], formula: String.raw`\mathbb Z/p\mathbb Z \text{ is a field}`,
           text: "A natural number p > 1 for which the residue class ring ℤ/pℤ is a field." },
       ], },
     { id: "composite-number", name: "Composite number", kind: "eigenschaft", area: "11A41", field: [11], msc: ["11A"], msc5: "11A41", uses: ["prime-number"], isA: ["natural-number"],

@@ -16,8 +16,9 @@
 //   proof  a theorem of X is a premise of a proof of a theorem of Y (`premises`; `alternativeProofs` counted apart)
 //   msc    a node of Y has, not in the first place, an MSC class whose home is X (stands in for "correspondence" and
 //          "analogy", which have no fields in the data yet)
-// References with a prefix (top:manifold) point to the node in the folder of the prefix (prefixes in the settings of
-// the bipartite pages, scripts/bipartite-page.js of each folder, collected in window.AREA_CFG by areas.html).
+// References with a prefix (top:manifold) point to the node in the folder of the prefix (prefixes in the register,
+// shared_scripts/areas.js; colours of the classes from scripts/bipartite-page.js of each folder, collected in
+// window.AREA_CFG by areas.html).
 //
 // Layout: the nodes on a circle; the order makes the sum of strength × angular distance small (pairs exchanged as long
 // as the sum falls; deterministic). At the level of classes the folders keep the order of the level of areas and only
@@ -31,8 +32,8 @@
     { key: "proof", name: "Proofs", text: "a theorem of X is a premise of a proof of a theorem of Y", color: "#b03a48" },
     { key: "msc", name: "Shared classification", text: "a node of Y also carries an MSC class whose home is X", color: "#5f9a3a" },
   ];
-  // colours of the folders: the colours of origin of the circle graphs (concept-graph.js)
-  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", ar: "#3f8f8a", ant: "#b5651d", co: "#c77dba", rt: "#7a6fb0", top: "#4f7f9f", ana: "#b04a5a", geo: "#8a9a3a" };
+  // colour of each area from the register (shared_scripts/areas.js, field `color`)
+  const ORIGIN_COLORS = Object.assign({}, ...(window.GRAPH_AREAS || []).map((a) => ({ [a.prefix]: a.color })));
   // MSC 2020, two-digit classes
   const MAIN = {
     "00": "General and overarching topics", "01": "History and biography", "03": "Mathematical logic and foundations", "05": "Combinatorics",
@@ -76,9 +77,11 @@
   // ------------------------------------------------------------ data
   function build(W) {
     const missing = [];
-    const folders = W.GRAPH_AREAS.map((a, i) => {
+    // the folders of the register whose data the page has loaded; colours of the classes from the bipartite page (concept
+    // and theorem classes), else from the register
+    const folders = W.GRAPH_AREAS.filter((a) => W[a.concepts] && W[a.theorems]).map((a, i) => {
       const cfg = (W.AREA_CFG || []).find((c) => c.folder === a.folder) || {};
-      return { i, folder: a.folder, name: a.name, msc: a.msc, codes: a.msc.split(/,\s*/), prefix: cfg.prefix, colors: cfg.colors || {}, C: W[a.concepts], T: W[a.theorems], color: ORIGIN_COLORS[cfg.prefix] || "#8a7f6e" };
+      return { i, folder: a.folder, name: a.name, msc: a.msc, codes: a.msc.split(/,\s*/), prefix: a.prefix, colors: cfg.colors || a.colors || {}, C: W[a.concepts], T: W[a.theorems], color: ORIGIN_COLORS[a.prefix] || "#8a7f6e" };
     });
     const items = [], cIndex = new Map(), tIndex = new Map();
     folders.forEach((f) => {
@@ -268,6 +271,19 @@
     areas: { R: 300, r: (n) => 5 + 2.2 * Math.sqrt(n), w: (n) => 1 + 1.25 * Math.sqrt(n), side: 330, pad: 70 },
     classes: { R: 470, r: (n) => 2.5 + 1.15 * Math.sqrt(n), w: (n) => 0.7 + 0.9 * Math.sqrt(n), side: 250, pad: 245 },
   };
+  // more than thirty areas (3 November 2026): the circle of each level grows until neighbouring points no longer
+  // overlap (with 13 areas the fixed radii were large enough and stay as they were)
+  for (const [level, g] of Object.entries(GEO)) {
+    const units = GROUPS[level].flat().slice().sort((a, b) => a.angle - b.angle), gap = level === "areas" ? 6 : 1.5;
+    units.forEach((u, i) => {
+      const v = units[(i + 1) % units.length];
+      if (v === u) return;
+      let d = Math.abs(v.angle - u.angle);
+      if (d > Math.PI) d = 2 * Math.PI - d;
+      const need = (g.r(Math.max(1, u.items.length)) + g.r(Math.max(1, v.items.length)) + gap) / (2 * Math.sin(d / 2) || 1e-9);
+      if (need > g.R) g.R = Math.ceil(need);
+    });
+  }
   const tip = document.createElement("div");
   tip.className = "knoten-tip mehrzeilig";
   tip.hidden = true;
@@ -341,8 +357,10 @@
       const deg = (u.angle * 180) / Math.PI, c = Math.cos(u.angle), s = Math.sin(u.angle);
       let t;
       if (level === "areas") {
-        const d = u.r + 7, anchor = c > 0.25 ? "start" : c < -0.25 ? "end" : "middle";
-        t = el("text", { x: c * d, y: s * d + (Math.abs(c) <= 0.25 ? (s > 0 ? 12 : -4) : 4), "text-anchor": anchor }, g);
+        // names centred only at the very top and bottom, so that the names of neighbouring points do not run into
+        // each other when there are many areas
+        const d = u.r + 7, mid = 0.05, anchor = c > mid ? "start" : c < -mid ? "end" : "middle";
+        t = el("text", { x: c * d, y: s * d + (Math.abs(c) <= mid ? (s > 0 ? 12 : -4) : 4), "text-anchor": anchor }, g);
         t.textContent = u.label;
       } else {
         const flip = c < 0, d = u.r + 5;
