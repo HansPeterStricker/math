@@ -564,7 +564,7 @@
     const t = el("text", { class: "sektor-name" }, gSectors);
     const tp = el("textPath", { href: "#" + arcId, startOffset: "50%", "text-anchor": "middle" }, t);
     // as long as the arc of the sector allows (about 11.5 units per letter at this size); the full name in a tooltip
-    const full = k === OTHER ? "Other classes" : D.areas[k], room = Math.max(4, Math.floor((sec.w * rT) / 11.5));
+    const full = k === OTHER ? "Smaller classes" : D.areas[k], room = Math.max(4, Math.floor((sec.w * rT) / 11.5));
     tp.textContent = full.length <= room ? full : full.slice(0, room - 1).replace(/[\s,;]+\S*$/, "") + " …";
     el("title", {}, t).textContent = k === OTHER ? smallAreas.map((a) => D.areas[a]).join("\n") : full;
   });
@@ -996,6 +996,8 @@
     });
     // "is a" only where no use already joins the two
     fEdges = fEdges.concat(isaEdges.filter((e) => set.has(e.from) && set.has(e.to) && !fEdges.some((u) => u.from === e.to && u.to === e.from)).map((e) => ({ from: e.to, to: e.from, kind: "isa" })));
+    // the card lays out only the edges it shows (user, 3 November 2026: direct premises directly above)
+    if (o.edgeOk) fEdges = fEdges.filter((e) => o.edgeOk(e.from, e.to, e.via || []));
     // rows: longest path from the selected node (cycles of alternative proofs broken by leaving out back edges)
     const out = new Map(ids.map((x) => [x, []]));
     fEdges.forEach((e) => (back ? out.get(e.to).push(e) : out.get(e.from).push(e)));
@@ -1034,8 +1036,16 @@
     all.forEach((it) => { it.cx += M - minX; });
     let W = maxX - minX + 2 * M;
     if (o.centre) { const cx = lay.item[id].cx, half = Math.max(cx, W - cx); all.forEach((it) => { it.cx += half - cx; }); W = 2 * half; }
-    const H = rows.length * ROWH - (ROWH - BH) + 2 * M;
-    const yOf = (it) => M + it.c * ROWH;
+    let H = rows.length * ROWH - (ROWH - BH) + 2 * M, offY = 0;
+    // at least the size of the fully expanded card, the selected node at the same place (bottom middle of the proof
+    // card, top middle of the card of the consequences), so that it does not move when boxes open or close
+    if (o.fill) {
+      const W2 = Math.max(W, o.fill.W), H2 = Math.max(H, o.fill.H);
+      all.forEach((it) => { it.cx += (W2 - W) / 2; });
+      if (back) offY = H2 - H;
+      W = W2; H = H2;
+    }
+    const yOf = (it) => offY + M + it.c * ROWH;
     const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
     const mk = "fp-" + o.cls;
     el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
@@ -1054,15 +1064,10 @@
     lay.chains.forEach(({ edge, chain }) => {
       const pts = chain.map((it, i) => it.kind === "knoten" ? [it.cx, yOf(it) + (i === 0 ? BH : 0)] : [it.cx, yOf(it) + BH / 2]);
       let d = `M${pts[0][0]},${pts[0][1]}`;
-      const first = pts[0], last = pts[pts.length - 1];
-      const onLine = pts.every(([x, y]) => Math.abs(first[0] + ((last[0] - first[0]) * (y - first[1])) / (last[1] - first[1] || 1) - x) < 0.5);
-      if (onLine) {
-        el("path", { d: `M${first[0]},${first[1]}L${last[0]},${last[1] - 2}`, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
-        return;
-      }
+      // only right angles (user, 3 November 2026): down to the middle between two rows, across, down again
       for (let i = 1; i < pts.length; i++) {
-        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2;
-        d += `C${x0},${m} ${x1},${m} ${x1},${y1 - (i === pts.length - 1 ? 2 : 0)}`;
+        const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2, end = y1 - (i === pts.length - 1 ? 2 : 0);
+        d += Math.abs(x1 - x0) < 0.5 ? `V${end}` : `V${m}H${x1}V${end}`;
       }
       el("path", { d, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
     });
@@ -1134,8 +1139,11 @@
         card.appendChild(note);
       }
       cardIds = new Set(localIds(id, cardMode, Infinity));
-      body.appendChild(layered([...cardIds], id, { mode: cardMode, switches: true, BW: 150, BH: 42, GAP: 14, ROWH: 78, M: 10, chars: 22, font: 12, cls: "karte-bild", label: c.name, centre: true }));
+      // the size of the fully expanded card; the card keeps it, so that the selected node stays where it is
+      const full = layered([...cardIds], id, { ...CARD_BOX, mode: cardMode, label: c.name });
+      cardSize = { W: +full.getAttribute("width"), H: +full.getAttribute("height") };
       card.appendChild(body);
+      drawCard(id);
       card.hidden = false;
       box.classList.add("mit-karte");
       card.querySelector(".karte-zu").addEventListener("click", (ev) => { ev.stopPropagation(); select(null); });
@@ -1150,26 +1158,31 @@
       card.scrollLeft += z.left + z.width / 2 - (k.left + k.width / 2);
       card.scrollTop += z.top + z.height / 2 - (k.top + k.height / 2);
     }
+    else drawCard(id);
+  }
+  // The card shows only the boxes that are open or opened from (user, 3 November 2026): drawn anew at every click, the
+  // direct premises in the row directly above; only the selected node keeps its place.
+  const CARD_BOX = { switches: true, BW: 150, BH: 42, GAP: 14, ROWH: 78, M: 10, chars: 22, font: 12, cls: "karte-bild", centre: true };
+  let cardSize = null;
+  function drawCard(id) {
     const shown = (cardShown = computeShown(id));
-    // a box that can still be opened has a small mark
-    card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => {
-      g.classList.toggle("offen", expanded.has(g.dataset.id));
-      g.classList.toggle("hat-mehr", !expanded.has(g.dataset.id) && cardNext(id, g.dataset.id).length > 0);
-    });
-    card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => { g.style.visibility = shown.has(g.dataset.id) ? "" : "hidden"; });
-    // an indirect edge a → x is hidden while a visible path leads from a to x through one of its intermediate premises
+    // an indirect edge a → x is left out while a visible path leads from a to x through one of its intermediate premises
     const reach = (start) => {
       const seen = new Set([start]), stack = [start];
       while (stack.length) { const y = stack.pop(); if (!expanded.has(y)) continue; cardNext(id, y).forEach((z) => { if (shown.has(z) && !seen.has(z)) { seen.add(z); stack.push(z); } }); }
       return seen;
     };
     const pathVia = (a, x, b) => (cardMode === "fwd" ? reach(a).has(b) && reach(b).has(x) : reach(x).has(b) && reach(b).has(a));
-    card.querySelectorAll(".karte-bild .fokus-kante").forEach((p) => {
-      const a = p.dataset.from, x = p.dataset.to, via = (p.dataset.via || "").split(" ").filter(Boolean);
-      // only edges of opened boxes: into an opened box (proof) or out of an opened box (consequences)
-      const opened = cardMode === "fwd" ? expanded.has(a) : expanded.has(x);
-      const on = opened && shown.has(a) && shown.has(x) && !via.some((b) => shown.has(b) && pathVia(a, x, b));
-      p.style.visibility = on ? "" : "hidden";
+    // only edges of opened boxes: into an opened box (proof) or out of an opened box (consequences)
+    const edgeOk = (a, x, via) => (cardMode === "fwd" ? expanded.has(a) : expanded.has(x)) && !via.some((b) => shown.has(b) && pathVia(a, x, b));
+    const body = card.querySelector(".karte-inhalt"), keep = { left: card.scrollLeft, top: card.scrollTop };
+    body.innerHTML = "";
+    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk, fill: cardSize }));
+    card.scrollLeft = keep.left; card.scrollTop = keep.top;
+    // a box that can still be opened has a small mark
+    card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => {
+      g.classList.toggle("offen", expanded.has(g.dataset.id));
+      g.classList.toggle("hat-mehr", !expanded.has(g.dataset.id) && cardNext(id, g.dataset.id).length > 0);
     });
   }
   card.addEventListener("click", (ev) => { ev.stopPropagation();
