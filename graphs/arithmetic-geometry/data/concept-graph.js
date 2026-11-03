@@ -96,7 +96,7 @@ window.AR_CG = {
       ] },
     { id: "field-trace", name: "Trace of a field extension", kind: "konstruktion", area: "12F", field: [12, 11], msc: ["12F", "11R"], msc5: "12F05", uses: ["field-extension"],
       formula: String.raw`\operatorname{Tr}_{L/K}(\alpha) = \operatorname{tr}(x \mapsto \alpha x)`,
-      text: "For a finite field extension L/K and α in L, the trace of multiplication by α as a K-linear map of L. It is K-linear, and the trace form (x, y) ↦ Tr<sub>L/K</sub>(xy) is non-degenerate exactly when L/K is separable. Added on 3 November 2026 for the discriminant and the different (../../algebraic-number-theory/).",
+      text: "For a finite field extension L/K and α in L, the trace of multiplication by α as a K-linear map of L. It is K-linear, and the trace form (x, y) ↦ Tr<sub>L/K</sub>(xy) is non-degenerate exactly when L/K is separable.",
       definitionName: "Trace of multiplication",
       alternativeDefinitions: [
         { name: "Sum of the conjugates", uses: ["field-extension", "ca:algebraic-closure", "ca:ring-homomorphism"], formula: String.raw`\operatorname{Tr}_{L/K}(\alpha) = [L : K]_i \sum_{\sigma} \sigma(\alpha)`,

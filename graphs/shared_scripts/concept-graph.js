@@ -643,7 +643,8 @@
     const t = el("text", { x: 0, y: p.r + 13, "text-anchor": "middle" }, g);
     t.textContent = plainName(c.name);
     // tooltip of its own (appears at once), not the slow one of the browser (user, 3 November 2026)
-    g.dataset.tip = plainName(c.name) + " — " + (KIND_LABEL[c.kind] || c.kind) + ", " + (c.msc5 || c.msc.join(", "));
+    g.dataset.tip = plainName(c.name) + " — " + (KIND_LABEL[c.kind] || c.kind) + ", " + (c.msc5 || c.msc.join(", "))
+      + (c.fromDefinitions ? "; proof from the definitions alone" : c.foundation && !(c.uses || []).length ? "; foundation, proof outside these graphs" : "");
     // pointing: the node is lit only after half a second; leaving it ends that at once (user, 3 November 2026)
     g.addEventListener("mouseenter", (ev) => { clearTimeout(hoverTimer); if (nodeDrag) return; showTip(g.dataset.tip, ev); hoverTimer = setTimeout(() => hover(c.id), 500); });
     g.addEventListener("mousemove", (ev) => moveTip(ev));
@@ -898,13 +899,19 @@
       ${special.length ? `<h3>Special cases</h3><p>${special.map(chip).join("")}</p>` : ""}
       <p class="meta">Depends on ${ancestors(c.id).size} ${WORDS.many}; ${descendants(c.id).size} ${WORDS.many} depend on it.</p>`;
   }
+  // Why the standard proof has no premises (user, 3 November 2026): `fromDefinitions` (it works with the definitions
+  // only) or `foundation` (it rests on methods outside these graphs, named in the proof idea)
+  const noPremiseReason = (c) => c.fromDefinitions
+    ? `No premises: the ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one}; it works directly with the definitions of the concepts in the statement.`
+    : c.foundation ? `No premises here: a foundation of this graph, whose ${WORDS.proofWord.toLowerCase()} rests on methods outside these graphs (see the idea).` : "";
+  const noPremises = (c) => `<p class="ohne-praemissen">${noPremiseReason(c) || "—"}</p>`;
   function proofList(c) {
     const P = proofsOf(c);
-    if (P.length <= 1) return `<h3>${WORDS.usesHead}</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>`;
+    if (P.length <= 1) return `<h3>${WORDS.usesHead}</h3>${(c.uses || []).length ? `<p>${c.uses.map(chip).join("")}</p>` : noPremises(c)}`;
     const k = proofChoice.get(c.id) || 0;
     return `<h3>${WORDS.proofsHead} (${P.length})</h3>` + P.map((b, i) => `<div class="beweis${i === k ? " gezeigt" : ""}" data-proof="${i}">
       <div class="beweis-name">${b.name}${b.who || b.year ? ` <span class="meta">${[b.who, b.year].filter(Boolean).join(", ")}</span>` : ""}${i === k ? ' <span class="meta">(shown)</span>' : ""}</div>
-      ${b.formula && window.katex ? `<div class="formel">${tex(b.formula)}</div>` : ""}${b.idea ? `<p>${b.idea}</p>` : ""}<p>${(b.premises || []).filter((t) => byId.has(t)).map(chip).join("") || "—"}</p></div>`).join("");
+      ${b.formula && window.katex ? `<div class="formel">${tex(b.formula)}</div>` : ""}${b.idea ? `<p>${b.idea}</p>` : ""}${(b.premises || []).filter((t) => byId.has(t)).length ? `<p>${b.premises.filter((t) => byId.has(t)).map(chip).join("")}</p>` : i === 0 ? noPremises(c) : "<p>—</p>"}</div>`).join("");
   }
   // concepts occurring in the statement of a theorem, as links into the concept graphs (field `concepts`)
   function statementConcepts(c) {
@@ -1078,7 +1085,7 @@
       if (cardMode === "back" && P.length && !usesOf(id).length) {
         const note = document.createElement("div");
         note.className = "karte-hinweis";
-        note.innerHTML = `This ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one} of this graph.` + (P[pk].idea ? ` <span>${P[pk].idea}</span>` : "");
+        note.innerHTML = ((pk === 0 && noPremiseReason(c)) || `This ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one} of this graph.`) + (P[pk].idea ? ` <span>${P[pk].idea}</span>` : "");
         card.appendChild(note);
       }
       cardIds = new Set(localIds(id, cardMode, Infinity));
