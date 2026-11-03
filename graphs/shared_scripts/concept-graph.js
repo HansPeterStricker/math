@@ -12,10 +12,26 @@
 //   sources       prefix -> { data, page, title }: concept files of other folders. References "<prefix>:<id>" in
 //                 `uses` and `isA` are shown as concepts of `foreignArea`, without their own dependencies (rule 2 in
 //                 graphs/CLAUDE.md); the panel links to the concept in its home graph.
+//
+// The same code draws the theorem graphs (theorems.html, user, 3 November 2026): their data have `theorems` with
+// `premises` instead of `concepts` with `uses` (model in graphs/CLAUDE.md) and are read as concepts whose `uses` are
+// the premises. Further settings for them:
+//   words         texts that differ from the concept graph (keys in WORDS below)
+//   shapes        kind -> shape of the concept graph (objekt circle, konstruktion square, invariante diamond,
+//                 eigenschaft triangle, morphismus hexagon)
+//   conceptSources  "" (own folder) and prefix -> { data, page }: concept files for the field `concepts` (concepts in
+//                 the statement), shown in the panel as links into the concept graphs
 (function () {
   "use strict";
   const CFG = window.CONCEPT_PAGE;
-  const OWN = window[CFG.data];
+  const asGraph = (d) => (!d || d.concepts ? d : { ...d, concepts: d.theorems.map((t) => ({ ...t, uses: t.premises || [] })) });
+  const OWN = asGraph(window[CFG.data]);
+  const WORDS = Object.assign({
+    one: "concept", many: "concepts", usingIt: "concepts using it",
+    usesHead: "Defined with", usedByHead: "Used in the definitions of", edges: "definitional dependencies",
+    arrow: "A → B: B is defined with A", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
+    levelHint: "Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.",
+  }, CFG.words || {});
   const { el, tex } = window.GL;
   const svg = document.getElementById("graph");
   const panel = document.getElementById("panel");
@@ -31,7 +47,7 @@
   // a concept of another folder by its prefixed id (null if that folder's data are not loaded)
   const lookup = (ref) => {
     const [prefix, id] = ref.split(":");
-    const source = (CFG.sources || {})[prefix], data = source && window[source.data];
+    const source = (CFG.sources || {})[prefix], data = source && asGraph(window[source.data]);
     const c = data && data.concepts.find((x) => x.id === id);
     return c ? { c, prefix, source } : null;
   };
@@ -66,7 +82,7 @@
   // every graph; the names come from the settings (title of the source).
   const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", local: "#d9d4ca" };
   const originOf = (c) => (c.foreign ? c.foreign.prefix : "local");
-  const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).title || o).replace(/^the concept graph of /, ""));
+  const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).title || o).replace(/^the (concept|theorem) graph of /, ""));
   const colorOf = (c) => (c.area === FOREIGN ? ORIGIN_COLORS[originOf(c)] || "#d9d4ca" : COLORS[c.area] || "#ccc");
   const byId = new Map(concepts.map((c) => [c.id, c]));
   const usesEdges = [];
@@ -390,8 +406,8 @@
     e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
   });
 
-  const shape = (g, kind, r, fill) => {
-    const s = { class: "form", fill };
+  const shape = (g, kind0, r, fill) => {
+    const s = { class: "form", fill }, kind = (CFG.shapes || {})[kind0] || kind0;
     if (kind === "konstruktion") return el("rect", { ...s, x: -r * 0.88, y: -r * 0.88, width: r * 1.76, height: r * 1.76, rx: 2 }, g);
     if (kind === "invariante") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.2},0L0,${r * 1.2}L${-r * 1.2},0Z` }, g);
     if (kind === "eigenschaft") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.1},${r * 0.8}L${-r * 1.1},${r * 0.8}Z` }, g);
@@ -517,6 +533,8 @@
       const isUp = (e.to === id || up.has(e.to)) && up.has(e.from) && (deep || e.to === id || e.from === id);
       const isDown = (e.from === id || down.has(e.from)) && down.has(e.to) && (deep || e.from === id || e.to === id);
       const direct = e.from === id || e.to === id;
+      // indirect dependencies stay hidden also for a selected concept (user, 3 November 2026); switch "indirect dependencies"
+      if (e.kind === "uses" && e.transitive) return;
       if (e.kind === "uses" && isUp) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); }
       else if (e.kind === "uses" && isDown) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); }
       else if (e.kind === "isa" && (showOut ? e.to === id : e.from === id)) e.line.classList.add("hell");
@@ -536,17 +554,31 @@
     const special = isaEdges.filter((e) => e.to === c.id).map((e) => e.from);
     panel.innerHTML = `<h2>${c.name}</h2>
       <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + CFG.foreignLabel + ")" : D.areas[c.area]}</div>
-      ${c.foreign ? `<p class="meta">Defined in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
+      ${c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
       ${c.formula && window.katex ? `<div class="formel">${tex(c.formula)}</div>` : ""}
       <p>${c.text || ""}</p>
+      ${c.who || c.year ? `<p class="meta">${[c.who, c.year < 0 ? -c.year + " BC" : c.year].filter(Boolean).join(", ")}</p>` : ""}
+      ${c.proof ? `<h3>Proof idea</h3><p>${c.proof}</p>` : ""}
+      ${statementConcepts(c)}
       ${focusView(c.id)}
-      <h3>Defined with</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>
-      <h3>Used in the definitions of</h3><p>${usedBy.get(c.id).length ? usedBy.get(c.id).map(chip).join("") : "—"}</p>
+      <h3>${WORDS.usesHead}</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>
+      <h3>${WORDS.usedByHead}</h3><p>${usedBy.get(c.id).length ? usedBy.get(c.id).map(chip).join("") : "—"}</p>
       ${generalisations.length ? `<h3>Is a special case of</h3><p>${generalisations.map(chip).join("")}</p>` : ""}
       ${special.length ? `<h3>Special cases</h3><p>${special.map(chip).join("")}</p>` : ""}
-      <p class="meta">Depends on ${ancestors(c.id).size} concepts; ${descendants(c.id).size} concepts depend on it.</p>`;
+      <p class="meta">Depends on ${ancestors(c.id).size} ${WORDS.many}; ${descendants(c.id).size} ${WORDS.many} depend on it.</p>`;
   }
-  panel.addEventListener("click", (ev) => { const t = ev.target.closest(".chip, .fokus-knoten"); if (t) select(t.dataset.id); });
+  // concepts occurring in the statement of a theorem, as links into the concept graphs (field `concepts`)
+  function statementConcepts(c) {
+    const S = CFG.conceptSources;
+    if (!S || !(c.concepts || []).length) return "";
+    const links = c.concepts.map((ref) => {
+      const [p, id] = ref.includes(":") ? ref.split(":") : ["", ref];
+      const src = S[p], data = src && window[src.data], hit = data && data.concepts.find((x) => x.id === id);
+      return hit ? `<a class="chip" href="${src.page}#${id}">${hit.name}</a>` : "";
+    }).join("");
+    return links ? `<h3>Concepts in the statement</h3><p>${links}</p>` : "";
+  }
+  panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-id]"); if (t) select(t.dataset.id); });
 
   // ------------------------------------------------------------ side view: the definitions a concept builds on
   // Small layered graph in the panel: the selected concept and all its predecessors along `uses`, one row per depth
@@ -556,7 +588,11 @@
   // positions are computed here (see below).
   // Only predecessors (user, 2 November 2026). A click on a box selects that concept.
   function focusView(id) {
-    const ids = [...ancestors(id), id];
+    // Only what belongs to the definition (user, 3 November 2026): the concepts of the area it builds on, and of the
+    // prerequisites only those the definition itself names, not those reached through other concepts (prime ideal
+    // through spectrum for points).
+    const own = (byId.get(id).uses || []).filter((t) => byId.has(t));
+    const ids = [...ancestors(id)].filter((x) => !isPre(x) || own.includes(x)).concat([id]);
     if (ids.length < 2) return "";
     const set = new Set(ids);
     const fEdges = usesEdges.filter((e) => set.has(e.from) && set.has(e.to) && !e.transitive);
@@ -593,7 +629,7 @@
     all.forEach((it) => { it.cx += M - minX; });
     const W = maxX - minX + 2 * M, H = rows.length * ROWH - (ROWH - BH) + 2 * M;
     const yOf = (it) => M + it.c * ROWH;
-    const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: "max-width:100%;height:auto", class: "fokus-ansicht", role: "img", "aria-label": "Definitions this concept builds on" });
+    const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: "max-width:100%;height:auto", class: "fokus-ansicht", role: "img", "aria-label": WORDS.buildsOn });
     el("defs", {}, s).innerHTML = `<marker id="fpfeil" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
     lay.chains.forEach(({ chain }) => {
       const pts = chain.map((it, i) => it.kind === "knoten"
@@ -616,15 +652,15 @@
       });
       el("title", {}, g).textContent = c.name + " — level " + level.get(x);
     });
-    return `<h3>Builds on (${ids.length - 1} concepts)</h3>` + s.outerHTML;
+    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + s.outerHTML;
   }
 
 
   function overview() {
     const top = concepts.map((c) => [c, descendants(c.id).size]).sort((a, b) => b[1] - a[1]).slice(0, 8);
     return `<h2>${D.title}</h2>
-      <p class="meta">${concepts.length} concepts, ${usesEdges.length} definitional dependencies, ${isaEdges.length} “is a” relations.</p>
-      <h3>Most used concepts</h3><p>${top.map(([c, n]) => chip(c.id) + `<span class="meta">${n}</span> `).join("")}</p>
+      <p class="meta">${concepts.length} ${WORDS.many}, ${usesEdges.length} ${WORDS.edges}${isaEdges.length ? `, ${isaEdges.length} “is a” relations` : ""}.</p>
+      <h3>Most used ${WORDS.many}</h3><p>${top.map(([c, n]) => chip(c.id) + `<span class="meta">${n}</span> `).join("")}</p>
       <p class="meta">The contents were compiled with the help of a language model and have not been checked by a specialist.</p>`;
   }
 
@@ -645,27 +681,27 @@
     block("Prerequisites: origin", [...new Set(concepts.filter((c) => c.area === FOREIGN).map(originOf))].map((o) => `<span><i style="background:#fbfaf6;border:3px solid ${ORIGIN_COLORS[o] || "#d9d4ca"}"></i>${originName(o)}</span>`), { closed: true }) +
     block("Shape: kind", Object.keys(D.kinds).map((k) => `<span>${kindSvg(k)}${D.kinds[k]}</span>`), { cls: "zweispaltig", closed: true }) +
     block("Lines and sizes", [
-      `<span>${lineSvg('stroke="#a99e8c" stroke-width="1.3" marker-end="url(#pfeil)"')}A → B: B is defined with A</span>`,
-      `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>`,
+      `<span>${lineSvg('stroke="#a99e8c" stroke-width="1.3" marker-end="url(#pfeil)"')}${WORDS.arrow}</span>`,
+      isaEdges.length ? `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>` : "",
       `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${CFG.foreignLabel}</span>`,
-      `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: concepts depending on it</span>`,
+      `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
       `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges from prerequisites${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
   document.getElementById("controls").innerHTML =
     block("Display", [
-      `<label class="toggle"><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
+      `<label class="toggle"${isaEdges.length ? "" : ' style="display:none"'}><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
       `<label class="toggle"><input type="checkbox" id="c-trans"><span class="regler"></span>indirect dependencies</label>`,
       `<label class="toggle"><input type="checkbox" id="c-basis"><span class="regler"></span>edges from prerequisites</label>`,
       ...Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => `<label class="toggle"><input type="checkbox" class="c-hub"><span class="regler"></span>edges from ${byId.get(h).name}</label>`),
-      `<label class="toggle"><input type="checkbox" id="c-out"><span class="regler"></span>concepts using it</label>`,
+      `<label class="toggle"><input type="checkbox" id="c-out"><span class="regler"></span>${WORDS.usingIt}</label>`,
       `<label class="toggle"><input type="checkbox" id="c-names" checked><span class="regler"></span>names</label>`,
       `<button id="c-home">Reset view</button>`,
     ]) +
     // levels in two columns, filled column by column (1 … 5 left, 6 … 10 right)
     block("Levels", [
       `<div class="spalten" style="grid-template-rows:repeat(${Math.ceil(levels.length / 2)},auto)">` + levels.map((l) =>
-        `<label class="toggle" title="${countAt(l)} ${countAt(l) === 1 ? "concept" : "concepts"}"><input type="checkbox" data-level="${l}" checked><span class="regler"></span>${l === 0 ? "prereq." : l} <span class="meta">(${countAt(l)})</span></label>`).join("") + "</div>",
-      `<span class="hinweis">Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.</span>`,
+        `<label class="toggle" title="${countAt(l)} ${countAt(l) === 1 ? WORDS.one : WORDS.many}"><input type="checkbox" data-level="${l}" checked><span class="regler"></span>${l === 0 ? "prereq." : l} <span class="meta">(${countAt(l)})</span></label>`).join("") + "</div>",
+      `<span class="hinweis">${WORDS.levelHint}</span>`,
     ]);
   const shownLevels = new Set(levels);
   function applyLevels() {
@@ -729,7 +765,7 @@
     svg.classList.toggle("suchend", hits.length > 0);
     resultList.innerHTML = hits.length
       ? hits.slice(0, 10).map((c, i) => `<li role="option" data-id="${c.id}" class="${i === active ? "aktiv" : ""}"><i style="background:${colorOf(c)}"></i>${c.name}<span class="meta">L${level.get(c.id)}</span></li>`).join("")
-      : `<li class="meta">no concept found</li>`;
+      : `<li class="meta">no ${WORDS.one} found</li>`;
   }
   function choose(id) {
     if (!id) return;
