@@ -41,6 +41,12 @@ window.ST_CONCEPTS = {
     invariante: "Invariant",
   },
 
+  // nodes of other folders that are equally important here (user, 3 November 2026): shown as own nodes of this area
+  // in the sector of `area`; definition and dependencies stay in their home folder
+  shared: [
+    { ref: "ent:integer", area: "numbers" },
+  ],
+
   concepts: [
     // ------------------------------------------------------------ 03E20 Sets, relations, functions
     { id: "set", name: "Set", kind: "objekt", area: "03E20", field: [3], msc: ["03E"], msc5: "03E20", uses: [],

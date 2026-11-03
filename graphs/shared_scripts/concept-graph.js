@@ -94,6 +94,16 @@
     return c ? { c, prefix, source } : null;
   };
   const withPrefix = (prefix, t) => (t.includes(":") ? t : prefix + ":" + t);
+  // Shared nodes (user, 3 November 2026): a concept or theorem that is equally important in two areas keeps its one home
+  // folder (definition, proofs, dependencies), but a second folder lists it in `shared` ({ ref, area }) and shows it as
+  // one of its own nodes: in the sector of `area`, filled, with its level, its edges and its card. The nodes its
+  // definition or proof uses are referenced as well.
+  const SHARED = new Map((OWN.shared || []).map((s) => [s.ref, s]));
+  SHARED.forEach((s, ref) => {
+    refs.add(ref);
+    const hit = lookup(ref);
+    if (hit) (hit.c.uses || hit.c.premises || []).map((u) => withPrefix(hit.prefix, u)).filter((u) => !(CFG.prefix && u.startsWith(CFG.prefix + ":"))).forEach((u) => refs.add(u));
+  });
   // Dependencies among the referenced concepts themselves are kept (ℕ → ℤ; user, 2 November 2026). Where the path in
   // the home graph runs through concepts that are not shown here (ideal → maximal ideal → local ring), it is followed
   // to the next referenced concept, so that the edge ideal → local ring appears.
@@ -103,6 +113,8 @@
       const t = stack.pop();
       if (seen.has(t)) continue;
       seen.add(t);
+      // a reference back into this folder (a shared node defined with concepts of this area) is an own concept
+      if (CFG.prefix && t.startsWith(CFG.prefix + ":") && OWN.concepts.some((x) => x.id === t.slice(CFG.prefix.length + 1))) { found.add(t.slice(CFG.prefix.length + 1)); continue; }
       if (refs.has(t)) { found.add(t); continue; }
       const hit = lookup(t);
       if (hit) (hit.c.uses || []).forEach((u) => stack.push(withPrefix(hit.prefix, u)));
@@ -114,7 +126,12 @@
     if (!hit) { console.error("concept graph: unknown reference " + ref); return; }
     const { c, prefix, source } = hit;
     const isA = (c.isA || []).map((t) => withPrefix(prefix, t)).filter((t) => refs.has(t));
-    D.concepts.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: FOREIGN, foreign: { home: source.page + "#mark=" + c.id, title: source.title, prefix } });
+    const shared = SHARED.get(ref);
+    // the alternative definitions and proofs refer to the nodes shown here as well
+    const alt = (list, key) => list && list.map((b) => ({ ...b, [key]: reachedRefs(prefix, b[key]).filter((t) => t !== ref) }));
+    D.concepts.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: shared ? shared.area : FOREIGN,
+      alternativeDefinitions: alt(c.alternativeDefinitions, "uses"), alternativeProofs: alt(c.alternativeProofs, "premises"),
+      shared: !!shared, foreign: { home: source.page + "#mark=" + c.id, title: source.title, prefix } });
   });
 
   const concepts = D.concepts;
@@ -648,7 +665,7 @@
     });
     g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1 && clickMode !== "graph") return;
       // a node of another area (outer ring): a left click only opens its home graph with it selected (user, 3 November 2026)
-      if (c.foreign && CFG.foreignOutside) { location.href = c.foreign.home; return; }
+      if (c.foreign && !c.shared && CFG.foreignOutside) { location.href = c.foreign.home; return; }
       step(c.id, "back"); });
     g.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); if (justDragged) { justDragged = false; return; } step(c.id, "fwd"); });
     nodeEls.set(c.id, g);
@@ -857,7 +874,7 @@
     svg.classList.add("fokus");
     nodeEls.get(id).classList.add("hell", "zeiger");
   }
-  const chip = (id) => `<span class="chip" data-id="${id}">${byId.get(id).name}</span>`;
+  const chip = (id) => (byId.has(id) ? `<span class="chip" data-id="${id}">${byId.get(id).name}</span>` : "");
   function select(id) {
     selected = id && byId.has(id) ? id : null;
     if (OUTSIDE) render();
@@ -875,7 +892,8 @@
     const stepNote = ""; // no step line (user, 3 November 2026)
     panel.innerHTML = `<h2>${c.name}</h2>${stepNote}
       <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + CFG.foreignLabel + ")" : D.areas[c.area]}</div>
-      ${c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
+      ${c.shared ? `<p class="meta">Equally important here and in <a href="${c.foreign.home}">${c.foreign.title}</a>, where it is ${WORDS.homeVerb.toLowerCase()}.</p>`
+        : c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
       ${c.formula && window.katex ? `<div class="formel">${tex(c.formula)}</div>` : ""}
       <p>${c.text || ""}</p>
       ${c.who || c.year ? `<p class="meta">${[c.who, c.year < 0 ? -c.year + " BC" : c.year].filter(Boolean).join(", ")}</p>` : ""}
@@ -927,7 +945,7 @@
   function jump(target) {
     const c = byId.get(target);
     if (!c) return;
-    if (c.foreign && CFG.foreignOutside) { location.href = c.foreign.home; return; }
+    if (c.foreign && !c.shared && CFG.foreignOutside) { location.href = c.foreign.home; return; }
     if (selected && clickMode === "card") jumpStack.push({ id: selected, mode: cardMode, expanded: new Set(expanded), choice: new Map(proofChoice) });
     history.pushState(null, "", "#" + target);
     const keep = jumpStack.slice();
@@ -1212,7 +1230,7 @@
         const j = el("g", { class: "sprung", "data-jump": x, transform: `translate(3,${BH - 14})` }, g);
         el("rect", { width: 17, height: 12, rx: 3 }, j);
         el("text", { x: 8.5, y: 9.5, "text-anchor": "middle" }, j).textContent = "↗";
-        el("title", {}, j).textContent = c.foreign ? "Open " + plainName(c.name) + " in " + c.foreign.title.replace(/^the /, "") : "Open the card of " + plainName(c.name);
+        el("title", {}, j).textContent = c.foreign && !c.shared ? "Open " + plainName(c.name) + " in " + c.foreign.title.replace(/^the /, "") : "Open the card of " + plainName(c.name);
       }
       // not on nodes of other areas: their premises are not followed here, a switch would show nothing (user, 3 November 2026)
       if (back && o.switches && P.length > 1 && x !== id && !c.foundation && c.area !== FOREIGN) {

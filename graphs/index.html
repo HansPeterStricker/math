@@ -44,7 +44,18 @@
 </head>
 <body>
 <div class="seite">
-  <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2></nav>
+  <nav class="gebiete" id="gebiete" aria-label="Areas"><h2>Areas</h2>
+    <!-- areas:start -->
+    <div class="gebiet"><div class="gebiet-name"><a href="#set-theory">Set theory</a></div><div class="gebiet-links"><a href="set-theory/concepts.html">Concepts</a><a href="set-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#elementary-number-theory">Elementary number theory</a></div><div class="gebiet-links"><a href="elementary-number-theory/concepts.html">Concepts</a><a href="elementary-number-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#group-theory">Group theory</a></div><div class="gebiet-links"><a href="group-theory/concepts.html">Concepts</a><a href="group-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#commutative-algebra">Commutative algebra</a></div><div class="gebiet-links"><a href="commutative-algebra/concepts.html">Concepts</a><a href="commutative-algebra/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#category-theory">Category theory</a></div><div class="gebiet-links"><a href="category-theory/concepts.html">Concepts</a><a href="category-theory/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-geometry">Algebraic geometry</a></div><div class="gebiet-links"><a href="algebraic-geometry/concepts.html">Concepts</a><a href="algebraic-geometry/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#arithmetic-geometry">Arithmetic geometry</a></div><div class="gebiet-links"><a href="arithmetic-geometry/concepts.html">Concepts</a><a href="arithmetic-geometry/theorems.html">Theorems</a></div></div>
+    <div class="gebiet"><div class="gebiet-name"><a href="#algebraic-number-theory">Algebraic number theory</a></div><div class="gebiet-links"><a href="algebraic-number-theory/concepts.html">Concepts</a><a href="algebraic-number-theory/theorems.html">Theorems</a></div></div>
+    <!-- areas:end -->
+  </nav>
   <main>
     <h1>Graphs of mathematics</h1>
     <p>For each area of mathematics there are two graphs. The <b>concept graph</b> shows the definitions and their use in
@@ -52,27 +63,85 @@
       lemmas and conjectures with their proofs: an arrow leads from each theorem a usual proof uses to the theorem it
       proves. In both, each MSC class has a sector, and a node lies further out than the nodes it builds on. Concepts
       and theorems of one area used in another link the graphs of the two areas.</p>
-    <div class="liste" id="liste"></div>
+    <div class="liste" id="liste">
+    <!-- entries:start -->
+    <section class="eintrag" id="set-theory">
+      <div class="msc">MSC 03E, 06A</div>
+      <h2>Set theory</h2>
+      <p>Sets, relations and maps, orders, ordinals and cardinals, forcing, and the construction of ℚ, ℝ and ℂ.</p>
+      <div class="paar">
+        <a href="set-theory/concepts.html"><img src="previews/set-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">66 concepts, 161 definitional dependencies</div></a>
+        <a href="set-theory/theorems.html"><img src="previews/set-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">61 theorems, 93 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="elementary-number-theory">
+      <div class="msc">MSC 11A</div>
+      <h2>Elementary number theory</h2>
+      <p>Divisibility, congruences, arithmetic functions, primes, continued fractions.</p>
+      <div class="paar">
+        <a href="elementary-number-theory/concepts.html"><img src="previews/elementary-number-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">65 concepts, 148 definitional dependencies</div></a>
+        <a href="elementary-number-theory/theorems.html"><img src="previews/elementary-number-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">74 theorems, 91 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="group-theory">
+      <div class="msc">MSC 20</div>
+      <h2>Group theory</h2>
+      <p>Groups and homomorphisms, group actions and permutations, finite and abelian groups.</p>
+      <div class="paar">
+        <a href="group-theory/concepts.html"><img src="previews/group-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">48 concepts, 97 definitional dependencies</div></a>
+        <a href="group-theory/theorems.html"><img src="previews/group-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">65 theorems, 101 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="commutative-algebra">
+      <div class="msc">MSC 13</div>
+      <h2>Commutative algebra</h2>
+      <p>Rings and ideals, localization, modules, chain conditions, special and local rings, completion.</p>
+      <div class="paar">
+        <a href="commutative-algebra/concepts.html"><img src="previews/commutative-algebra.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">64 concepts, 167 definitional dependencies</div></a>
+        <a href="commutative-algebra/theorems.html"><img src="previews/commutative-algebra-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">66 theorems, 95 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="category-theory">
+      <div class="msc">MSC 18</div>
+      <h2>Category theory</h2>
+      <p>Categories, functors and limits, abelian categories and homological algebra, sheaves, higher categories.</p>
+      <div class="paar">
+        <a href="category-theory/concepts.html"><img src="previews/category-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">80 concepts, 195 definitional dependencies</div></a>
+        <a href="category-theory/theorems.html"><img src="previews/category-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">65 theorems, 75 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="algebraic-geometry">
+      <div class="msc">MSC 14</div>
+      <h2>Algebraic geometry</h2>
+      <p>Schemes and morphisms, sheaves and cohomology, divisors, curves, surfaces, birational geometry, moduli, abelian varieties.</p>
+      <div class="paar">
+        <a href="algebraic-geometry/concepts.html"><img src="previews/algebraic-geometry.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">124 concepts, 509 definitional dependencies</div></a>
+        <a href="algebraic-geometry/theorems.html"><img src="previews/algebraic-geometry-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">87 theorems, 110 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="arithmetic-geometry">
+      <div class="msc">MSC 11F, 11G, 11M, 11N</div>
+      <h2>Arithmetic geometry</h2>
+      <p>L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need.</p>
+      <div class="paar">
+        <a href="arithmetic-geometry/concepts.html"><img src="previews/arithmetic-geometry.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">57 concepts, 184 definitional dependencies</div></a>
+        <a href="arithmetic-geometry/theorems.html"><img src="previews/arithmetic-geometry-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">75 theorems, 102 premises</div></a>
+      </div>
+    </section>
+    <section class="eintrag" id="algebraic-number-theory">
+      <div class="msc">MSC 11R, 11S</div>
+      <h2>Algebraic number theory</h2>
+      <p>Number fields and rings of integers, ramification, units and class groups, cyclotomic fields, class field theory, adeles, local fields.</p>
+      <div class="paar">
+        <a href="algebraic-number-theory/concepts.html"><img src="previews/algebraic-number-theory.jpg" alt="" loading="lazy"><div class="art">Concepts</div><div class="zahlen">64 concepts, 288 definitional dependencies</div></a>
+        <a href="algebraic-number-theory/theorems.html"><img src="previews/algebraic-number-theory-theorems.jpg" alt="" loading="lazy"><div class="art">Theorems</div><div class="zahlen">79 theorems, 130 premises</div></a>
+      </div>
+    </section>
+    <!-- entries:end -->
+    </div>
     <p class="folgt">Further areas and the graph of the areas will follow.</p>
   </main>
 </div>
-<script src="shared_scripts/areas.js"></script>
-<script src="set-theory/data/concepts.js"></script>
-<script src="elementary-number-theory/data/concepts.js"></script>
-<script src="group-theory/data/concepts.js"></script>
-<script src="category-theory/data/concepts.js"></script>
-<script src="commutative-algebra/data/concepts.js"></script>
-<script src="algebraic-geometry/data/concept-graph.js"></script>
-<script src="arithmetic-geometry/data/concept-graph.js"></script>
-<script src="algebraic-number-theory/data/concepts.js"></script>
-<script src="set-theory/data/theorem-graph.js"></script>
-<script src="elementary-number-theory/data/theorem-graph.js"></script>
-<script src="group-theory/data/theorem-graph.js"></script>
-<script src="category-theory/data/theorem-graph.js"></script>
-<script src="commutative-algebra/data/theorem-graph.js"></script>
-<script src="algebraic-geometry/data/theorem-graph.js"></script>
-<script src="arithmetic-geometry/data/theorem-graph.js"></script>
-<script src="algebraic-number-theory/data/theorem-graph.js"></script>
-<script src="index.js"></script>
+<a href="../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>
 </body>
 </html>
