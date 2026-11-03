@@ -959,9 +959,38 @@
   }
   panel.addEventListener("click", (ev) => {
     const t = ev.target.closest("[data-id]");
-    if (t) { selected = null; step(t.dataset.id, "back"); return; }
+    if (t) { if (selected && clickMode === "card") jump(t.dataset.id); else { selected = null; step(t.dataset.id, "back"); } return; }
     const b = ev.target.closest("[data-proof]");
     if (b && selected) showProof(selected, Number(b.dataset.proof));
+  });
+  // Jumps between cards (user, 3 November 2026): "↗" on a box or a box of the side view opens the card of that node;
+  // "‹ Back" in the head of the card and the back button of the browser return to the previous card as it was.
+  const jumpStack = [];
+  let restoring = 0; // time of the last return by the history; the hashchange that follows it is not handled again
+  function jump(target) {
+    const c = byId.get(target);
+    if (!c) return;
+    if (c.foreign && CFG.foreignOutside) { location.href = c.foreign.home; return; }
+    if (selected && clickMode === "card") jumpStack.push({ id: selected, mode: cardMode, expanded: new Set(expanded), choice: new Map(proofChoice) });
+    history.pushState(null, "", "#" + target);
+    const keep = jumpStack.slice();
+    selected = null;
+    step(target, "back");
+    jumpStack.length = 0; jumpStack.push(...keep);
+    cardFor = null; showCard(target); mark(target);
+  }
+  window.addEventListener("popstate", () => {
+    const h = decodeURIComponent(location.hash.slice(1)), top = jumpStack[jumpStack.length - 1];
+    restoring = Date.now();
+    if (top && top.id === h) {
+      jumpStack.pop();
+      const keep = jumpStack.slice();
+      cardMode = top.mode; expanded = top.expanded; proofChoice.clear(); top.choice.forEach((v, k) => proofChoice.set(k, v));
+      cardFor = null; selected = null;
+      select(h);
+      jumpStack.length = 0; jumpStack.push(...keep);
+      cardFor = null; showCard(h); mark(h);
+    } else { jumpStack.length = 0; fromHash(); }
   });
   // another proof of the selected theorem: the card is drawn anew, the steps start again
   function showProof(id, k) {
@@ -1221,6 +1250,13 @@
       });
       // proof card: a theorem with several proofs gets a small switch "1/3" (user, 3 November 2026)
       const P = proofsOf(c);
+      // jump to the card of this node, or for a node of another area to its home graph (user, 3 November 2026)
+      if (o.switches && x !== id) {
+        const j = el("g", { class: "sprung", "data-jump": x, transform: `translate(3,${BH - 14})` }, g);
+        el("rect", { width: 17, height: 12, rx: 3 }, j);
+        el("text", { x: 8.5, y: 9.5, "text-anchor": "middle" }, j).textContent = "↗";
+        el("title", {}, j).textContent = c.foreign ? "Open " + plainName(c.name) + " in " + c.foreign.title.replace(/^the /, "") : "Open the card of " + plainName(c.name);
+      }
       // not on nodes of other areas: their premises are not followed here, a switch would show nothing (user, 3 November 2026)
       if (back && o.switches && P.length > 1 && x !== id && !c.foundation && c.area !== FOREIGN) {
         const k = proofChoice.get(x) || 0;
@@ -1256,7 +1292,7 @@
   function showCard(id) {
     const box = svg.parentNode;
     // closing a card, however, resets it completely (user, 3 November 2026): opened again it starts from scratch
-    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); graphFor = null; return; }
+    if (!id) { card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardShown = null; cardIds = null; expanded = new Set(); proofChoice.clear(); graphFor = null; jumpStack.length = 0; return; }
     if (clickMode === "graph") {
       card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardIds = null;
       if (graphFor !== id) { graphFor = id; graphDepth = 1; }
@@ -1268,7 +1304,8 @@
       cardFor = id;
       const P = proofsOf(c), pk = proofChoice.get(id) || 0;
       const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${WORDS.proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button></div>` : "";
-      card.innerHTML = `<div class="karte-kopf"><b>${c.name}</b> <button class="karte-zu" aria-label="Close">×</button>${switcher}</div>`;
+      const backBtn = jumpStack.length ? `<button class="klein-knopf karte-zurueck" title="Back to ${plainName(byId.get(jumpStack[jumpStack.length - 1].id).name)}">‹ Back</button> ` : "";
+      card.innerHTML = `<div class="karte-kopf">${backBtn}<b>${c.name}</b> <button class="karte-zu" aria-label="Close">×</button>${switcher}</div>`;
       card.querySelectorAll("[data-step]").forEach((bt) => bt.addEventListener("click", (ev) => { ev.stopPropagation(); showProof(id, (pk + Number(bt.dataset.step) + P.length) % P.length); }));
       const body = document.createElement("div");
       body.className = "karte-inhalt";
@@ -1327,6 +1364,9 @@
     });
   }
   card.addEventListener("click", (ev) => { ev.stopPropagation();
+    const jb = ev.target.closest("[data-jump]");
+    if (jb) { jump(jb.dataset.jump); return; }
+    if (ev.target.closest(".karte-zurueck")) { history.back(); return; }
     const w = ev.target.closest("[data-proof-of]");
     // another proof at a box: above it only its direct premises are shown, everything further up is folded
     // (user, 3 November 2026)
@@ -1525,7 +1565,7 @@
     clickMode = mode;
     // the whole graph stays in view, centred as usual (user, 3 November 2026: not the node in the middle)
   }
-  window.addEventListener("hashchange", fromHash);
+  window.addEventListener("hashchange", () => { if (Date.now() - restoring < 400) return; fromHash(); });
   fromHash();
   // for tests: concepts whose angle lies outside the sector of their class (concepts of level 1 and higher)
   const outsideSectors = () => concepts.filter((c) => level.get(c.id) >= 1 && c.id !== CENTRE_ID && sectors[secKey(c)]).filter((c) => {

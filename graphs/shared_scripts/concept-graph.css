@@ -204,6 +204,13 @@ a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; ma
 .fokus-ansicht .beweis-wahl rect { fill: #fffdf7; stroke: #8a7f6e; stroke-width: .8; fill-opacity: 1 !important; }
 .fokus-ansicht .beweis-wahl text { font-size: 9.5px !important; fill: var(--tinte); pointer-events: none; font-weight: 400 !important; }
 .fokus-ansicht .beweis-wahl:hover rect { stroke-width: 1.6; }
+/* jump to the card of a box (user, 3 November 2026) */
+.fokus-ansicht .sprung { cursor: pointer; opacity: .35; transition: opacity .15s; }
+.fokus-ansicht .sprung rect { fill: transparent !important; stroke: none !important; fill-opacity: 0 !important; }
+.fokus-ansicht .sprung text { font-size: 9px !important; fill: var(--tinte); pointer-events: none; font-weight: 400 !important; }
+.fokus-ansicht .fokus-knoten:hover .sprung { opacity: .7; }
+.fokus-ansicht .sprung:hover { opacity: 1 !important; }
+.karte-zurueck { margin-right: 6px; }
 /* a box whose neighbours can still be shown (click) */
 .karte .fokus-ansicht .fokus-knoten.hat-mehr rect { stroke-dasharray: none; filter: drop-shadow(0 2px 0 #b9ad9a); }
 .karte-hinweis { font-size: 13px; color: var(--leise); margin: 4px 0 8px; max-width: 520px; }
