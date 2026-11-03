@@ -60,7 +60,7 @@
 
   // Kleine SVG-Symbole für Bedienspalte und Zeichenerklärung; sie entsprechen der Darstellung im Graphen.
   const GLYPHS = {
-    fixed: () => [svgEl('circle', { cx: 9, cy: 9, r: 7, fill: '#1a1a1a' })],
+    fixed: () => [svgEl('circle', { cx: 9, cy: 9, r: 4.5, fill: '#1a1a1a' })],
     nonimage: () => [svgEl('circle', { cx: 9, cy: 9, r: 4, fill: 'silver' })],
     zero: () => [svgEl('line', { x1: 2, y1: 16, x2: 15, y2: 3, stroke: 'silver', 'stroke-width': 2 }), svgEl('circle', { cx: 15, cy: 3, r: 2.5, fill: '#c81e1e' })],
     unit: () => [svgEl('circle', { cx: 9, cy: 9, r: 3.5 }), svgEl('circle', { cx: 9, cy: 9, r: 7, fill: 'none', stroke: '#1a1a1a' })],

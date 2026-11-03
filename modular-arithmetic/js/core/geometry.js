@@ -85,15 +85,25 @@
         }
       }
       const p = pts.get(e.from), q = pts.get(e.to)
-      lines.push({ x1: p.x, y1: p.y, x2: q.x, y2: q.y, color, width, order })
+      lines.push({ x1: p.x, y1: p.y, x2: q.x, y2: q.y, color, width, order, fixed: e.from === e.to })
     })
+    // Fixpunkte höchstens so dick wie die dickste Zyklenlinie (Nutzer, 3. November 2026; nicht in der Tabelle): Der Durchmesser eines
+    // Fixpunkts (Linie der Länge 0 und hervorgehobener Punkt) ist höchstens die Breite der dicksten Linie eines Zyklus
+    // mit mindestens zwei Elementen; ohne solchen Zyklus die Breite, die ein Zyklus der Länge 2 hätte. Der Punkt einer
+    // Linie der Länge 0 ist zudem nie kleiner als ein gewöhnlicher Punkt.
+    const cycleWidths = lines.filter((l) => !l.fixed && graph.edges[l.order].cycleIndex !== null && showCycles).map((l) => l.width)
+    const maxFixedD = cycleWidths.length ? Math.max(...cycleWidths) : (sc * w0) / 2
+    const minFixedD = 2 * (context === 'single' ? 5 : 2)
+    if (!isTable) lines.forEach((l) => { if (l.fixed) l.width = Math.max(Math.min(l.width, minFixedD), Math.min(l.width, maxFixedD)) })
+    lines.forEach((l) => { delete l.fixed })
 
     const imageSet = new Set(graph.imagePoints)
     const fixedSet = new Set(graph.fixedPoints)
     // Radius des Kreises in denselben Pixeln wie die Punktradien: 0,45 · 640 im SVG, 0,45 · 120 in der Tabellenzelle.
     const circleR = isTable ? 0.45 * 120 : 0.45 * 640
     const baseR = context === 'single' ? 5 : 2
-    const fixedR = context === 'single' ? 10 : context === 'neighbour' ? 8 : 3.6
+    // höchstens so dick wie die dickste Zyklenlinie, aber nie kleiner als ein gewöhnlicher Punkt
+    const fixedR = isTable ? 3.6 : Math.max(baseR, Math.min(context === 'single' ? 10 : 8, maxFixedD / 2))
     // In der Einzelansicht bleiben Fixpunkte auch bei farbigen Zyklen groß und tragen die Farbe ihres Zyklus.
     const cycleOfFixed = new Map()
     if (context === 'single' && showCycles) {
