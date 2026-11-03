@@ -53,6 +53,11 @@ window.CONCEPT_PAGE = {
       "data": "AR_THEOREMS",
       "page": "../arithmetic-geometry/theorems.html",
       "title": "the theorem graph of arithmetic geometry"
+    },
+    "ant": {
+      "data": "ANT_THEOREMS",
+      "page": "../algebraic-number-theory/theorems.html",
+      "title": "the theorem graph of algebraic number theory"
     }
   },
   "conceptSources": {
@@ -83,6 +88,10 @@ window.CONCEPT_PAGE = {
     "ar": {
       "data": "AR_CG",
       "page": "../arithmetic-geometry/concepts.html"
+    },
+    "ant": {
+      "data": "ANT_CONCEPTS",
+      "page": "../algebraic-number-theory/concepts.html"
     }
   },
   "shapes": {

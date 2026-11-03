@@ -8,21 +8,19 @@ window.CONCEPT_PAGE = {
     "11M": "#c0392b",
     "11N": "#e76f51",
     "11F": "#9b5de5",
-    "11R": "#4f86c6",
-    "11S": "#2a9d8f",
     "11G": "#8ab17d",
     "12E": "#e9c46a",
     "12F": "#d4a017",
-    "11C": "#b08968",
-    "11D": "#7f8c3a",
-    "11E": "#5fa8a0"
+    "11C": "#2a9d8f",
+    "11D": "#4f86c6",
+    "11E": "#b08968"
   },
   "foreignArea": "basic",
   "foreignLabel": "proved outside arithmetic geometry",
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "minkowski-bound"
+    "atkin-lehner"
   ],
   "sources": {
     "st": {
@@ -54,6 +52,11 @@ window.CONCEPT_PAGE = {
       "data": "AG_THEOREMS",
       "page": "../algebraic-geometry/theorems.html",
       "title": "the theorem graph of algebraic geometry"
+    },
+    "ant": {
+      "data": "ANT_THEOREMS",
+      "page": "../algebraic-number-theory/theorems.html",
+      "title": "the theorem graph of algebraic number theory"
     }
   },
   "conceptSources": {
@@ -84,6 +87,10 @@ window.CONCEPT_PAGE = {
     "ag": {
       "data": "AG_CG",
       "page": "../algebraic-geometry/concepts.html"
+    },
+    "ant": {
+      "data": "ANT_CONCEPTS",
+      "page": "../algebraic-number-theory/concepts.html"
     }
   },
   "shapes": {

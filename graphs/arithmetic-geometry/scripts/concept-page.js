@@ -3,7 +3,7 @@ window.CONCEPT_PAGE = {
   data: "AR_CG",
   prefix: "ar",
   colors: {
-    basic: "#d9d4ca", "11M": "#c0392b", "11N": "#e76f51", "11F": "#9b5de5", "11R": "#4f86c6", "11S": "#2a9d8f",
+    basic: "#d9d4ca", "11M": "#c0392b", "11N": "#e76f51", "11F": "#9b5de5",
     "11G": "#8ab17d", "12E": "#e9c46a", "12F": "#d4a017", "12J": "#6d597a",
   },
   foreignArea: "basic",
@@ -17,5 +17,6 @@ window.CONCEPT_PAGE = {
     ct: { data: "CT_CONCEPTS", page: "../category-theory/concepts.html", title: "the concept graph of category theory" },
     ca: { data: "CA_CONCEPTS", page: "../commutative-algebra/concepts.html", title: "the concept graph of commutative algebra" },
     ag: { data: "AG_CG", page: "../algebraic-geometry/concepts.html", title: "the concept graph of algebraic geometry" },
+    ant: { data: "ANT_CONCEPTS", page: "../algebraic-number-theory/concepts.html", title: "the concept graph of algebraic number theory" },
   },
 };
