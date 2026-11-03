@@ -150,8 +150,9 @@ a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; ma
 
 /* formulas in the panel: each part of a formula is one unbreakable piece; lines break only between the parts
    (user, 3 November 2026) */
-#panel .formel { text-align: center; line-height: 2.2; overflow-x: auto; }
-#panel .formel .formel-teil { display: inline-block; white-space: nowrap; margin: 0 .8em; }
+#panel .formel { text-align: center; line-height: 1.9; overflow-x: auto; }
+/* one part of a formula per line (user, 3 November 2026) */
+#panel .formel .formel-teil { display: block; white-space: nowrap; margin: .1em 0; }
 .ent-graph .stub.nur-linie circle, .ent-graph .stub.nur-linie text { display: none; }
 /* arrows to other areas: from a concept to a point outside the circle (user, 3 November 2026) */
 .ent-graph:not(.zeige-aus) .stub.aus:not(.hell) { display: none; }
