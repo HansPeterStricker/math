@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Theorems of category theory</title>
+<link rel="icon" href="../../scripts/site-icon.svg" type="image/svg+xml">
+<link rel="icon" href="../../scripts/site-icon-32.png" sizes="32x32" type="image/png">
+<link rel="apple-touch-icon" href="../../scripts/site-icon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+<script src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;1,8..60,400&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="../shared_scripts/style.css">
+<link rel="stylesheet" href="../shared_scripts/concept-graph.css">
+</head>
+<body class="vollbild">
+<div class="app">
+  <aside id="side">
+    <div class="kopf">
+      <h1>Theorems of category theory</h1>
+      <button id="about-open" class="klein-knopf" aria-haspopup="dialog">About this graph</button>
+      <a class="klein-knopf" href="../theorems.html">All theorem graphs</a>
+      <a class="klein-knopf" href="concepts.html">Concepts</a>
+    </div>
+    <div class="suche">
+      <input id="search" type="search" placeholder="Search theorem …" autocomplete="off" aria-label="Search theorem">
+      <ul id="search-results" role="listbox"></ul>
+    </div>
+    <div id="controls"></div>
+    <div id="legend"></div>
+  </aside>
+  <div class="graph"><svg id="graph" role="img" aria-label="Theorem graph of category theory"></svg></div>
+  <aside id="panel"></aside>
+</div>
+
+<div id="about" class="about" hidden>
+  <div class="about-box" role="dialog" aria-modal="true" aria-labelledby="about-title">
+    <button id="about-close" class="about-zu" aria-label="Close">×</button>
+    <h2 id="about-title">About this graph</h2>
+    <p>Each point is a theorem, lemma, corollary of category theory (MSC 18). An arrow from A to B
+      means that a usual proof of B uses A. Where there are several proofs, one has been chosen; its idea is in the panel.</p>
+    <p>Each MSC class has its own sector of the circle. The distance from the centre shows the level within the area:
+      within a sector a theorem lies further out than the theorems its proof uses. The colour shows the MSC class; larger points are used, directly or
+      indirectly, by more proofs.</p>
+    <p>Results proved in another area are not points of this graph. When a theorem whose proof uses one of them is
+      selected, an arrow comes from outside, from a small point with its name in the colour of that area; a click on the
+      point leads to it. The switch “arrows from other areas” shows all these arrows. Arrows to other areas lead from a theorem to the theorems of other areas whose proofs use it. The panel also links the concepts
+      occurring in a statement to the concept graphs.</p>
+    <p>Indirect dependencies (A → C when C also uses B and B depends on A) are shown only with their switch on the left.</p>
+    <p>As on the maps, a click on a theorem shows the theorems its proof uses (brown) and the panel shows the statement
+      and the proof idea; every further click adds one more step of indirect prerequisites, and after the last step the
+      selection ends. A right click does the same for the consequences (blue). While a theorem is selected, all levels
+      are shown. Point at a theorem to see the theorems its proof uses. Drag a theorem to move it, drag the background
+      to move the picture, use the mouse wheel to zoom. The search field finds theorems by name.</p>
+    <p class="meta">The contents were compiled with the help of a language model and have not been checked by a
+      specialist.</p>
+  </div>
+</div>
+
+<script src="data/theorem-graph.js"></script>
+<script src="../set-theory/data/theorem-graph.js"></script>
+<script src="../elementary-number-theory/data/theorem-graph.js"></script>
+<script src="../group-theory/data/theorem-graph.js"></script>
+<script src="../commutative-algebra/data/theorem-graph.js"></script>
+<script src="../algebraic-geometry/data/theorem-graph.js"></script>
+<script src="../arithmetic-geometry/data/theorem-graph.js"></script>
+<script src="data/concepts.js"></script>
+<script src="../set-theory/data/concepts.js"></script>
+<script src="../elementary-number-theory/data/concepts.js"></script>
+<script src="../group-theory/data/concepts.js"></script>
+<script src="../commutative-algebra/data/concepts.js"></script>
+<script src="../algebraic-geometry/data/concept-graph.js"></script>
+<script src="../arithmetic-geometry/data/concept-graph.js"></script>
+<script src="scripts/theorem-page.js"></script>
+<script src="../shared_scripts/graph.js"></script>
+<script src="../shared_scripts/concept-graph.js"></script>
+</body>
+</html>

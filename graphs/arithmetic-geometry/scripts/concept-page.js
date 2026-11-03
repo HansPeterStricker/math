@@ -1,9 +1,10 @@
 // Settings of concepts.html for ../../shared_scripts/concept-graph.js (meaning of the fields there).
 window.CONCEPT_PAGE = {
   data: "AR_CG",
+  prefix: "ar",
   colors: {
     basic: "#d9d4ca", "11M": "#c0392b", "11N": "#e76f51", "11F": "#9b5de5", "11R": "#4f86c6", "11S": "#2a9d8f",
-    "11G": "#8ab17d", "12E": "#e9c46a", "12F": "#d4a017",
+    "11G": "#8ab17d", "12E": "#e9c46a", "12F": "#d4a017", "12J": "#6d597a",
   },
   foreignArea: "basic",
   foreignLabel: "defined outside arithmetic geometry",

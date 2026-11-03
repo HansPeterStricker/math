@@ -1,6 +1,7 @@
 // Settings of concepts.html for ../../shared_scripts/concept-graph.js (meaning of the fields there).
 window.CONCEPT_PAGE = {
   data: "ENT_CONCEPTS",
+  prefix: "ent",
   colors: {
     basic: "#d9d4ca", "11A05": "#e9c46a", "11A07": "#8ab17d", "11A15": "#2a9d8f", "11A25": "#e76f51",
     "11A41": "#c0392b", "11A51": "#9b5de5", "11A55": "#4f86c6", "11A63": "#b08968", "11A67": "#7f8c3a", "11B39": "#d4a017",
@@ -10,6 +11,9 @@ window.CONCEPT_PAGE = {
   hubs: [],
   centre: ["divisibility"],
   sources: {
+    ct: { data: "CT_CONCEPTS", page: "../category-theory/concepts.html", title: "the concept graph of category theory" },
+    ag: { data: "AG_CG", page: "../algebraic-geometry/concepts.html", title: "the concept graph of algebraic geometry" },
+    ar: { data: "AR_CG", page: "../arithmetic-geometry/concepts.html", title: "the concept graph of arithmetic geometry" },
     ca: { data: "CA_CONCEPTS", page: "../commutative-algebra/concepts.html", title: "the concept graph of commutative algebra" },
     st: { data: "ST_CONCEPTS", page: "../set-theory/concepts.html", title: "the concept graph of set theory" },
     gt: { data: "GT_CONCEPTS", page: "../group-theory/concepts.html", title: "the concept graph of group theory" },

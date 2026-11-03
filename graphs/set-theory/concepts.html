@@ -43,18 +43,27 @@
       out than the concepts its definition uses. The colour shows the MSC class; larger points are used, directly or
       indirectly, by more definitions.</p>
     <p>Concepts with a dashed border are defined in another area; their panel links to the graph of that area.</p>
-    <p>“Is a” relations and edges from prerequisites such as ℕ and ℤ appear when a concept is selected;
+    <p>“Is a” relations and arrows from other areas (prerequisites such as ℕ and ℤ) appear when a concept is selected;
       indirect dependencies (A → C when C also uses B and B depends on A) only with their switch on the left.</p>
-    <p>Point at a concept to see the concepts its definition uses; click it to read the definition and to mark
-      everything it depends on (brown). The switch “concepts using it” marks instead everything that depends on
-      it (blue). The panel on the right shows the definitions it builds on. Drag a concept to move it, drag the background to move the picture, use the mouse wheel to zoom.
-      The search field finds concepts by name; the concept found is ringed in yellow and the view is centred on it.</p>
+    <p>As on the maps, a click on a concept shows the concepts its definition uses (brown) and the panel shows the
+      definition; every further click adds one more step of indirect prerequisites, and after the last step the selection
+      ends. A right click does the same for the concepts using it (blue). While a concept is selected, all levels are
+      shown. Arrows to other areas lead to the concepts of other areas whose definitions use it. The panel shows the
+      definitions it builds on. Point at a concept to see the concepts its definition uses. Drag a concept to move it,
+      drag the background to move the picture, use the mouse wheel to zoom. The search field finds concepts by name; the
+      concept found is ringed in yellow and the view is centred on it.</p>
     <p class="meta">The contents were compiled with the help of a language model and have not been checked by a
       specialist.</p>
   </div>
 </div>
 
 <script src="data/concepts.js"></script>
+<script src="../elementary-number-theory/data/concepts.js"></script>
+<script src="../group-theory/data/concepts.js"></script>
+<script src="../category-theory/data/concepts.js"></script>
+<script src="../commutative-algebra/data/concepts.js"></script>
+<script src="../algebraic-geometry/data/concept-graph.js"></script>
+<script src="../arithmetic-geometry/data/concept-graph.js"></script>
 <script src="scripts/concept-page.js"></script>
 <script src="../shared_scripts/graph.js"></script>
 <script src="../shared_scripts/concept-graph.js"></script>

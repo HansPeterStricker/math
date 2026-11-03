@@ -11,41 +11,89 @@
 <link rel="stylesheet" href="shared_scripts/style.css">
 <style>
   main { max-width: 900px; margin: 0 auto; padding: 24px 16px 40px; }
-  .liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 14px; margin: 18px 0; }
+  .liste { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 14px; margin: 18px 0; }
   .eintrag { display: block; border: 1px solid var(--linie); border-radius: 6px; background: #fbfaf6; padding: 14px 16px; color: inherit; text-decoration: none; }
   .eintrag:hover { border-color: var(--tinte); }
-  .eintrag .vorschau { display: block; width: 100%; aspect-ratio: 8 / 5; object-fit: cover; object-position: top left; border-radius: 4px; margin-bottom: 10px; background: #fbfaf6; }
+  .eintrag .vorschau { display: block; width: 100%; aspect-ratio: 1; object-fit: cover; border-radius: 4px; margin-bottom: 10px; background: #fbfaf6; }
   .eintrag .gebiet { color: var(--leise); font-size: 13px; text-transform: uppercase; letter-spacing: .05em; }
   .eintrag h2 { font-size: 20px; margin: 2px 0 6px; }
-  .eintrag p { margin: 0; font-size: 15px; }
+  .eintrag .zahlen { color: var(--leise); font-size: 14px; margin-top: 6px; }
   .folgt { color: var(--leise); }
 </style>
 </head>
 <body>
 <main>
   <h1>Theorem graphs</h1>
-  <p>Theorems and conjectures of an area with their proofs: an arrow leads from each premise of a proof to the theorem
-    it proves. The theorems are ordered by logical depth. The two graphs below are first versions; they will be replaced
-    by theorem graphs built on the concept graphs of the same areas.</p>
+  <p>Theorems, lemmas and conjectures of an area with their proofs: an arrow leads from each theorem a usual proof uses
+    to the theorem it proves. The graphs look like the <a href="index.html">concept graphs</a>: each MSC class has a
+    sector, and a theorem lies further out than the theorems its proof uses. Theorems proved in another area link the
+    graphs of the two areas.</p>
 
   <div class="liste">
-    <a class="eintrag" href="algebraic-geometry/index.html?lang=en">
-      <img class="vorschau" src="../previews/public/algebraic-geometry.jpg" alt="" loading="lazy">
+    <a class="eintrag" href="set-theory/theorems.html">
+      <img class="vorschau" src="previews/set-theory-theorems.jpg" alt="" loading="lazy">
+      <div class="gebiet">MSC 03E, 06A</div>
+      <h2>Set theory</h2>
+      <div class="zahlen" data-zahlen="ST_THEOREMS"></div>
+    </a>
+    <a class="eintrag" href="elementary-number-theory/theorems.html">
+      <img class="vorschau" src="previews/elementary-number-theory-theorems.jpg" alt="" loading="lazy">
+      <div class="gebiet">MSC 11A</div>
+      <h2>Elementary number theory</h2>
+      <div class="zahlen" data-zahlen="ENT_THEOREMS"></div>
+    </a>
+    <a class="eintrag" href="group-theory/theorems.html">
+      <img class="vorschau" src="previews/group-theory-theorems.jpg" alt="" loading="lazy">
+      <div class="gebiet">MSC 20</div>
+      <h2>Group theory</h2>
+      <div class="zahlen" data-zahlen="GT_THEOREMS"></div>
+    </a>
+    <a class="eintrag" href="commutative-algebra/theorems.html">
+      <img class="vorschau" src="previews/commutative-algebra-theorems.jpg" alt="" loading="lazy">
+      <div class="gebiet">MSC 13</div>
+      <h2>Commutative algebra</h2>
+      <div class="zahlen" data-zahlen="CA_THEOREMS"></div>
+    </a>
+    <a class="eintrag" href="category-theory/theorems.html">
+      <img class="vorschau" src="previews/category-theory-theorems.jpg" alt="" loading="lazy">
+      <div class="gebiet">MSC 18</div>
+      <h2>Category theory</h2>
+      <div class="zahlen" data-zahlen="CT_THEOREMS"></div>
+    </a>
+    <a class="eintrag" href="algebraic-geometry/theorems.html">
+      <img class="vorschau" src="previews/algebraic-geometry-theorems.jpg" alt="" loading="lazy">
       <div class="gebiet">MSC 14</div>
       <h2>Algebraic geometry</h2>
-      <p>Central theorems of algebraic geometry with their proofs, ordered by logical depth; also as a graph of concepts
-        and as a graph of concepts and theorems.</p>
+      <div class="zahlen" data-zahlen="AG_THEOREMS"></div>
     </a>
-    <a class="eintrag" href="arithmetic-geometry/index.html?lang=en">
-      <img class="vorschau" src="../previews/public/arithmetic-geometry.jpg" alt="" loading="lazy">
+    <a class="eintrag" href="arithmetic-geometry/theorems.html">
+      <img class="vorschau" src="previews/arithmetic-geometry-theorems.jpg" alt="" loading="lazy">
       <div class="gebiet">MSC 11F, 11G, 11M, 11N, 11R, 11S</div>
       <h2>Arithmetic geometry</h2>
-      <p>Proved theorems and open conjectures around the Riemann hypothesis, the Birch and Swinnerton-Dyer conjecture and
-        the abc conjecture, with conditional proofs and their relations.</p>
+      <div class="zahlen" data-zahlen="AR_THEOREMS"></div>
     </a>
   </div>
-  <p class="folgt">Theorem graphs of further areas will follow. The concepts of these areas are in the
-    <a href="index.html">concept graphs</a>.</p>
+  <p class="folgt">Earlier versions, ordered by logical depth:
+    <a href="algebraic-geometry/index.html?lang=en">algebraic geometry</a>,
+    <a href="arithmetic-geometry/index.html?lang=en">arithmetic geometry</a>.</p>
 </main>
+<script src="set-theory/data/theorem-graph.js"></script>
+<script src="elementary-number-theory/data/theorem-graph.js"></script>
+<script src="group-theory/data/theorem-graph.js"></script>
+<script src="commutative-algebra/data/theorem-graph.js"></script>
+<script src="category-theory/data/theorem-graph.js"></script>
+<script src="algebraic-geometry/data/theorem-graph.js"></script>
+<script src="arithmetic-geometry/data/theorem-graph.js"></script>
+<script>
+  // number of theorems and of proof dependencies per entry
+  document.querySelectorAll("[data-zahlen]").forEach((d) => {
+    const data = window[d.dataset.zahlen];
+    if (!data) return;
+    const own = data.theorems.filter((t) => t.area !== "basic");
+    const edges = data.theorems.reduce((s, t) => s + (t.premises || []).length, 0);
+    const conj = own.filter((t) => t.kind === "conjecture").length;
+    d.textContent = own.length + " theorems" + (conj ? " (" + conj + " conjectures)" : "") + ", " + edges + " proof dependencies";
+  });
+</script>
 </body>
 </html>

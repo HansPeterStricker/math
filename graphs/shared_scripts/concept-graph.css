@@ -123,3 +123,21 @@ a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; ma
 .ent-graph .knoten.fremd.vorfahr .form, .ent-graph .knoten.fremd.nachfahr .form { stroke: var(--herkunft, #8a7f6e); stroke-width: 4; }
 .ent-graph .knoten.fremd.gewaehlt .form { stroke: var(--herkunft, #8a7f6e); stroke-width: 5; }
 .ent-graph .knoten.fremd.treffer .form { stroke: #d4a017; stroke-width: 3; }
+
+/* theorem graphs: results of other areas are not points on an inner circle; their arrows come from a small point
+   next to the theorem they are used for, shown when that theorem is marked or with the switch (user, 3 November 2026) */
+.ent-graph .knoten.aussen { display: none; }
+.ent-graph:not(.zeige-basis) .stub:not(.aus):not(.hell) { display: none; }
+.ent-graph .stub { cursor: pointer; }
+.ent-graph .stub circle { fill: #fbfaf6; stroke: var(--herkunft, #8a7f6e); stroke-width: 2.5; }
+.ent-graph .stub text { font-size: 9px; fill: #5b5246; paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; }
+.ent-graph.fokus .stub:not(.hell) { opacity: .25; }
+
+/* formulas in the panel: each part of a formula is one unbreakable piece; lines break only between the parts
+   (user, 3 November 2026) */
+#panel .formel { text-align: center; line-height: 2.2; overflow-x: auto; }
+#panel .formel .formel-teil { display: inline-block; white-space: nowrap; margin: 0 .8em; }
+.ent-graph .stub.nur-linie circle, .ent-graph .stub.nur-linie text { display: none; }
+/* arrows to other areas: from a concept to a point outside the circle (user, 3 November 2026) */
+.ent-graph:not(.zeige-aus) .stub.aus:not(.hell) { display: none; }
+.ent-graph .stub.aus .aus-linie { stroke: var(--herkunft, #8a7f6e); stroke-width: 1.4; }

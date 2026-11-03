@@ -19,6 +19,9 @@
 //   words         texts that differ from the concept graph (keys in WORDS below)
 //   shapes        kind -> shape of the concept graph (objekt circle, konstruktion square, invariante diamond,
 //                 eigenschaft triangle, morphismus hexagon)
+//   foreignOutside  true: results of other areas are not drawn as points on an inner circle; each of their arrows
+//                 comes from outside, from a small point next to the theorem it is used for, shown when that theorem
+//                 is marked or with the switch (user, 3 November 2026)
 //   conceptSources  "" (own folder) and prefix -> { data, page }: concept files for the field `concepts` (concepts in
 //                 the statement), shown in the panel as links into the concept graphs
 (function () {
@@ -32,7 +35,29 @@
     arrow: "A → B: B is defined with A", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
     levelHint: "Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.",
   }, CFG.words || {});
-  const { el, tex } = window.GL;
+  const { el } = window.GL;
+  // Formulas (user, 3 November 2026): no line break inside a formula; a formula with several parts separated by
+  // ",\quad", "\quad", ",\;" or ",\ " at the outer level is split there, and every part is set on its own as one
+  // unbreakable piece. The pieces stand side by side and wrap only between each other; the commas are dropped.
+  const formulaParts = (f) => {
+    if (/\\begin\{/.test(f)) return [f];
+    const parts = [];
+    let depth = 0, start = 0;
+    for (let i = 0; i < f.length; i++) {
+      const ch = f[i];
+      if (ch === "\\" && (f[i + 1] === "{" || f[i + 1] === "}")) { i++; continue; }
+      if (ch === "{") depth++;
+      else if (ch === "}") depth--;
+      if (depth) continue;
+      const m = /^(,\s*\\q?quad(?![a-zA-Z])|\\q?quad(?![a-zA-Z])|,\s*\\;|,\s*\\ )\s*/.exec(f.slice(i));
+      if (m) { parts.push(f.slice(start, i)); i += m[0].length - 1; start = i + 1; }
+    }
+    parts.push(f.slice(start));
+    return parts.map((p) => p.trim()).filter(Boolean);
+  };
+  const tex = (f) => formulaParts(f).map((p) => {
+    try { return '<span class="formel-teil">' + katex.renderToString("\\displaystyle " + p, { throwOnError: false }) + "</span>"; } catch (e) { return p; }
+  }).join(" ");
   const svg = document.getElementById("graph");
   const panel = document.getElementById("panel");
 
@@ -80,7 +105,7 @@
   // Prerequisites are coloured by their origin (user, 2 November 2026): the home folder of a referenced concept, or
   // "local" for the placeholders of this folder. Colours fixed per prefix, so that an area has the same colour in
   // every graph; the names come from the settings (title of the source).
-  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", local: "#d9d4ca" };
+  const ORIGIN_COLORS = { st: "#a39171", ent: "#c97b63", gt: "#6f9e6f", ct: "#6d8fc0", ca: "#c9a33e", ag: "#9d7cbf", ar: "#3f8f8a", local: "#d9d4ca" };
   const originOf = (c) => (c.foreign ? c.foreign.prefix : "local");
   const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).title || o).replace(/^the (concept|theorem) graph of /, ""));
   const colorOf = (c) => (c.area === FOREIGN ? ORIGIN_COLORS[originOf(c)] || "#d9d4ca" : COLORS[c.area] || "#ccc");
@@ -396,15 +421,58 @@
   });
   // guide circle of the prerequisites (the levels have no global rings any more)
   const gRings = el("g", { class: "ringe" }, svg);
-  if (levelsSorted.includes(0)) {
+  const OUTSIDE = !!CFG.foreignOutside;
+  if (levelsSorted.includes(0) && !OUTSIDE) {
     el("circle", { cx: 0, cy: 0, r: RING.pre, class: "ring" }, gRings);
     el("text", { x: 0, y: -RING.pre - 5, "text-anchor": "middle", class: "ring-name" }, gRings).textContent = "Prerequisites";
   }
-  const gEdges = el("g", {}, svg), gNodes = el("g", {}, svg);
+  const gEdges = el("g", {}, svg), gNodes = el("g", {}, svg), gStubs = el("g", {}, svg);
 
   edges.forEach((e) => {
     e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
+    if (OUTSIDE && e.pre && e.kind === "uses") {
+      // arrow from outside: a small point in the colour of the origin next to the target, with the name of the result
+      const c = byId.get(e.from);
+      e.stub = el("g", { class: "stub" }, gStubs);
+      e.stub.style.setProperty("--herkunft", colorOf(c));
+      e.stubDot = el("circle", { r: 5 }, e.stub);
+      e.stubText = el("text", {}, e.stub);
+      e.stubText.textContent = c.name;
+      el("title", {}, e.stub).textContent = c.name + " — " + originName(originOf(c));
+      // a click keeps the point where it is and shows from there the arrows to all theorems using the result
+      const stubClick = (ev) => { ev.preventDefault(); ev.stopPropagation(); anchor = { id: e.from, x: e.sx, y: e.sy, ux: e.ux, uy: e.uy }; step(e.from, "fwd"); };
+      e.stub.addEventListener("click", stubClick);
+      e.stub.addEventListener("contextmenu", stubClick);
+    }
   });
+  // position of the arrows from outside around their target (index among the arrows from outside of that target)
+  const stubsOf = new Map();
+  edges.filter((e) => e.stub).forEach((e) => { if (!stubsOf.has(e.to)) stubsOf.set(e.to, []); stubsOf.get(e.to).push(e); });
+  let anchor = null; // { id, x, y, ux, uy }: clicked point of a result of another area
+  let stubSelected = null; // selected concept, for render (which runs before the selection code is set up)
+  // Arrows to other areas (user, 3 November 2026): for an own concept, the concepts of other folders (loaded through
+  // `sources`) whose `uses` name it with this folder's prefix (setting `prefix`). Drawn from the concept to a small
+  // point outside the circle in the colour of that area; a click opens it in its own graph.
+  const outsOf = new Map();
+  if (CFG.prefix) for (const [q, src] of Object.entries(CFG.sources || {})) {
+    const d = asGraph(window[src.data]);
+    if (!d) continue;
+    d.concepts.forEach((t) => (t.uses || []).forEach((u) => {
+      const [p, id] = u.split(":");
+      if (p !== CFG.prefix || !byId.has(id) || isPre(id)) return;
+      if (!outsOf.has(id)) outsOf.set(id, []);
+      const o = { from: id, q, t, page: src.page + "#" + t.id, title: src.title };
+      o.g = el("g", { class: "stub aus" }, gStubs);
+      o.g.style.setProperty("--herkunft", ORIGIN_COLORS[q] || "#8a7f6e");
+      o.line = el("line", { class: "kante aus-linie", "marker-end": "url(#pfeil)" }, o.g);
+      o.dot = el("circle", { r: 5 }, o.g);
+      o.text = el("text", {}, o.g);
+      o.text.textContent = t.name;
+      el("title", {}, o.g).textContent = t.name + " — " + src.title.replace(/^the /, "");
+      o.g.addEventListener("click", (ev) => { ev.stopPropagation(); location.href = o.page; });
+      outsOf.get(id).push(o);
+    }));
+  }
 
   const shape = (g, kind0, r, fill) => {
     const s = { class: "form", fill }, kind = (CFG.shapes || {})[kind0] || kind0;
@@ -422,7 +490,7 @@
   let nodeDrag = null; // { p, moved }
   concepts.forEach((c) => {
     const p = pos.get(c.id);
-    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" : "") }, gNodes);
+    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" + (OUTSIDE ? " aussen" : "") : "") }, gNodes);
     // prerequisites: light fill with a thick border in the colour of their origin, unlike the filled own concepts
     shape(g, c.kind, p.r, c.area === FOREIGN ? "#fbfaf6" : colorOf(c));
     if (c.area === FOREIGN) g.style.setProperty("--herkunft", colorOf(c));
@@ -436,13 +504,50 @@
       ev.stopPropagation();
       nodeDrag = { p, moved: false, x: ev.clientX, y: ev.clientY };
     });
-    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } select(c.id); });
+    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1) return; step(c.id, "back"); });
+    g.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); if (justDragged) { justDragged = false; return; } step(c.id, "fwd"); });
     nodeEls.set(c.id, g);
   });
 
   function render() {
     points.forEach((p) => nodeEls.get(p.id).setAttribute("transform", `translate(${p.x.toFixed(1)},${p.y.toFixed(1)})`));
+    outsOf.forEach((list, id) => {
+      const a = pos.get(id), RS = rOut + 14, d0 = Math.hypot(a.x, a.y), base = d0 > 1 ? Math.atan2(a.y, a.x) : -Math.PI / 2;
+      const before = (stubsOf.get(id) || []).length, n = before + list.length;
+      list.forEach((o, j) => {
+        const ang = base + (before + j - (n - 1) / 2) * (24 / RS), ux = Math.cos(ang), uy = Math.sin(ang), sx = RS * ux, sy = RS * uy;
+        const lx = sx - a.x, ly = sy - a.y, ld = Math.hypot(lx, ly) || 1;
+        o.dot.setAttribute("cx", sx.toFixed(1)); o.dot.setAttribute("cy", sy.toFixed(1));
+        o.text.setAttribute("x", (sx + ux * 9).toFixed(1)); o.text.setAttribute("y", (sy + uy * 9 + 3).toFixed(1));
+        o.text.setAttribute("text-anchor", ux > 0.3 ? "start" : ux < -0.3 ? "end" : "middle");
+        o.line.setAttribute("x1", (a.x + (lx / ld) * a.r).toFixed(1)); o.line.setAttribute("y1", (a.y + (ly / ld) * a.r).toFixed(1));
+        o.line.setAttribute("x2", (sx - (lx / ld) * 7).toFixed(1)); o.line.setAttribute("y2", (sy - (ly / ld) * 7).toFixed(1));
+      });
+    });
     edges.forEach((e) => {
+      if (e.stub) {
+        // outside the circle of sectors, at the angle of the target; several results of other areas used by the same
+        // theorem side by side along the circle (user, 3 November 2026)
+        const b = pos.get(e.to), list = stubsOf.get(e.to), k = list.indexOf(e), d0 = Math.hypot(b.x, b.y);
+        const RS = rOut + 14, base = d0 > 1 ? Math.atan2(b.y, b.x) : -Math.PI / 2, ang = base + (k - (list.length - 1) / 2) * (24 / RS);
+        let ux = Math.cos(ang), uy = Math.sin(ang), sx = RS * ux, sy = RS * uy;
+        e.sx = sx; e.sy = sy; e.ux = ux; e.uy = uy;
+        // the selected result of another area: all its arrows start at the point that was clicked
+        const anchored = OUTSIDE && stubSelected === e.from;
+        if (anchored) {
+          const first = edges.find((x) => x.stub && x.from === e.from);
+          const A = anchor && anchor.id === e.from ? anchor : { x: first.sx, y: first.sy, ux: first.ux, uy: first.uy };
+          sx = A.x; sy = A.y; ux = A.ux; uy = A.uy;
+          e.stub.classList.toggle("nur-linie", first !== e);
+        } else e.stub.classList.remove("nur-linie");
+        const lx = b.x - sx, ly = b.y - sy, ld = Math.hypot(lx, ly) || 1;
+        e.stubDot.setAttribute("cx", sx.toFixed(1)); e.stubDot.setAttribute("cy", sy.toFixed(1));
+        e.stubText.setAttribute("x", (sx + ux * 9).toFixed(1)); e.stubText.setAttribute("y", (sy + uy * 9 + 3).toFixed(1));
+        e.stubText.setAttribute("text-anchor", ux > 0.3 ? "start" : ux < -0.3 ? "end" : "middle");
+        e.line.setAttribute("x1", (sx + (lx / ld) * 5).toFixed(1)); e.line.setAttribute("y1", (sy + (ly / ld) * 5).toFixed(1));
+        e.line.setAttribute("x2", (b.x - (lx / ld) * (b.r + 2)).toFixed(1)); e.line.setAttribute("y2", (b.y - (ly / ld) * (b.r + 2)).toFixed(1));
+        return;
+      }
       const a = pos.get(e.from), b = pos.get(e.to);
       const dx = b.x - a.x, dy = b.y - a.y, d = Math.hypot(dx, dy) || 1;
       e.line.setAttribute("x1", (a.x + (dx / d) * a.r).toFixed(1));
@@ -507,6 +612,7 @@
     box.classList.remove("dragging");
   });
   svg.addEventListener("click", () => { if (justDragged) { justDragged = false; return; } if (!moved) select(null); });
+  svg.addEventListener("contextmenu", (ev) => ev.preventDefault());
 
   render();
 
@@ -517,15 +623,39 @@
     svg.querySelectorAll(".hell, .vorfahr, .nachfahr, .gewaehlt").forEach((x) => x.classList.remove("hell", "vorfahr", "nachfahr", "gewaehlt"));
     usesEdges.forEach((e) => e.line.setAttribute("marker-end", "url(#pfeil)"));
   }
-  // The switch "concepts using it" changes what is marked (user, 2 November 2026): off, only what the concept depends
-  // on (in-edges, brown); on, only what depends on it (out-edges, blue).
-  let showOut = false;
-  function mark(id, deep) {
+  // Clicks as on the maps (user, 3 November 2026): a click shows the direct prerequisites, every further click on the
+  // same point one step more (indirect prerequisites), until all are shown; the next click ends the selection. A right
+  // click does the same for the consequences. Prerequisites brown, consequences blue.
+  const backOf = (x) => (byId.get(x).uses || []).concat(byId.get(x).isA || []).filter((t) => byId.has(t));
+  const fwdOf = (x) => usedBy.get(x).concat(isaEdges.filter((e) => e.to === x).map((e) => e.from));
+  const within = (id, next, k) => {
+    const seen = new Set();
+    let frontier = [id];
+    for (let d = 0; d < k && frontier.length; d++) {
+      const nf = [];
+      frontier.forEach((x) => next(x).forEach((y) => { if (y !== id && !seen.has(y)) { seen.add(y); nf.push(y); } }));
+      frontier = nf;
+    }
+    return seen;
+  };
+  const maxDepth = (id, dir) => { let k = 0, n = 0; for (;;) { const m = within(id, dir === "fwd" ? fwdOf : backOf, k + 1).size; if (m === n) return k; n = m; k++; } };
+  let selDir = "back", selDepth = 1;
+  function step(id, dir) {
+    if (OUTSIDE && isPre(id)) dir = "fwd"; // a result of another area has only consequences here
+    if (id === selected && dir === selDir) {
+      if (selDepth >= maxDepth(id, dir)) { select(null); return; }
+      selDepth++;
+    } else { selDir = dir; selDepth = Math.min(1, maxDepth(id, dir)); }
+    select(id);
+  }
+  function mark(id, dir, depth) {
     clearMarks();
     if (!id) return;
     svg.classList.add("fokus");
-    const up = showOut ? new Set() : deep ? ancestors(id) : new Set((byId.get(id).uses || []).concat(byId.get(id).isA || []));
-    const down = !showOut ? new Set() : deep ? descendants(id) : new Set(usedBy.get(id).concat(isaEdges.filter((e) => e.to === id).map((e) => e.from)));
+    const out = dir === "fwd";
+    const up = out ? new Set() : within(id, backOf, depth);
+    const down = !out ? new Set() : within(id, fwdOf, depth);
+    const deep = true;
     nodeEls.get(id).classList.add("hell", "gewaehlt");
     up.forEach((x) => nodeEls.get(x).classList.add("hell", "vorfahr"));
     down.forEach((x) => nodeEls.get(x).classList.add("hell", "nachfahr"));
@@ -537,22 +667,30 @@
       if (e.kind === "uses" && e.transitive) return;
       if (e.kind === "uses" && isUp) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); }
       else if (e.kind === "uses" && isDown) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); }
-      else if (e.kind === "isa" && (showOut ? e.to === id : e.from === id)) e.line.classList.add("hell");
+      else if (e.kind === "isa" && (out ? e.to === id : e.from === id)) e.line.classList.add("hell");
     });
+    edges.forEach((e) => { if (e.stub) ["hell", "vorfahr", "nachfahr"].forEach((k) => e.stub.classList.toggle(k, e.line.classList.contains(k))); });
+    (outsOf.get(id) || []).forEach((o) => o.g.classList.add("hell"));
   }
-  function hover(id) { mark(id || selected, !id); }
+  function hover(id) { if (id) mark(id, "back", 1); else mark(selected, selDir, selDepth); }
 
   const chip = (id) => `<span class="chip" data-id="${id}">${byId.get(id).name}</span>`;
   function select(id) {
     selected = id && byId.has(id) ? id : null;
+    if (!selected || !anchor || anchor.id !== selected) anchor = anchor && anchor.id === selected ? anchor : null;
+    stubSelected = selected;
+    if (OUTSIDE) render();
     if (found && found !== selected) markFound(null);
-    mark(selected, true);
+    mark(selected, selDir, selDepth);
+    applyLevels();
     if (location.hash.slice(1) !== (selected || "")) history.replaceState(null, "", selected ? "#" + selected : location.pathname + location.search);
     if (!selected) { panel.innerHTML = overview(); return; }
     const c = byId.get(selected);
     const generalisations = c.isA || [];
     const special = isaEdges.filter((e) => e.to === c.id).map((e) => e.from);
-    panel.innerHTML = `<h2>${c.name}</h2>
+    const md = maxDepth(c.id, selDir);
+    const stepNote = `<p class="meta schritt">${selDir === "fwd" ? "Consequences" : "Prerequisites"}: ${md ? `step ${selDepth} of ${md}; click again for ${selDepth < md ? "the next step" : "no selection"}` : "none in this graph"}. ${selDir === "fwd" ? "Left click: prerequisites." : "Right click: consequences."}</p>`;
+    panel.innerHTML = `<h2>${c.name}</h2>${stepNote}
       <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + CFG.foreignLabel + ")" : D.areas[c.area]}</div>
       ${c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
       ${c.formula && window.katex ? `<div class="formel">${tex(c.formula)}</div>` : ""}
@@ -563,6 +701,7 @@
       ${focusView(c.id)}
       <h3>${WORDS.usesHead}</h3><p>${(c.uses || []).length ? c.uses.map(chip).join("") : "—"}</p>
       <h3>${WORDS.usedByHead}</h3><p>${usedBy.get(c.id).length ? usedBy.get(c.id).map(chip).join("") : "—"}</p>
+      ${(outsOf.get(c.id) || []).length ? `<h3>Used in other areas</h3><p>${outsOf.get(c.id).map((o) => `<a class="chip" href="${o.page}" title="${o.title}">${o.t.name}</a>`).join("")}</p>` : ""}
       ${generalisations.length ? `<h3>Is a special case of</h3><p>${generalisations.map(chip).join("")}</p>` : ""}
       ${special.length ? `<h3>Special cases</h3><p>${special.map(chip).join("")}</p>` : ""}
       <p class="meta">Depends on ${ancestors(c.id).size} ${WORDS.many}; ${descendants(c.id).size} ${WORDS.many} depend on it.</p>`;
@@ -578,7 +717,7 @@
     }).join("");
     return links ? `<h3>Concepts in the statement</h3><p>${links}</p>` : "";
   }
-  panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-id]"); if (t) select(t.dataset.id); });
+  panel.addEventListener("click", (ev) => { const t = ev.target.closest("[data-id]"); if (t) { selected = null; step(t.dataset.id, "back"); } });
 
   // ------------------------------------------------------------ side view: the definitions a concept builds on
   // Small layered graph in the panel: the selected concept and all its predecessors along `uses`, one row per depth
@@ -685,28 +824,31 @@
       isaEdges.length ? `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>` : "",
       `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${CFG.foreignLabel}</span>`,
       `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
-      `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges from prerequisites${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
+      `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
   document.getElementById("controls").innerHTML =
     block("Display", [
       `<label class="toggle"${isaEdges.length ? "" : ' style="display:none"'}><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
       `<label class="toggle"><input type="checkbox" id="c-trans"><span class="regler"></span>indirect dependencies</label>`,
-      `<label class="toggle"><input type="checkbox" id="c-basis"><span class="regler"></span>edges from prerequisites</label>`,
+      `<label class="toggle"><input type="checkbox" id="c-basis"><span class="regler"></span>arrows from other areas</label>`,
+      ...(outsOf.size ? [`<label class="toggle"><input type="checkbox" id="c-aus"><span class="regler"></span>arrows to other areas</label>`] : []),
       ...Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => `<label class="toggle"><input type="checkbox" class="c-hub"><span class="regler"></span>edges from ${byId.get(h).name}</label>`),
-      `<label class="toggle"><input type="checkbox" id="c-out"><span class="regler"></span>${WORDS.usingIt}</label>`,
       `<label class="toggle"><input type="checkbox" id="c-names" checked><span class="regler"></span>names</label>`,
       `<button id="c-home">Reset view</button>`,
     ]) +
     // levels in two columns, filled column by column (1 … 5 left, 6 … 10 right)
     block("Levels", [
-      `<div class="spalten" style="grid-template-rows:repeat(${Math.ceil(levels.length / 2)},auto)">` + levels.map((l) =>
+      `<div class="spalten" style="grid-template-rows:repeat(${Math.ceil(levels.length / 2)},auto)">` + levels.filter((l) => !(OUTSIDE && l === 0)).map((l) =>
         `<label class="toggle" title="${countAt(l)} ${countAt(l) === 1 ? WORDS.one : WORDS.many}"><input type="checkbox" data-level="${l}" checked><span class="regler"></span>${l === 0 ? "prereq." : l} <span class="meta">(${countAt(l)})</span></label>`).join("") + "</div>",
       `<span class="hinweis">${WORDS.levelHint}</span>`,
     ]);
   const shownLevels = new Set(levels);
+  // The level switches act only while nothing is selected (user, 3 November 2026)
   function applyLevels() {
-    concepts.forEach((c) => { nodeEls.get(c.id).style.display = shownLevels.has(level.get(c.id)) ? "" : "none"; });
-    edges.forEach((e) => { e.line.style.display = shownLevels.has(level.get(e.from)) && shownLevels.has(level.get(e.to)) ? "" : "none"; });
+    const on = (l) => !!selected || shownLevels.has(l);
+    concepts.forEach((c) => { nodeEls.get(c.id).style.display = on(level.get(c.id)) ? "" : "none"; });
+    edges.forEach((e) => { e.line.style.display = on(level.get(e.from)) && on(level.get(e.to)) ? "" : "none"; if (e.stub) e.stub.style.display = e.line.style.display; });
+    outsOf.forEach((list, id) => list.forEach((o) => { o.g.style.display = on(level.get(id)) ? "" : "none"; }));
   }
   // Hiding a level hides all higher levels, showing a level shows all lower levels (user, 2 November 2026), so that the
   // shown levels are always 0 … k.
@@ -725,8 +867,8 @@
   document.getElementById("c-isa").addEventListener("change", (ev) => svg.classList.toggle("zeige-isa", ev.target.checked));
   document.getElementById("c-trans").addEventListener("change", (ev) => svg.classList.toggle("zeige-transitiv", ev.target.checked));
   document.getElementById("c-basis").addEventListener("change", (ev) => svg.classList.toggle("zeige-basis", ev.target.checked));
+  if (document.getElementById("c-aus")) document.getElementById("c-aus").addEventListener("change", (ev) => svg.classList.toggle("zeige-aus", ev.target.checked));
   document.querySelectorAll("#controls .c-hub").forEach((box) => box.addEventListener("change", () => svg.classList.toggle("zeige-hub", box.checked)));
-  document.getElementById("c-out").addEventListener("change", (ev) => { showOut = ev.target.checked; mark(selected, true); });
   document.getElementById("c-names").addEventListener("change", (ev) => svg.classList.toggle("ohne-namen", !ev.target.checked));
   document.getElementById("c-home").addEventListener("click", () => { view = fit(); applyView(); });
 
@@ -771,7 +913,7 @@
     if (!id) return;
     searchBox.value = "";
     showHits();
-    select(id);
+    selected = null; step(id, "back");
     markFound(id);
     centerOn(id, true);
   }
