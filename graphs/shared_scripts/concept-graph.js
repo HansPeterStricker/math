@@ -1142,7 +1142,26 @@
     const maxD = Math.max(...dist.values());
     // the tree grows from the top downwards in both cards (user, 3 November 2026): the selected node in the top row; on
     // the proof card the arrows point upwards, from each premise to the node that uses it
-    const rowOf = (x) => dist.get(x);
+    let rowOf = (x) => dist.get(x);
+    // A card that is redrawn after a click (user, 3 November 2026: much calmer): the boxes shown before keep their row
+    // and place (o.keep: id -> { r, cx }); a new box goes into the row below the box it was opened from.
+    const keep = o.keep && o.keep.has(id) ? o.keep : null;
+    if (keep) {
+      const r = new Map(ids.filter((x) => keep.has(x)).map((x) => [x, keep.get(x).r]));
+      const upperOf = (x) => fEdges.filter((e) => (back ? e.from === x : e.to === x)).map((e) => (back ? e.to : e.from));
+      for (let changed = true, round = 0; changed && round < ids.length + 2; round++) {
+        changed = false;
+        ids.forEach((x) => {
+          if (r.has(x) && keep.has(x)) return;
+          const up = upperOf(x).filter((u) => r.has(u));
+          if (!up.length) return;
+          const v = 1 + Math.max(...up.map((u) => r.get(u)));
+          if (r.get(x) !== v) { r.set(x, v); changed = true; }
+        });
+      }
+      ids.forEach((x) => { if (!r.has(x)) r.set(x, (dist.get(x) || 1)); });
+      rowOf = (x) => r.get(x);
+    }
     const rows = [...new Set(ids.map(rowOf))].sort((a, b) => a - b);
     const { BW, BH, GAP, ROWH, M, chars, font } = o;
     // the layout runs from the upper row to the lower one; on the proof card that is against the direction of the edges
@@ -1158,8 +1177,42 @@
       if (Math.abs(X.get(it) - X.get(prev)) < 0.5) return s;
       return s + (it.kind === "weg" && prev.kind === "weg" ? 10 : 1);
     }, 0), 0);
-    const bk = placeBK(lay.columns.filter(Boolean), sep).map((X) => ({ X, n: offsets(X) })).reduce((b, c) => (c.n < b.n ? c : b)).X;
-    lay.columns.forEach((row) => {
+    if (keep) {
+      // boxes shown before stay where they were; new boxes below the boxes they were opened from, as a group in the
+      // order of their upper neighbours, each moved only as far as needed to the nearest free place in its row
+      const step = BW + GAP;
+      const placed = new Map(); // row index -> [cx of the boxes]
+      const put = (it, x) => { it.cx = x; if (!placed.has(it.c)) placed.set(it.c, []); placed.get(it.c).push(x); };
+      lay.columns.forEach((row) => row.forEach((it) => { if (it.kind === "knoten" && keep.has(it.id)) put(it, keep.get(it.id).cx); }));
+      const free = (c, x) => !(placed.get(c) || []).some((q) => Math.abs(q - x) < step - 0.5);
+      lay.columns.forEach((row) => {
+        const fresh = row.filter((it) => it.kind === "knoten" && !keep.has(it.id));
+        const target = (it) => { const up = it.links.filter((q) => q.cx != null); return up.length ? up.reduce((a, q) => a + q.cx, 0) / up.length : 0; };
+        // groups under the same upper neighbours, spread around their mean
+        const groups = new Map();
+        fresh.forEach((it) => { const k = it.links.map((q) => q.id || "").sort().join(" "); if (!groups.has(k)) groups.set(k, []); groups.get(k).push(it); });
+        [...groups.values()].sort((a, b) => target(a[0]) - target(b[0])).forEach((g) => {
+          g.forEach((it, i) => {
+            const want = target(it) + (i - (g.length - 1) / 2) * step;
+            const cands = [want, ...(placed.get(it.c) || []).flatMap((q) => [q - step, q + step])].filter((x) => free(it.c, x));
+            put(it, cands.sort((a, b) => Math.abs(a - want) - Math.abs(b - want))[0] ?? want);
+          });
+        });
+      });
+      // waypoints of long edges: one free vertical lane, as near as possible below the lower box
+      const lanes = new Map(); // row index -> [x]
+      lay.chains.forEach(({ chain }) => {
+        const ways = chain.slice(1, -1);
+        if (!ways.length) return;
+        const goal = chain[chain.length - 1].cx;
+        const ok = (x) => ways.every((it) => !(placed.get(it.c) || []).some((q) => Math.abs(q - x) < BW / 2 + 8) && !(lanes.get(it.c) || []).some((q) => Math.abs(q - x) < 8));
+        let x = goal;
+        for (let k = 1; !ok(x) && k < 400; k++) x = goal + (k % 2 ? 1 : -1) * Math.ceil(k / 2) * 10;
+        ways.forEach((it) => { it.cx = x; if (!lanes.has(it.c)) lanes.set(it.c, []); lanes.get(it.c).push(x); });
+      });
+    }
+    const bk = keep ? null : placeBK(lay.columns.filter(Boolean), sep).map((X) => ({ X, n: offsets(X) })).reduce((b, c) => (c.n < b.n ? c : b)).X;
+    if (!keep) lay.columns.forEach((row) => {
       row.forEach((it) => { it.cx = bk.get(it); });
       for (let round = 0; round < 50; round++) {
         let moved = false;
@@ -1172,7 +1225,7 @@
     });
     // one vertical line for all waypoints of an edge wherever every row has room for it between the neighbours of the
     // waypoint; preferably at the target, else at the source
-    for (let round = 0; round < 3; round++) lay.chains.forEach(({ chain }) => {
+    if (!keep) for (let round = 0; round < 3; round++) lay.chains.forEach(({ chain }) => {
       const ways = chain.slice(1, -1);
       if (!ways.length) return;
       let lo = -Infinity, hi = Infinity;
@@ -1190,7 +1243,7 @@
     const minX = Math.min(...all.map((it) => it.cx - wOf(it) / 2)), maxX = Math.max(...all.map((it) => it.cx + wOf(it) / 2));
     all.forEach((it) => { it.cx += M - minX; });
     let W = maxX - minX + 2 * M;
-    if (o.centre) { const cx = lay.item[id].cx, half = Math.max(cx, W - cx); all.forEach((it) => { it.cx += half - cx; }); W = 2 * half; }
+    if (o.centre && !keep) { const cx = lay.item[id].cx, half = Math.max(cx, W - cx); all.forEach((it) => { it.cx += half - cx; }); W = 2 * half; }
     const H = rows.length * ROWH - (ROWH - BH) + 2 * M, offY = 0;
     const yOf = (it) => offY + M + it.c * ROWH;
     const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
@@ -1351,7 +1404,7 @@
   // The card shows only the boxes that are open or opened from (user, 3 November 2026): drawn anew at every click, the
   // direct premises in the row directly above; only the selected node keeps its place.
   const CARD_BOX = { switches: true, BW: 150, BH: 42, GAP: 14, ROWH: 78, M: 10, chars: 22, font: 12, cls: "karte-bild", centre: true };
-  const REDUCED = window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+  let cardLayout = new Map(), cardLayoutFor = null; // places of the boxes of the card shown last
   const boxAt = (g) => { const m = /translate\(([-\d.]+),([-\d.]+)\)/.exec(g.getAttribute("transform")); return { x: +m[1], y: +m[2] }; };
   function drawCard(id) {
     const shown = (cardShown = computeShown(id));
@@ -1361,36 +1414,30 @@
     const edgeOk = (a, x) => (cardMode === "fwd" ? expanded.has(a) : expanded.has(x));
     const body = card.querySelector(".karte-inhalt"), keep = { left: card.scrollLeft, top: card.scrollTop };
     // the card grows with its content (user, 3 November 2026); the selected node keeps its place on the screen
-    const old = new Map([...body.querySelectorAll(".fokus-knoten")].map((g) => [g.dataset.id, boxAt(g)]));
+    // place of the selected box on the screen before redrawing (its rectangle, not the whole group)
+    const rootRect = () => { const r = body.querySelector(".fokus-knoten.ziel rect"); return r ? r.getBoundingClientRect() : null; };
+    const before = rootRect(), had = new Set([...body.querySelectorAll(".fokus-knoten")].map((g) => g.dataset.id));
     body.innerHTML = "";
-    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk }));
+    // the places of the boxes are kept while the card belongs to the same node and mode (also when a proof is switched)
+    if (cardLayoutFor !== id + "|" + cardMode) { cardLayout = new Map(); cardLayoutFor = id + "|" + cardMode; }
+    body.appendChild(layered([...shown], id, { ...CARD_BOX, mode: cardMode, label: byId.get(id).name, edgeOk, keep: cardLayout.size ? cardLayout : null }));
+    cardLayout = new Map([...body.querySelectorAll(".fokus-knoten")].map((g) => { const p = boxAt(g); return [g.dataset.id, { r: Math.round((p.y - CARD_BOX.M) / CARD_BOX.ROWH), cx: p.x + CARD_BOX.BW / 2 }]; }));
     card.scrollLeft = keep.left; card.scrollTop = keep.top;
-    const rootNew = boxAt(body.querySelector(".fokus-knoten.ziel")), rootOld = old.get(id);
-    const dx = rootOld ? rootNew.x - rootOld.x : 0, dy = rootOld ? rootNew.y - rootOld.y : 0;
-    // ... as far as the card stays inside the picture (its head always visible)
-    let sx = 0, sy = 0;
-    if (rootOld) {
-      const left = Math.max(10, card.offsetLeft - dx), top = Math.max(10, card.offsetTop - dy);
-      sx = card.offsetLeft - left; sy = card.offsetTop - top;
-      card.style.left = left + "px"; card.style.top = top + "px";
+    // the selected box keeps its place on the screen: the card is moved back by the shift measured on the screen; where
+    // the card would leave the picture, it is scrolled instead
+    const after = rootRect();
+    if (before && after) {
+      const dx = after.left - before.left, dy = after.top - before.top;
+      const left = card.offsetLeft - dx, top = card.offsetTop - dy;
+      card.style.left = Math.max(10, left) + "px"; card.style.top = Math.max(10, top) + "px";
+      if (left < 10) card.scrollLeft += 10 - left;
+      if (top < 10) card.scrollTop += 10 - top;
     }
-    // a soft transition (user, 3 November 2026): boxes glide from their old places, new boxes and the edges fade in
-    if (old.size && !REDUCED) {
-      body.querySelectorAll(".fokus-knoten").forEach((g) => {
-        const n = boxAt(g), o = old.get(g.dataset.id);
-        if (!o) { g.style.opacity = "0"; g.style.transition = "opacity .3s"; requestAnimationFrame(() => requestAnimationFrame(() => { g.style.opacity = ""; })); return; }
-        const ox = o.x + sx, oy = o.y + sy;
-        if (Math.abs(ox - n.x) < 0.5 && Math.abs(oy - n.y) < 0.5) return;
-        g.style.transform = `translate(${ox}px, ${oy}px)`;
-        g.getBoundingClientRect();
-        g.style.transition = "transform .3s ease";
-        g.style.transform = `translate(${n.x}px, ${n.y}px)`;
-        g.addEventListener("transitionend", () => { g.style.transition = ""; g.style.transform = ""; }, { once: true });
-      });
-      body.querySelectorAll(".fokus-kante").forEach((p) => {
-        p.style.opacity = "0"; p.style.transition = "opacity .2s .25s";
-        requestAnimationFrame(() => requestAnimationFrame(() => { p.style.opacity = ""; }));
-      });
+    // no movement; new boxes and the edges fade in (user, 3 November 2026: calm cards, fading in is fine)
+    if (had.size) {
+      body.querySelectorAll(".fokus-knoten").forEach((g) => { if (had.has(g.dataset.id)) return; g.style.opacity = "0"; g.style.transition = "opacity .3s"; });
+      body.querySelectorAll(".fokus-kante").forEach((p) => { p.style.opacity = "0"; p.style.transition = "opacity .3s"; });
+      requestAnimationFrame(() => requestAnimationFrame(() => body.querySelectorAll(".fokus-knoten, .fokus-kante").forEach((x) => { x.style.opacity = ""; })));
     }
     // a box that can still be opened has a small mark
     card.querySelectorAll(".karte-bild .fokus-knoten").forEach((g) => {

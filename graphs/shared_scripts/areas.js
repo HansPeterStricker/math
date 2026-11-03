@@ -18,4 +18,8 @@ window.GRAPH_AREAS = [
     text: "L-functions, primes, modular forms, elliptic curves over number fields, and the field theory they need." },
   { folder: "algebraic-number-theory", name: "Algebraic number theory", msc: "11R, 11S", concepts: "ANT_CONCEPTS", theorems: "ANT_THEOREMS",
     text: "Number fields and rings of integers, ramification, units and class groups, cyclotomic fields, class field theory, adeles, local fields." },
+  { folder: "combinatorics", name: "Combinatorics", msc: "05, 11B, 11P, 52B, 52C", concepts: "CO_CONCEPTS", theorems: "CO_THEOREMS",
+    text: "Graphs, colourings, matchings and spectra, extremal and probabilistic combinatorics, designs and matroids, partitions, tableaux and symmetric functions, polytopes." },
+  { folder: "representation-theory", name: "Representation theory", msc: "20C, 22, 17B", concepts: "RT_CONCEPTS", theorems: "RT_THEOREMS",
+    text: "Representations and characters of finite groups, blocks, Hecke algebras, Lie algebras and their highest weights, Kac–Moody and vertex algebras, Lie groups and their unitary representations." },
 ];

@@ -168,7 +168,8 @@ a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; ma
 .karte-kopf b { font-size: 15px; }
 .karte-kopf .meta { font-size: 12px; margin-top: 2px; }
 .karte-zu { position: absolute; right: -6px; top: 6px; border: 0; background: none; font-size: 20px; line-height: 1; cursor: pointer; color: var(--leise); }
-.karte-inhalt { display: flex; justify-content: center; }
+.karte-inhalt { display: flex; justify-content: flex-start; } /* not centred: a wider drawing would move every box (user, 3 November 2026: calm cards) */
+.karte-inhalt > svg { flex-shrink: 0; } /* never scaled down: a scaled drawing would move every box; the card scrolls instead */
 .fokus-ansicht .fokus-knoten.oben rect { stroke: #a0522d; }
 .fokus-ansicht .fokus-knoten.unten rect { stroke: #3f6fa0; }
 .karte .fokus-ansicht .fokus-knoten rect { fill-opacity: .7; stroke-width: 1.2; }

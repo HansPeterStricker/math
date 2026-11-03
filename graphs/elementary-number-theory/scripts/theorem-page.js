@@ -58,6 +58,16 @@ window.CONCEPT_PAGE = {
       "data": "ANT_THEOREMS",
       "page": "../algebraic-number-theory/theorems.html",
       "title": "the theorem graph of algebraic number theory"
+    },
+    "co": {
+      "data": "CO_THEOREMS",
+      "page": "../combinatorics/theorems.html",
+      "title": "the theorem graph of combinatorics"
+    },
+    "rt": {
+      "data": "RT_THEOREMS",
+      "page": "../representation-theory/theorems.html",
+      "title": "the theorem graph of representation theory"
     }
   },
   "conceptSources": {
@@ -92,6 +102,14 @@ window.CONCEPT_PAGE = {
     "ant": {
       "data": "ANT_CONCEPTS",
       "page": "../algebraic-number-theory/concepts.html"
+    },
+    "co": {
+      "data": "CO_CONCEPTS",
+      "page": "../combinatorics/concepts.html"
+    },
+    "rt": {
+      "data": "RT_CONCEPTS",
+      "page": "../representation-theory/concepts.html"
     }
   },
   "shapes": {

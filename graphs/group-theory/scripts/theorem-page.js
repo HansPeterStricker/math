@@ -10,6 +10,7 @@ window.CONCEPT_PAGE = {
     "20D": "#c0392b",
     "20E": "#4f86c6",
     "20F": "#9b5de5",
+    "20G": "#2a9d8f",
     "20K": "#e76f51"
   },
   "foreignArea": "basic",
@@ -54,6 +55,16 @@ window.CONCEPT_PAGE = {
       "data": "ANT_THEOREMS",
       "page": "../algebraic-number-theory/theorems.html",
       "title": "the theorem graph of algebraic number theory"
+    },
+    "co": {
+      "data": "CO_THEOREMS",
+      "page": "../combinatorics/theorems.html",
+      "title": "the theorem graph of combinatorics"
+    },
+    "rt": {
+      "data": "RT_THEOREMS",
+      "page": "../representation-theory/theorems.html",
+      "title": "the theorem graph of representation theory"
     }
   },
   "conceptSources": {
@@ -88,6 +99,14 @@ window.CONCEPT_PAGE = {
     "ant": {
       "data": "ANT_CONCEPTS",
       "page": "../algebraic-number-theory/concepts.html"
+    },
+    "co": {
+      "data": "CO_CONCEPTS",
+      "page": "../combinatorics/concepts.html"
+    },
+    "rt": {
+      "data": "RT_CONCEPTS",
+      "page": "../representation-theory/concepts.html"
     }
   },
   "shapes": {

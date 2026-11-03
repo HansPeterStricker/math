@@ -24,7 +24,9 @@ window.CONCEPT_PAGE = {
   "foreignLabel": "proved outside algebraic number theory",
   "hubs": [],
   "foreignOutside": true,
-  "centre": [],
+  "centre": [
+    "ideal-contains-integer"
+  ],
   "sources": {
     "st": {
       "data": "ST_THEOREMS",
@@ -60,6 +62,16 @@ window.CONCEPT_PAGE = {
       "data": "AR_THEOREMS",
       "page": "../arithmetic-geometry/theorems.html",
       "title": "the theorem graph of arithmetic geometry"
+    },
+    "co": {
+      "data": "CO_THEOREMS",
+      "page": "../combinatorics/theorems.html",
+      "title": "the theorem graph of combinatorics"
+    },
+    "rt": {
+      "data": "RT_THEOREMS",
+      "page": "../representation-theory/theorems.html",
+      "title": "the theorem graph of representation theory"
     }
   },
   "conceptSources": {
@@ -94,6 +106,14 @@ window.CONCEPT_PAGE = {
     "ar": {
       "data": "AR_CG",
       "page": "../arithmetic-geometry/concepts.html"
+    },
+    "co": {
+      "data": "CO_CONCEPTS",
+      "page": "../combinatorics/concepts.html"
+    },
+    "rt": {
+      "data": "RT_CONCEPTS",
+      "page": "../representation-theory/concepts.html"
     }
   },
   "shapes": {
