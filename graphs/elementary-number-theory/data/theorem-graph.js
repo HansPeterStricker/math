@@ -56,7 +56,7 @@ window.ENT_THEOREMS = {
       formula: String.raw`a = qb + r,\quad 0 \le r < b`,
       text: "For every integer a and every natural number b there are unique integers q and r with a = qb + r and 0 ≤ r < b.",
       proof: "r is the least nonnegative number of the form a − qb, which exists by the well-ordering of ℕ (equivalent to induction); r ≥ b would give a smaller one. Uniqueness: two such representations differ by a multiple of b smaller than b.",
-      concepts: ["division-with-remainder", "st:integer", "st:natural-number"],
+      concepts: ["division-with-remainder", "integer", "natural-number"],
       year: -300, who: "Euclid" },
     { id: "euclidean-algorithm", name: "Euclidean algorithm", kind: "theorem", area: "11A05", field: [11], msc: ["11A"], msc5: "11A05",
       premises: ["division-with-remainder"],

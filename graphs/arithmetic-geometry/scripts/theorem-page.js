@@ -20,7 +20,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "hecke-operators-normal"
+    "dedekind-independence"
   ],
   "sources": {
     "st": {

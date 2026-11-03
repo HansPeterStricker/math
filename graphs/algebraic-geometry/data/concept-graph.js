@@ -49,7 +49,7 @@ window.AG_CG = {
 
   concepts: [
     // ------------------------------------------------------------ Defined elsewhere
-    { id: "singular-cohomology", name: "Singular cohomology", kind: "invariante", area: "basic", field: [55], msc: ["55N"], uses: ["ct:topological-space", "ct:chain-complex", "st:integer"],
+    { id: "singular-cohomology", name: "Singular cohomology", kind: "invariante", area: "basic", field: [55], msc: ["55N"], uses: ["ct:topological-space", "ct:chain-complex", "ent:integer"],
       formula: String.raw`H^i(X, \mathbb Z)`,
       text: "The cohomology of the chain complex of singular cochains of a topological space, here with integer coefficients ℤ; the model for the Weil cohomology theories." },
     { id: "manifold", name: "Differentiable manifold", kind: "objekt", area: "basic", field: [58], msc: ["58A"], uses: ["ct:topological-space", "st:real-number"],
@@ -64,10 +64,10 @@ window.AG_CG = {
     { id: "riemann-surface", name: "Compact Riemann surface", kind: "objekt", area: "basic", field: [30], msc: ["30F"], uses: ["manifold", "analytic-space", "st:complex-number"],
       formula: String.raw`\dim_{\mathbb C} X = 1`,
       text: "A compact connected complex manifold (a complex analytic space that is a manifold) of complex dimension 1; the same as a smooth complex projective curve (Riemann existence theorem)." },
-    { id: "polyhedral-cone", name: "Rational polyhedral cone", kind: "objekt", area: "basic", field: [52], msc: ["52B"], uses: ["st:real-number", "st:integer"],
+    { id: "polyhedral-cone", name: "Rational polyhedral cone", kind: "objekt", area: "basic", field: [52], msc: ["52B"], uses: ["st:real-number", "ent:integer"],
       formula: String.raw`\sigma = \mathbb R_{\ge 0} v_1 + \dots + \mathbb R_{\ge 0} v_k,\quad v_i \in \mathbb Z^n`,
       text: "The combinations with non-negative real coefficients of finitely many lattice vectors, vectors in ℝ<sup>n</sup> with integer coordinates." },
-    { id: "lattice-polytope", name: "Lattice polytope", kind: "objekt", area: "basic", field: [52], msc: ["52B"], uses: ["st:real-number", "st:integer"],
+    { id: "lattice-polytope", name: "Lattice polytope", kind: "objekt", area: "basic", field: [52], msc: ["52B"], uses: ["st:real-number", "ent:integer"],
       formula: String.raw`P = \operatorname{conv}(v_1, \dots, v_k),\quad v_i \in \mathbb Z^n`,
       text: "The convex hull in ℝ<sup>n</sup> of finitely many lattice points, points with integer coordinates; Newton polytopes of polynomials are lattice polytopes." },
     { id: "invariant-ring", name: "Ring of invariants", kind: "konstruktion", area: "basic", field: [13], msc: ["13A"], uses: ["ca:algebra", "gt:group-action"],

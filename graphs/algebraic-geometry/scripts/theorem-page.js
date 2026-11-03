@@ -23,9 +23,7 @@ window.CONCEPT_PAGE = {
   "foreignLabel": "proved outside algebraic geometry",
   "hubs": [],
   "foreignOutside": true,
-  "centre": [
-    "grassmannian-representable"
-  ],
+  "centre": [],
   "sources": {
     "st": {
       "data": "ST_THEOREMS",

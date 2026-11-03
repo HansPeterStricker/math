@@ -24,9 +24,7 @@ window.CONCEPT_PAGE = {
   "foreignLabel": "proved outside algebraic number theory",
   "hubs": [],
   "foreignOutside": true,
-  "centre": [
-    "discriminant-sign"
-  ],
+  "centre": [],
   "sources": {
     "st": {
       "data": "ST_THEOREMS",

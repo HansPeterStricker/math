@@ -17,7 +17,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "cancellation-law"
+    "uniqueness-of-inverses"
   ],
   "sources": {
     "st": {

@@ -1,7 +1,8 @@
 // Data model: concepts (definitions) of set theory and their definitional dependencies, from the set to the number
 // systems: sets, relations and functions (03E20), ordered sets (06A, lattices 06B), ordinals and cardinals (03E10),
 // choice (03E25), axiomatics and models of ZFC (03E30), forcing (03E40), independence (03E35), Boolean algebras (06E),
-// and the set-theoretic construction of ℕ, ℤ, ℚ, ℝ and ℂ (todo B81).
+// and the set-theoretic construction of ℕ (finite ordinals), ℚ, ℝ and ℂ (todo B81). The natural numbers and the integers
+// used by the other graphs are concepts of elementary number theory (ent:natural-number, ent:integer; user, 3 November 2026).
 //
 // Same model as ../../elementary-number-theory/data/concepts.js (see its header comment): id, name, kind, area, field,
 // msc, msc5, uses, isA, formula, text. The set is the basic concept without dependencies (membership is not defined).
@@ -178,7 +179,7 @@ window.ST_CONCEPTS = {
         { name: "Class of equinumerous sets (Frege–Russell)", uses: ["equinumerous", "class"], formula: String.raw`|A| = \{B : B \approx A\}`,
           text: "Frege (1884), Russell: the class of all sets equinumerous to A. For a non-empty A it is a proper class, so ZFC uses the initial ordinal instead; both definitions give |A| = |B| exactly when A and B are equinumerous." },
       ] },
-    { id: "finite-set", name: "Finite set", kind: "eigenschaft", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["equinumerous", "natural-number"], isA: ["set"],
+    { id: "finite-set", name: "Finite set", kind: "eigenschaft", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["equinumerous", "finite-ordinal"], isA: ["set"],
       formula: String.raw`A \approx \{0, 1, \dots, n - 1\}`,
       text: "A set equinumerous to a natural number n (as a von Neumann ordinal, n = {0, …, n − 1}).",
       definitionName: "Equinumerous to a natural number",
@@ -188,7 +189,7 @@ window.ST_CONCEPTS = {
         { name: "Dedekind finite", uses: ["bijection", "subset"],
           text: "Dedekind (1888): there is no bijection from A onto a proper subset of A. Equivalent to the standard definition in ZFC; the proof needs a weak form of the axiom of choice (countable choice), and without it there can be infinite Dedekind-finite sets." },
       ] },
-    { id: "countable-set", name: "Countable set", kind: "eigenschaft", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["equinumerous", "natural-number"], isA: ["set"],
+    { id: "countable-set", name: "Countable set", kind: "eigenschaft", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["equinumerous", "finite-ordinal"], isA: ["set"],
       formula: String.raw`A \approx \mathbb N`,
       text: "A set equinumerous to the natural numbers (countably infinite); ℤ and ℚ are countable, ℝ is not (Cantor 1874)." },
     { id: "ordinal", name: "Ordinal number", kind: "objekt", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["well-order", "subset"], isA: ["set"],
@@ -213,10 +214,10 @@ window.ST_CONCEPTS = {
     { id: "cardinal-number", name: "Cardinal number", kind: "objekt", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["ordinal", "equinumerous"], isA: ["ordinal"],
       formula: String.raw`\kappa \not\approx \alpha \ \ (\alpha < \kappa)`,
       text: "An ordinal not equinumerous to any smaller ordinal (initial ordinal)." },
-    { id: "aleph", name: "Aleph numbers", kind: "objekt", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["cardinal-number", "ordinal", "cardinality", "natural-number", "limit-ordinal", "supremum"], isA: ["cardinal-number"],
+    { id: "aleph", name: "Aleph numbers", kind: "objekt", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["cardinal-number", "ordinal", "cardinality", "finite-ordinal", "limit-ordinal", "supremum"], isA: ["cardinal-number"],
       formula: String.raw`\aleph_0 = |\mathbb N|,\quad \aleph_{\alpha+1} = \aleph_\alpha^+`,
       text: "The infinite cardinal numbers indexed by ordinals: ℵ<sub>0</sub> is the cardinality of the natural numbers, ℵ<sub>α+1</sub> = ℵ<sub>α</sub><sup>+</sup> is the smallest cardinal number larger than ℵ<sub>α</sub>, and at a limit ordinal λ the aleph ℵ<sub>λ</sub> is the supremum of the earlier ones." },
-    { id: "continuum", name: "Cardinality of the continuum", kind: "invariante", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["cardinality", "power-set", "real-number", "aleph", "natural-number"],
+    { id: "continuum", name: "Cardinality of the continuum", kind: "invariante", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["cardinality", "power-set", "real-number", "aleph", "finite-ordinal"],
       formula: String.raw`\mathfrak c = |\mathbb R| = 2^{\aleph_0}`,
       text: "The cardinality of the real numbers. It equals 2<sup>ℵ<sub>0</sub></sup>, the cardinality of the power set of the natural numbers ℕ, whose cardinality is the aleph ℵ<sub>0</sub>. Whether it equals ℵ<sub>1</sub> (continuum hypothesis) is independent of ZFC (Gödel 1940, Cohen 1963)." },
 
@@ -278,7 +279,7 @@ window.ST_CONCEPTS = {
         { name: "Internal forcing by recursion", uses: ["forcing-poset", "p-name", "formula", "dense-set"], formula: String.raw`p \Vdash^* \varphi`,
           text: "Defined inside the ground model by recursion on names and on the build-up of φ: for atomic formulas through dense sets of conditions below p, p ⊩* ¬φ if no q ≤ p forces φ, and p ⊩* φ ∧ ψ if p forces both. The forcing theorem says that it agrees with semantic forcing (Cohen, Kunen)." },
       ] },
-    { id: "cohen-forcing", name: "Cohen forcing", kind: "objekt", area: "03E40", field: [3], msc: ["03E"], msc5: "03E40", uses: ["forcing-poset", "map", "natural-number", "finite-set", "cartesian-product", "cardinal-number", "subset"], isA: ["ccc"],
+    { id: "cohen-forcing", name: "Cohen forcing", kind: "objekt", area: "03E40", field: [3], msc: ["03E"], msc5: "03E40", uses: ["forcing-poset", "map", "finite-ordinal", "finite-set", "cartesian-product", "cardinal-number", "subset"], isA: ["ccc"],
       formula: String.raw`\mathbb P = \{p : \kappa \times \omega \to 2 \ \text{finite partial}\}`,
       text: "For a cardinal number κ the maps p from a finite subset of κ × ω to {0, 1} (finite partial maps; ω is the set of natural numbers), ordered by extension: q ≤ p if p ⊆ q. Adding κ ≥ ℵ<sub>2</sub> new reals makes the continuum hypothesis fail." },
     { id: "boolean-valued-model", name: "Boolean-valued model", kind: "objekt", area: "03E40", field: [3], msc: ["03E", "03C"], msc5: "03E40", uses: ["complete-boolean-algebra", "model", "formula"],
@@ -316,9 +317,9 @@ window.ST_CONCEPTS = {
       text: "A structure (a set with relations and maps on it) in which all sentences of the theory T, first-order formulas without free variables, hold (03C)." },
 
     // ------------------------------------------------------------ Construction of the number systems
-    { id: "natural-number", name: "Natural number", kind: "objekt", area: "numbers", field: [3], msc: ["03E"], msc5: "03E10", uses: ["empty-set", "union"], isA: ["ordinal"],
+    { id: "finite-ordinal", name: "Finite ordinal", kind: "objekt", area: "numbers", field: [3], msc: ["03E"], msc5: "03E10", uses: ["empty-set", "union"], isA: ["ordinal"],
       formula: String.raw`0 = \emptyset,\quad n + 1 = n \cup \{n\}`,
-      text: "Von Neumann: the finite ordinals, built from the empty set by the successor n ∪ {n}; ℕ = ω is their set. Whether 0 is counted varies; the elementary number theory graph starts at 1.",
+      text: "The natural numbers of von Neumann: built from the empty set by the successor n ∪ {n}, so that 0 = ∅, 1 = {∅}, 2 = {∅, {∅}}, …; ω is their set. They satisfy the Peano axioms with 0 as the first element.",
       definitionName: "Generated from ∅ by the successor",
       alternativeDefinitions: [
         { name: "Element of every inductive set", uses: ["empty-set", "union", "intersection"], formula: String.raw`\mathbb N = \bigcap \{I : \emptyset \in I,\ x \in I \Rightarrow x \cup \{x\} \in I\}`,
@@ -326,10 +327,7 @@ window.ST_CONCEPTS = {
         { name: "Ordinal with only successors below", uses: ["ordinal", "successor-ordinal", "empty-set"],
           text: "An ordinal n such that n and every element of n is either ∅ or a successor ordinal (Jech)." },
       ] },
-    { id: "integer", name: "Integer", kind: "objekt", area: "numbers", field: [3, 11], msc: ["03E", "11A"], msc5: "03E20", uses: ["natural-number", "ordered-pair", "quotient-set"],
-      formula: String.raw`(a, b) \sim (c, d) \iff a + d = b + c`,
-      text: "Classes of pairs of natural numbers, (a, b) standing for a − b. ℤ is a commutative ring." },
-    { id: "rational-number", name: "Rational number", kind: "objekt", area: "numbers", field: [3, 11], msc: ["03E", "11A"], msc5: "03E20", uses: ["integer", "ordered-pair", "quotient-set"],
+    { id: "rational-number", name: "Rational number", kind: "objekt", area: "numbers", field: [3, 11], msc: ["03E", "11A"], msc5: "03E20", uses: ["ent:integer", "ordered-pair", "quotient-set"],
       formula: String.raw`(a, b) \sim (c, d) \iff ad = bc,\quad b, d \ne 0`,
       text: "Classes of pairs of integers with non-zero second entry, (a, b) standing for a/b. ℚ is the smallest field containing ℤ." },
     { id: "real-number", name: "Real number", kind: "objekt", area: "numbers", field: [26, 3], msc: ["26A", "03E"], msc5: "26A03", uses: ["rational-number", "subset", "total-order", "least-element"],
@@ -337,7 +335,7 @@ window.ST_CONCEPTS = {
       text: "Dedekind (1872): a cut, a non-empty proper subset of ℚ that is closed downward and has no largest element. ℝ is the complete ordered field.",
       definitionName: "Dedekind cuts",
       alternativeDefinitions: [
-        { name: "Cauchy sequences", uses: ["rational-number", "map", "natural-number", "equivalence-relation", "quotient-set"], formula: String.raw`(a_n) \sim (b_n) \iff \lim_{n \to \infty} (a_n - b_n) = 0`,
+        { name: "Cauchy sequences", uses: ["rational-number", "map", "finite-ordinal", "equivalence-relation", "quotient-set"], formula: String.raw`(a_n) \sim (b_n) \iff \lim_{n \to \infty} (a_n - b_n) = 0`,
           text: "Cantor, Méray (1872): equivalence classes of Cauchy sequences of rationals, maps ℕ → ℚ with |a<sub>m</sub> − a<sub>n</sub>| < ε for every rational ε > 0 and all large m, n; two sequences are equivalent if their difference tends to 0." },
         { name: "Complete ordered field", uses: ["ca:field", "total-order", "upper-bound", "supremum"],
           text: "Axiomatic (Hilbert 1900): an element of a field with a total order compatible with addition and multiplication in which every non-empty subset with an upper bound has a supremum. Such a field exists and is unique up to a unique isomorphism." },

@@ -1039,9 +1039,27 @@
     const s = el("svg", { viewBox: `0 0 ${W} ${H}`, width: W, height: H, style: o.fit ? "max-width:100%;height:auto" : "", class: "fokus-ansicht " + o.cls, role: "img", "aria-label": o.label });
     const mk = "fp-" + o.cls;
     el("defs", {}, s).innerHTML = `<marker id="${mk}" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0L10,5L0,10Z" fill="#8a7f6e"/></marker>`;
+    // edges over several rows (user, 3 November 2026: no needless swings): the bends of an edge lie on the straight
+    // line between its two boxes wherever no box of that row is in the way; then the edge is drawn straight
+    const boxesIn = (c) => all.filter((it) => it.kind === "knoten" && it.c === c);
+    lay.chains.forEach(({ chain }) => {
+      if (chain.length < 3) return;
+      const a = chain[0], b = chain[chain.length - 1];
+      const ya = yOf(a) + BH, yb = yOf(b);
+      chain.slice(1, -1).forEach((it) => {
+        const y = yOf(it) + BH / 2, x = a.cx + ((b.cx - a.cx) * (y - ya)) / (yb - ya || 1);
+        if (!boxesIn(it.c).some((q) => Math.abs(q.cx - x) < BW / 2 + 8)) it.cx = x;
+      });
+    });
     lay.chains.forEach(({ edge, chain }) => {
       const pts = chain.map((it, i) => it.kind === "knoten" ? [it.cx, yOf(it) + (i === 0 ? BH : 0)] : [it.cx, yOf(it) + BH / 2]);
       let d = `M${pts[0][0]},${pts[0][1]}`;
+      const first = pts[0], last = pts[pts.length - 1];
+      const onLine = pts.every(([x, y]) => Math.abs(first[0] + ((last[0] - first[0]) * (y - first[1])) / (last[1] - first[1] || 1) - x) < 0.5);
+      if (onLine) {
+        el("path", { d: `M${first[0]},${first[1]}L${last[0]},${last[1] - 2}`, class: "fokus-kante" + (edge.dashed ? " gestrichelt" : ""), "marker-end": `url(#${mk})`, "data-from": edge.from, "data-to": edge.to, "data-via": (edge.via || []).join(" ") }, s);
+        return;
+      }
       for (let i = 1; i < pts.length; i++) {
         const [x0, y0] = pts[i - 1], [x1, y1] = pts[i], m = (y0 + y1) / 2;
         d += `C${x0},${m} ${x1},${m} ${x1},${y1 - (i === pts.length - 1 ? 2 : 0)}`;
@@ -1341,7 +1359,7 @@
   }
 
   // address #mark=<id> (from a click on a node of this area in another graph): the node is only marked, lit in the
-  // dimmed graph and centred, with its panel; no card and no premises (user, 3 November 2026)
+  // dimmed graph, with its panel, the whole graph in view; no card and no premises (user, 3 November 2026)
   function fromHash() {
     const h = decodeURIComponent(location.hash.slice(1));
     if (!h.startsWith("mark=")) { select(h); return; }
@@ -1351,7 +1369,7 @@
     clickMode = "graph"; cardMode = "back"; graphFor = id; graphDepth = 0;
     select(id);
     clickMode = mode;
-    centerOn(id, false);
+    // the whole graph stays in view, centred as usual (user, 3 November 2026: not the node in the middle)
   }
   window.addEventListener("hashchange", fromHash);
   fromHash();

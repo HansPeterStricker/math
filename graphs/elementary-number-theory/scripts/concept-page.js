@@ -13,7 +13,7 @@ window.CONCEPT_PAGE = {
   words: { levelHint: "Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition. Concepts of other areas are not counted; their arrows come from outside." },
   foreignLabel: "defined outside 11A",
   hubs: [],
-  centre: ["divisibility"],
+  centre: ["natural-number"],
   sources: {
     ct: { data: "CT_CONCEPTS", page: "../category-theory/concepts.html", title: "the concept graph of category theory" },
     ag: { data: "AG_CG", page: "../algebraic-geometry/concepts.html", title: "the concept graph of algebraic geometry" },
