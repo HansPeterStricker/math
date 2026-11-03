@@ -24,7 +24,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "affine-schemes-and-rings"
+    "grassmannian-representable"
   ],
   "sources": {
     "st": {

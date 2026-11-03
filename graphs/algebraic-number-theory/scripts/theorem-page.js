@@ -25,7 +25,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "integral-basis-existence"
+    "discriminant-sign"
   ],
   "sources": {
     "st": {

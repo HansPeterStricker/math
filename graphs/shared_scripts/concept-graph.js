@@ -114,7 +114,7 @@
     if (!hit) { console.error("concept graph: unknown reference " + ref); return; }
     const { c, prefix, source } = hit;
     const isA = (c.isA || []).map((t) => withPrefix(prefix, t)).filter((t) => refs.has(t));
-    D.concepts.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: FOREIGN, foreign: { home: source.page + "#" + c.id, title: source.title, prefix } });
+    D.concepts.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: FOREIGN, foreign: { home: source.page + "#mark=" + c.id, title: source.title, prefix } });
   });
 
   const concepts = D.concepts;
@@ -226,6 +226,9 @@
   };
 
   const CENTRE_ID = (CFG.centre || []).find((id) => byId.has(id) && level.get(id) === 1);
+  // the white inner circle only holds the centre node (an axiom or a theorem from the definitions alone in the theorem
+  // graphs): small with one node, smaller still without (user, 3 November 2026)
+  if (CFG.foreignOutside) RING.inner = CENTRE_ID ? 130 : 95;
   const ringConcepts = concepts.filter((c) => level.get(c.id) >= 1 && c.id !== CENTRE_ID);
   const count = {};
   // Small classes (fewer than CFG.minSector concepts, default 4) share one sector "other" if there are at least two of
@@ -599,7 +602,7 @@
       const [p, id] = u.split(":");
       if (p !== CFG.prefix || !byId.has(id) || isPre(id)) return;
       if (!outsOf.has(id)) outsOf.set(id, []);
-      const o = { from: id, q, t, page: src.page + "#" + t.id, title: src.title };
+      const o = { from: id, q, t, page: src.page + "#mark=" + t.id, title: src.title };
       o.g = el("g", { class: "stub aus" }, gStubs);
       o.g.style.setProperty("--herkunft", ORIGIN_COLORS[q] || "#8a7f6e");
       o.line = el("line", { class: "kante aus-linie", "marker-end": "url(#pfeil)" }, o.g);
@@ -654,7 +657,10 @@
       ev.stopPropagation();
       nodeDrag = { p, moved: false, x: ev.clientX, y: ev.clientY };
     });
-    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1 && clickMode !== "graph") return; step(c.id, "back"); });
+    g.addEventListener("click", (ev) => { ev.stopPropagation(); if (justDragged) { justDragged = false; return; } if (ev.detail > 1 && clickMode !== "graph") return;
+      // a node of another area (outer ring): a left click only opens its home graph with it selected (user, 3 November 2026)
+      if (c.foreign && CFG.foreignOutside) { location.href = c.foreign.home; return; }
+      step(c.id, "back"); });
     g.addEventListener("contextmenu", (ev) => { ev.preventDefault(); ev.stopPropagation(); if (justDragged) { justDragged = false; return; } step(c.id, "fwd"); });
     nodeEls.set(c.id, g);
   });
@@ -801,7 +807,10 @@
     }
     return seen;
   };
-  const maxDepth = (id, dir) => { let k = 0, n = 0; for (;;) { const m = within(id, dir === "fwd" ? fwdOf : backFrom(id), k + 1).size; if (m === n) return k; n = m; k++; } };
+  // marking in the graph, like the card: nodes of other areas are shown where a node of this area uses them, but their
+  // own premises are not followed (they are not drawn here; user, 3 November 2026)
+  const backLocal = (root) => (x) => (x !== root && isPre(x) ? [] : backFrom(root)(x));
+  const maxDepth = (id, dir) => { let k = 0, n = 0; for (;;) { const m = within(id, dir === "fwd" ? fwdOf : backLocal(id), k + 1).size; if (m === n) return k; n = m; k++; } };
   // Each box of a card shows and hides its own prerequisites (proof card) or consequences (card of the consequences)
   // with a click; nothing jumps to another card (user, 3 November 2026). `expanded`: boxes whose neighbours are shown.
   let cardMode = "back", cardDepth = 1, expanded = new Set(), cardIds = null, cardShown = null;
@@ -827,7 +836,7 @@
       select(id);
       return;
     }
-    if (id === selected && dir === cardMode) toggle(id);
+    if (id === selected && dir === cardMode && cardFor === id) toggle(id);
     else { cardMode = dir; expanded = new Set([id]); proofChoice.clear(); cardFor = null; select(id); }
   }
   function toggle(x) {
@@ -845,13 +854,22 @@
     nodeEls.get(id).classList.add("hell", "gewaehlt");
     set.forEach((x) => nodeEls.get(x).classList.add("hell", back ? "vorfahr" : "nachfahr"));
     const inSet = (x) => x === id || set.has(x);
+    const light = (e) => {
+      if (e.kind === "uses" && back && usesOf(e.to).includes(e.from)) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); return true; }
+      if (e.kind === "uses" && !back) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); return true; }
+      if (e.kind === "isa") e.line.classList.add("hell");
+      return false;
+    };
+    const lit = new Map(); // from -> [to] along the lit uses edges
     edges.forEach((e) => {
       if (e.kind === "uses" && e.transitive) return;
       if (!inSet(e.from) || !inSet(e.to)) return;
-      if (e.kind === "uses" && back && usesOf(e.to).includes(e.from)) { e.line.classList.add("hell", "vorfahr"); e.line.setAttribute("marker-end", "url(#pfeil-v)"); }
-      else if (e.kind === "uses" && !back) { e.line.classList.add("hell", "nachfahr"); e.line.setAttribute("marker-end", "url(#pfeil-n)"); }
-      else if (e.kind === "isa") e.line.classList.add("hell");
+      if (light(e)) { if (!lit.has(e.from)) lit.set(e.from, []); lit.get(e.from).push(e.to); }
     });
+    // an indirect edge is lit where no path along the lit edges replaces it (user, 3 November 2026: otherwise a marked
+    // node may have no edge at all)
+    const reaches = (a, x) => { const seen = new Set([a]), st = [a]; while (st.length) for (const y of lit.get(st.pop()) || []) { if (y === x) return true; if (!seen.has(y)) { seen.add(y); st.push(y); } } return false; };
+    edges.filter((e) => e.kind === "uses" && e.transitive && inSet(e.from) && inSet(e.to) && !reaches(e.from, e.to)).forEach(light);
     edges.forEach((e) => { if (e.stub) ["hell", "vorfahr", "nachfahr"].forEach((k) => e.stub.classList.toggle(k, e.line.classList.contains(k))); });
     if (!back) (outsOf.get(id) || []).forEach((o) => o.g.classList.add("hell"));
   }
@@ -1069,7 +1087,7 @@
     if (clickMode === "graph") {
       card.hidden = true; box.classList.remove("mit-karte"); cardFor = null; cardIds = null;
       if (graphFor !== id) { graphFor = id; graphDepth = 1; }
-      cardShown = new Set([id, ...within(id, cardMode === "fwd" ? fwdOf : backFrom(id), graphDepth)]);
+      cardShown = new Set([id, ...within(id, cardMode === "fwd" ? fwdOf : backLocal(id), graphDepth)]);
       return;
     }
     const c = byId.get(id);
@@ -1309,8 +1327,21 @@
   about.addEventListener("click", (ev) => { if (ev.target === about) closeAbout(); });
   document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && !about.hidden) closeAbout(); });
 
-  window.addEventListener("hashchange", () => select(decodeURIComponent(location.hash.slice(1))));
-  select(decodeURIComponent(location.hash.slice(1)));
+  // address #mark=<id> (from a click on a node of this area in another graph): the node is only marked, lit in the
+  // dimmed graph and centred, with its panel; no card and no premises (user, 3 November 2026)
+  function fromHash() {
+    const h = decodeURIComponent(location.hash.slice(1));
+    if (!h.startsWith("mark=")) { select(h); return; }
+    const id = h.slice(5);
+    if (!byId.has(id)) { select(null); return; }
+    const mode = clickMode;
+    clickMode = "graph"; cardMode = "back"; graphFor = id; graphDepth = 0;
+    select(id);
+    clickMode = mode;
+    centerOn(id, false);
+  }
+  window.addEventListener("hashchange", fromHash);
+  fromHash();
   // for tests: concepts whose angle lies outside the sector of their class (concepts of level 1 and higher)
   const outsideSectors = () => concepts.filter((c) => level.get(c.id) >= 1 && c.id !== CENTRE_ID && sectors[secKey(c)]).filter((c) => {
     const p = pos.get(c.id), sec = sectors[secKey(c)];
