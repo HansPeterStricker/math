@@ -336,13 +336,13 @@ window.CV_THEOREMS = {
       proof: "The value function is a viscosity solution, and by the comparison principle any two such solutions coincide.",
       concepts: ["value-function", "de:viscosity-solution", "hjb-equation"],
       year: 1983, who: "Crandall, Evans, Lions" },
-    { id: "lqr-riccati", name: "Linear-quadratic regulator and the Riccati equation", kind: "theorem", area: "49N", field: [49, 93], msc: ["49N", "93C"], msc5: "49N10",
+    { id: "lqr-riccati", name: "Finite-horizon linear-quadratic regulator and the Riccati equation", kind: "theorem", area: "49N", field: [49, 93], msc: ["49N", "93C"], msc5: "49N10",
       premises: ["hjb-verification-theorem", "de:picard-lindelof"],
       proofName: "Quadratic ansatz in the HJB equation",
       formula: String.raw`-\dot P = A^{\mathsf T} P + P A - P B R^{-1} B^{\mathsf T} P + Q,\quad P(T) = S,\quad u^* = -R^{-1} B^{\mathsf T} P x`,
       text: "The linear-quadratic regulator problem has a unique optimal control, given by the linear feedback shown, where P(t) is the solution of the matrix Riccati equation; the minimal cost is x<sub>0</sub><sup>T</sup>P(0)x<sub>0</sub>.",
       proof: "Inserting W = x<sup>T</sup>P(t)x into the HJB equation turns it into the Riccati equation. Its solution exists on all of [0, T] (Picard–Lindelöf, with a priori bounds 0 ≤ P from the cost), and the verification theorem shows that W is the value function and the feedback is optimal.",
-      concepts: ["opt:lqr-problem", "hjb-equation"],
+      concepts: ["lqr-problem", "hjb-equation"],
       year: 1960, who: "Kalman" },
 
     // ------------------------------------------------------------ 49J Existence theories

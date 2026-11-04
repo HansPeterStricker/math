@@ -29,7 +29,6 @@ window.STA_THEOREMS = {
 
   areas: {
     basic: "Results from other areas without a home folder yet",
-    "62A": "62A Foundations",
     "62B": "62B Sufficiency and information",
     "62C": "62C Decision theory",
     "62E": "62E Distribution theory",
@@ -43,20 +42,6 @@ window.STA_THEOREMS = {
   kinds: { axiom: "Axiom", theorem: "Theorem", lemma: "Lemma", corollary: "Corollary", conjecture: "Conjecture" },
 
   theorems: [
-    // ------------------------------------------------------------ 62A Foundations
-    { id: "de-finetti-theorem", name: "De Finetti's representation theorem", kind: "theorem", area: "62A", field: [62, 60], msc: ["62A", "60G"], msc5: "62A01",
-      premises: ["pr:reverse-martingale-convergence"],
-      proofName: "Reverse martingale of empirical measures",
-      formula: String.raw`P(X_1 \in A_1, \dots, X_n \in A_n) = \int \prod_{i=1}^n \mu(A_i)\, d\Pi(\mu)`,
-      text: "An infinite sequence of random variables (with values in a Polish space) is exchangeable exactly when it is a mixture of i.i.d. sequences: there is a probability measure Π on the set of distributions μ such that, given μ, the variables are independent with distribution μ. It justifies treating the parameter as random in Bayesian statistics.",
-      proof: "Conditioning on the exchangeable σ-algebra 𝓔<sub>n</sub> (symmetric functions of the first n variables and the tail) gives a reverse martingale; by its convergence theorem the empirical measures converge almost surely to a random measure μ. Exchangeability shows that, given the limiting σ-algebra, the variables are independent with distribution μ; Π is the distribution of μ.",
-      concepts: ["pr:exchangeable-sequence", "prior-distribution", "sample"],
-      alternativeProofs: [
-        { name: "Finite approximation (Diaconis–Freedman 1980)", premises: ["pr:prokhorov-theorem"],
-          idea: "The first k of n exchangeable variables are within total variation k(k − 1)/n of a mixture of i.i.d. laws (sampling without versus with replacement from an urn); letting n → ∞ and taking a weak limit of the mixing measures, which exists by Prokhorov's theorem, gives the representation." },
-      ],
-      year: 1931, who: "de Finetti; Hewitt and Savage (1955)" },
-
     // ------------------------------------------------------------ 62B Sufficiency and information
     { id: "score-identities", name: "Mean and variance of the score (Bartlett identities)", kind: "lemma", fromDefinitions: true, area: "62B", field: [62], msc: ["62B"], msc5: "62B10",
       premises: [],

@@ -135,10 +135,10 @@ window.CS_CONCEPTS = {
       text: "A context-free grammar whose rules have the form A → BC with variables B, C other than the start variable, or A → a with a terminal a, plus possibly S → ε." },
 
     // ------------------------------------------------------------ 68Q70 Algebraic theory of languages
-    { id: "syntactic-monoid", name: "Syntactic monoid", kind: "konstruktion", area: "68Q70", field: [68], msc: ["68Q"], msc5: "68Q70", uses: ["formal-language", "word", "ga:monoid", "st:quotient-set"],
+    { id: "syntactic-monoid", name: "Syntactic monoid", kind: "konstruktion", area: "68Q70", field: [68], msc: ["68Q"], msc5: "68Q70", uses: ["formal-language", "word", "gt:monoid", "st:quotient-set"],
       formula: String.raw`M(L) = \Sigma^* / {\equiv_L},\quad x \equiv_L y \iff (uxv \in L \Leftrightarrow uyv \in L)`,
       text: "The quotient of the free monoid Σ* by the syntactic congruence of L, in which x ≡<sub>L</sub> y holds if for all words u, v either both or neither of uxv and uyv lie in L." },
-    { id: "aperiodic-monoid", name: "Aperiodic monoid", kind: "eigenschaft", area: "68Q70", field: [68], msc: ["68Q"], msc5: "68Q70", uses: ["ga:monoid", "ent:natural-number"], isA: ["ga:monoid"],
+    { id: "aperiodic-monoid", name: "Aperiodic monoid", kind: "eigenschaft", area: "68Q70", field: [68], msc: ["68Q"], msc5: "68Q70", uses: ["gt:monoid", "ent:natural-number"], isA: ["gt:monoid"],
       formula: String.raw`x^{n} = x^{n+1}`,
       text: "A finite monoid in which for some n every element satisfies x<sup>n</sup> = x<sup>n+1</sup>; equivalently, it contains no non-trivial group." },
     { id: "star-free-language", name: "Star-free language", kind: "eigenschaft", area: "68Q70", field: [68], msc: ["68Q"], msc5: "68Q70", uses: ["language-operations", "st:union", "st:difference"], isA: ["formal-language"],
@@ -266,7 +266,7 @@ window.CS_CONCEPTS = {
     { id: "hamiltonian-cycle-problem", name: "Hamiltonian cycle problem", kind: "objekt", area: "68Q17", field: [68], msc: ["68Q"], msc5: "68Q17", uses: ["co:graph-path", "formal-language"],
       formula: String.raw`v_1 v_2 \cdots v_n v_1`,
       text: "Given a graph, decide whether it has a Hamiltonian cycle, a cycle passing through every vertex exactly once." },
-    { id: "traveling-salesman-problem", name: "Travelling salesman problem", kind: "objekt", area: "68Q17", field: [68], msc: ["68Q"], msc5: "68Q17", uses: ["co:complete-graph", "hamiltonian-cycle-problem"],
+    { id: "traveling-salesman-problem", name: "Travelling salesman problem", kind: "objekt", area: "68Q17", field: [68, 90], msc: ["68Q", "90C"], msc5: "68Q17", uses: ["co:complete-graph", "hamiltonian-cycle-problem"],
       formula: String.raw`\min_{\text{tours } T} \textstyle\sum_{e \in T} w(e)`,
       text: "Given a complete graph with non-negative edge weights, find a Hamiltonian cycle (tour) of least total weight. In the metric case the weights satisfy the triangle inequality." },
     { id: "subset-sum-problem", name: "Subset sum problem", kind: "objekt", area: "68Q17", field: [68], msc: ["68Q"], msc5: "68Q17", uses: ["ent:natural-number", "st:subset", "formal-language"],

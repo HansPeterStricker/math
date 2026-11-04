@@ -5,7 +5,6 @@ window.CONCEPT_PAGE = {
   "prefix": "sta",
   "colors": {
     "basic": "#d9d4ca",
-    "62A": "#8c6d5a",
     "62B": "#5b7a99",
     "62C": "#9a6b8e",
     "62E": "#6f8f5e",

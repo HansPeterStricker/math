@@ -1,7 +1,8 @@
 // Data model: theorems of group theory (MSC 2020 20) and the premises of one usual textbook proof each:
 // foundations up to Lagrange, the isomorphism theorems and cyclic groups (20A), group actions and permutation groups
 // (20B), conjugacy classes and products (20E), finite groups: p-groups, Cauchy, Sylow, Jordan–Hölder (20D),
-// solvable and nilpotent groups (20F), abelian groups (20K).
+// solvable and nilpotent groups (20F), abelian groups (20K), semigroups and monoids (20M; moved here from
+// ../../general-algebra/ on 4 November 2026, rule 1 of ../../CLAUDE.md).
 //
 // Model (see ../../CLAUDE.md and reports/2026-11-03 Satzgraphen aller Gebiete/auftrag.md): id, name, kind, area,
 // field, msc, msc5, premises, formula (without quantifiers), text, proof, concepts, year, who. As in concepts.js,
@@ -31,6 +32,7 @@ window.GT_THEOREMS = {
     "20F": "20F Commutators, solvable and nilpotent groups",
     "20G": "20G Linear algebraic groups and groups of Lie type",
     "20K": "20K Abelian groups",
+    "20M": "20M Semigroups and monoids",
   },
 
   kinds: { axiom: "Axiom", theorem: "Theorem", lemma: "Lemma", corollary: "Corollary", conjecture: "Conjecture" },
@@ -750,5 +752,30 @@ window.GT_THEOREMS = {
       proofName: "Modular Koszul duality (Achar, Makisumi, Riche, Williamson)",
       concepts: ["ag:reductive-group", "rt:soergel-bimodule"],
       year: 2017, who: "Achar, Makisumi, Riche, Williamson; Riche, Williamson" },
+    // ------------------------------------------------------------ 20M Semigroups and monoids (moved from general algebra, 4 November 2026)
+    { id: "free-monoid-universal", name: "Words form the free monoid", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M05",
+      premises: [],
+      proofName: "Extension letter by letter",
+      formula: String.raw`\bar\alpha(x_1 \cdots x_n) = \alpha(x_1) \cdots \alpha(x_n)`,
+      text: "For every monoid M and every map α from an alphabet X to M there is exactly one monoid homomorphism ᾱ from the monoid X<sup>*</sup> of words to M extending α, given by the formula shown.",
+      proof: "The formula defines a homomorphism because concatenation of words corresponds to multiplication in M, and associativity makes the product of n elements independent of bracketing. A homomorphism extending α must satisfy it.",
+      concepts: ["free-monoid", "monoid", "ga:homomorphism"],
+      year: 1940, who: "folklore" },
+    { id: "monoid-cayley", name: "Cayley's theorem for monoids", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M20",
+      premises: [],
+      proofName: "Left multiplications",
+      formula: String.raw`M \hookrightarrow T_M,\quad m \mapsto (x \mapsto mx)`,
+      text: "Every monoid M is isomorphic to a submonoid of the full transformation monoid of its own underlying set.",
+      proof: "Associativity makes m ↦ (x ↦ mx) a homomorphism, the neutral element goes to the identity map, and m is recovered as the image of e, so the map is injective.",
+      concepts: ["monoid", "transformation-monoid"],
+      year: 1940, who: "folklore (after Cayley 1854)" },
+    { id: "eckmann-hilton", name: "Eckmann–Hilton argument", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10",
+      premises: [],
+      proofName: "Interchange with units",
+      formula: String.raw`(a \cdot b) \ast (c \cdot d) = (a \ast c) \cdot (b \ast d) \;\Rightarrow\; {\cdot} = {\ast},\ \text{commutative}`,
+      text: "If a set carries two binary operations with neutral elements that satisfy the interchange law shown, then the two operations coincide and are commutative and associative. It explains why higher homotopy groups are abelian.",
+      proof: "Interchange with units gives that the two units are equal; then a · b = (a ∗ 1) · (1 ∗ b) = (a · 1) ∗ (1 · b) = a ∗ b, and similarly a · b = b ∗ a and associativity.",
+      concepts: ["monoid"],
+      year: 1962, who: "Eckmann, Hilton" },
   ],
 };

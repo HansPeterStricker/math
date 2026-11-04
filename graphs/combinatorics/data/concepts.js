@@ -299,6 +299,9 @@ window.CO_CONCEPTS = {
     { id: "rank-and-crank", name: "Rank and crank of a partition", kind: "invariante", area: "11P", field: [11, 5], msc: ["11P"], msc5: "11P83", uses: ["integer-partition"],
       formula: String.raw`\operatorname{rank}(\lambda) = \lambda_1 - \ell(\lambda)`,
       text: "Dyson's rank of a partition is its largest part minus its number of parts. The Andrews–Garvan crank is the largest part if the partition has no part 1, and otherwise the number of parts larger than the number of ones minus the number of ones." },
+    { id: "waring-number", name: "Waring numbers g(k) and G(k)", kind: "invariante", area: "11P", field: [11], msc: ["11P", "11D"], msc5: "11P05", uses: ["ent:natural-number"],
+      formula: String.raw`n = x_1^k + \dots + x_s^k,\quad g(2) = 4,\ g(3) = 9`,
+      text: "g(k) is the least s such that every natural number is a sum of s k-th powers of natural numbers; G(k) is the least s such that every sufficiently large natural number is such a sum. G(2) = 4, G(4) = 16." },
 
     // ------------------------------------------------------------ 52B, 52C Polytopes and discrete geometry
     { id: "convex-polytope", name: "Convex polytope", kind: "objekt", area: "52B", field: [52], msc: ["52B"], msc5: "52B11", uses: ["st:real-number", "st:finite-set"],
@@ -328,5 +331,8 @@ window.CO_CONCEPTS = {
     { id: "lattice-polytope", name: "Lattice polytope", kind: "objekt", area: "52B", field: [52], msc: ["52B"], msc5: "52B20", uses: ["convex-polytope", "ent:integer"], isA: ["convex-polytope"],
       formula: String.raw`P = \operatorname{conv}(v_1, \dots, v_k),\quad v_i \in \mathbb Z^n`,
       text: "The convex hull in ℝ<sup>n</sup> of finitely many lattice points, points with integer coordinates; Newton polytopes of polynomials are lattice polytopes." },
+    { id: "polyhedron", name: "Polyhedron", kind: "objekt", area: "52B", field: [52, 90], msc: ["52B", "90C"], msc5: "52B11", uses: ["la:matrix", "geo:euclidean-space"],
+      formula: String.raw`P = \{ x \in \mathbb R^n : Ax \le b \}`,
+      text: "The set of solutions of finitely many linear inequalities, an intersection of finitely many closed half-spaces of ℝ<sup>n</sup>. The feasible set of a linear program is a polyhedron; a bounded polyhedron is a convex polytope." },
   ],
 };

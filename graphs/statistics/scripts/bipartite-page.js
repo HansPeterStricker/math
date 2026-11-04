@@ -8,7 +8,6 @@ window.BIPARTITE_PAGE = {
   "theorems": "STA_THEOREMS",
   "colors": {
     "basic": "#d9d4ca",
-    "62A": "#8c6d5a",
     "62B": "#5b7a99",
     "62C": "#9a6b8e",
     "62E": "#6f8f5e",
@@ -16,7 +15,8 @@ window.BIPARTITE_PAGE = {
     "62G": "#4f8a8b",
     "62H": "#a35d5d",
     "62J": "#7a7aa8",
-    "62L": "#8f8a4c"
+    "62L": "#8f8a4c",
+    "62A": "#8c6d5a"
   },
   "shapes": {
     "axiom": "konstruktion",

@@ -1,8 +1,9 @@
 // Data of the theorem graph (theorems.html): theorems, lemmas, corollaries and conjectures of general algebra, MSC 2020
 // 08 (universal algebra, varieties, equational logic) and 06B–06F (lattices, Heyting and Boolean algebras, ordered
-// algebraic structures), with semigroups and monoids (20M) and Galois connections and closure operators (06A15). In
-// English. Built on 3 November 2026. Moved here by rule 1 of ../../CLAUDE.md, with its id: `knaster-tarski` from
-// ../../set-theory/ (first class 06B; same premise as before).
+// algebraic structures). In English. Built on 3 November 2026. Moved here by rule 1 of ../../CLAUDE.md, with its id:
+// `knaster-tarski` from ../../set-theory/ (first class 06B; same premise as before). Moved away on 4 November 2026 by
+// the same rule: the theorems on semigroups and monoids (20M) to ../../group-theory/, those on Galois connections and
+// closure operators (06A15) to ../../set-theory/.
 //
 // Model as in ../../algebraic-number-theory/data/theorem-graph.js (see its header comment): `premises` and `proof` are
 // the standard textbook proof, named in `proofName`; further proofs in `alternativeProofs`; `foundation: true` marks a
@@ -26,13 +27,11 @@ window.GA_THEOREMS = {
   areas: {
     "08A": "08A Algebraic structures: operations, subalgebras, congruences, terms",
     "08B": "08B Varieties: identities, free algebras, subdirect products",
-    "06A": "06A Ordered sets: Galois connections, closure operators (home set theory)",
     "06B": "06B Lattices",
     "06C": "06C Modular and complemented lattices",
     "06D": "06D Distributive lattices and Heyting algebras",
     "06E": "06E Boolean algebras",
     "06F": "06F Ordered algebraic structures",
-    "20M": "20M Semigroups and monoids",
   },
 
   kinds: { axiom: "Axiom", theorem: "Theorem", lemma: "Lemma", corollary: "Corollary", conjecture: "Conjecture" },
@@ -285,31 +284,6 @@ window.GA_THEOREMS = {
       concepts: ["free-algebra", "lattice"],
       year: 1941, who: "Whitman" },
 
-    // ------------------------------------------------------------ 06A Galois connections, closure operators
-    { id: "galois-connection-properties", name: "Basic properties of Galois connections", kind: "theorem", fromDefinitions: true, area: "06A", field: [6], msc: ["06A"], msc5: "06A15",
-      premises: [],
-      proofName: "Unit and counit inequalities",
-      formula: String.raw`f g f = f,\quad g f g = g,\quad f\big(\textstyle\bigvee S\big) = \bigvee f(S),\quad g\big(\textstyle\bigwedge T\big) = \bigwedge g(T)`,
-      text: "For a Galois connection (f, g), the maps satisfy f g f = f and g f g = g, g ∘ f is a closure operator, f preserves all existing suprema and g all existing infima, and each map determines the other.",
-      proof: "From f(x) ≤ f(x) one gets x ≤ g f(x), and dually f g(y) ≤ y; monotonicity gives f g f = f and g f g = g. For an upper bound y of f(S), f(s) ≤ y gives s ≤ g(y), so ⋁S ≤ g(y) and f(⋁S) ≤ y.",
-      concepts: ["galois-connection", "closure-operator", "order-preserving-map"],
-      year: 1944, who: "Ore" },
-    { id: "closure-system-complete-lattice", name: "Closed sets of a closure operator form a complete lattice", kind: "theorem", fromDefinitions: true, area: "06A", field: [6], msc: ["06A"], msc5: "06A15",
-      premises: [],
-      proofName: "Intersections of closed sets",
-      formula: String.raw`c\big(\textstyle\bigcap_i C_i\big) = \bigcap_i C_i`,
-      text: "For a closure operator c on the subsets of a set, the closed sets are closed under arbitrary intersections and form a complete lattice, with meet the intersection and join the closure of the union. Conversely every family of sets closed under intersections (a Moore family) is the family of closed sets of a closure operator.",
-      proof: "If each C<sub>i</sub> is closed, c(⋂C<sub>i</sub>) ⊆ c(C<sub>i</sub>) = C<sub>i</sub> for every i, so the intersection is closed. Conversely, for a Moore family let c(X) be the intersection of all its members containing X.",
-      concepts: ["closure-operator", "complete-lattice"],
-      year: 1910, who: "Moore" },
-    { id: "adjoint-functor-theorem-posets", name: "Adjoint functor theorem for complete lattices", kind: "theorem", fromDefinitions: true, area: "06A", field: [6], msc: ["06A"], msc5: "06A15",
-      premises: [],
-      proofName: "Upper adjoint as a supremum",
-      formula: String.raw`g(y) = \textstyle\bigvee \{ x : f(x) \le y \}`,
-      text: "A map f between complete lattices that preserves all suprema has an upper adjoint g, given by the formula shown, so that (f, g) is a Galois connection; dually for maps preserving all infima.",
-      proof: "g is order-preserving. If f(x) ≤ y, then x ≤ g(y) by definition; conversely f(g(y)) = ⋁{f(x) : f(x) ≤ y} ≤ y because f preserves suprema, so x ≤ g(y) implies f(x) ≤ y.",
-      concepts: ["galois-connection", "complete-lattice", "order-preserving-map"],
-      year: 1944, who: "Ore; Freyd (1964) for categories" },
 
     // ------------------------------------------------------------ 06B Lattices
     { id: "lattice-order-algebra-equivalence", name: "Lattices as ordered sets and as algebras", kind: "theorem", fromDefinitions: true, area: "06B", field: [6], msc: ["06B"], msc5: "06B05",
@@ -326,17 +300,17 @@ window.GA_THEOREMS = {
       formula: String.raw`f(a) = a,\quad a = \sup\{x : x \le f(x)\}`,
       text: "Every order-preserving map f of a complete lattice into itself has a fixed point, indeed a greatest one; the fixed points form a complete lattice (Tarski 1955).",
       proof: "The set {x : x ≤ f(x)} is formed by separation. For its supremum a one shows a ≤ f(a), then f(a) ≤ f(f(a)), so f(a) belongs to the set and f(a) ≤ a.",
-      concepts: ["complete-lattice", "order-preserving-map"], year: 1928, who: "Knaster, Tarski" },
+      concepts: ["complete-lattice", "st:order-preserving-map"], year: 1928, who: "Knaster, Tarski" },
     { id: "davis-theorem", name: "Davis's converse of Knaster–Tarski", kind: "theorem", area: "06B", field: [6], msc: ["06B"], msc5: "06B23",
       premises: ["knaster-tarski", "st:axiom-of-choice"],
       proofName: "A fixed-point-free map on an incomplete lattice",
       formula: String.raw`L \ \text{complete} \iff \operatorname{Fix}(f) \ne \emptyset \ \ (f : L \to L \ \text{order-preserving})`,
       text: "A lattice is complete if and only if every order-preserving map of it into itself has a fixed point.",
       proof: "One direction is the Knaster–Tarski theorem. If L is not complete, choice yields a well-ordered chain without supremum (or dually), and Davis builds from it an order-preserving map of L without a fixed point.",
-      concepts: ["complete-lattice", "order-preserving-map"],
+      concepts: ["complete-lattice", "st:order-preserving-map"],
       year: 1955, who: "Davis" },
     { id: "fca-basic-theorem", name: "Basic theorem of formal concept analysis", kind: "theorem", area: "06B", field: [6], msc: ["06B"], msc5: "06B23",
-      premises: ["galois-connection-properties", "closure-system-complete-lattice"],
+      premises: ["st:galois-connection-properties", "st:closure-system-complete-lattice"],
       proofName: "Extents as closed sets of the derivation operators",
       formula: String.raw`\textstyle\bigwedge_i (A_i, B_i) = \big(\bigcap_i A_i,\ (\bigcup_i B_i)''\big),\quad L \cong \mathfrak B(L, L, \le)`,
       text: "The concept lattice of every formal context is a complete lattice, with meets and joins as shown for meets; conversely every complete lattice L is isomorphic to a concept lattice, for example that of the context (L, L, ≤).",
@@ -404,20 +378,20 @@ window.GA_THEOREMS = {
       concepts: ["distributive-lattice", "prime-filter"],
       year: 1937, who: "Stone; Birkhoff (1933)" },
     { id: "heyting-algebra-distributive", name: "Heyting algebras are distributive", kind: "corollary", area: "06D", field: [6], msc: ["06D"], msc5: "06D20",
-      premises: ["galois-connection-properties"],
+      premises: ["st:galois-connection-properties"],
       proofName: "Meet with a has an upper adjoint",
       formula: String.raw`a \wedge \textstyle\bigvee S = \bigvee \{ a \wedge s : s \in S \}`,
       text: "In a Heyting algebra, meet with a fixed element preserves all existing suprema; in particular every Heyting algebra is a distributive lattice.",
       proof: "The map x ↦ a ∧ x is the lower adjoint of b ↦ (a → b) by the definition of the relative pseudocomplement, and lower adjoints of Galois connections preserve all existing suprema.",
-      concepts: ["heyting-algebra", "distributive-lattice", "galois-connection"],
+      concepts: ["heyting-algebra", "distributive-lattice", "st:galois-connection"],
       year: 1930, who: "Heyting; Skolem (1919)" },
     { id: "complete-heyting-criterion", name: "Complete Heyting algebras are the frames", kind: "theorem", area: "06D", field: [6], msc: ["06D"], msc5: "06D22",
-      premises: ["adjoint-functor-theorem-posets", "heyting-algebra-distributive"],
+      premises: ["st:adjoint-functor-theorem-posets", "heyting-algebra-distributive"],
       proofName: "Upper adjoint of meet",
       formula: String.raw`a \to b = \textstyle\bigvee \{ c : c \wedge a \le b \}`,
       text: "A complete lattice is a Heyting algebra if and only if it satisfies the infinite distributive law a ∧ ⋁S = ⋁(a ∧ s); then a → b is given by the formula shown.",
       proof: "If the law holds, x ↦ a ∧ x preserves all suprema and has an upper adjoint by the adjoint functor theorem for complete lattices, which is a → b. The converse is the distributivity of Heyting algebras.",
-      concepts: ["heyting-algebra", "complete-lattice", "galois-connection"],
+      concepts: ["heyting-algebra", "complete-lattice", "st:galois-connection"],
       year: 1957, who: "Ehresmann; Bénabou (1959)" },
     { id: "open-sets-heyting", name: "Open sets form a complete Heyting algebra", kind: "corollary", area: "06D", field: [6], msc: ["06D"], msc5: "06D22",
       premises: ["complete-heyting-criterion"],
@@ -501,30 +475,5 @@ window.GA_THEOREMS = {
       concepts: ["archimedean-ordered-group", "partially-ordered-group"],
       year: 1907, who: "Hahn" },
 
-    // ------------------------------------------------------------ 20M Semigroups and monoids
-    { id: "free-monoid-universal", name: "Words form the free monoid", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M05",
-      premises: [],
-      proofName: "Extension letter by letter",
-      formula: String.raw`\bar\alpha(x_1 \cdots x_n) = \alpha(x_1) \cdots \alpha(x_n)`,
-      text: "For every monoid M and every map α from an alphabet X to M there is exactly one monoid homomorphism ᾱ from the monoid X<sup>*</sup> of words to M extending α, given by the formula shown.",
-      proof: "The formula defines a homomorphism because concatenation of words corresponds to multiplication in M, and associativity makes the product of n elements independent of bracketing. A homomorphism extending α must satisfy it.",
-      concepts: ["free-monoid", "monoid", "homomorphism"],
-      year: 1940, who: "folklore" },
-    { id: "monoid-cayley", name: "Cayley's theorem for monoids", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M20",
-      premises: [],
-      proofName: "Left multiplications",
-      formula: String.raw`M \hookrightarrow T_M,\quad m \mapsto (x \mapsto mx)`,
-      text: "Every monoid M is isomorphic to a submonoid of the full transformation monoid of its own underlying set.",
-      proof: "Associativity makes m ↦ (x ↦ mx) a homomorphism, the neutral element goes to the identity map, and m is recovered as the image of e, so the map is injective.",
-      concepts: ["monoid", "transformation-monoid"],
-      year: 1940, who: "folklore (after Cayley 1854)" },
-    { id: "eckmann-hilton", name: "Eckmann–Hilton argument", kind: "theorem", fromDefinitions: true, area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10",
-      premises: [],
-      proofName: "Interchange with units",
-      formula: String.raw`(a \cdot b) \ast (c \cdot d) = (a \ast c) \cdot (b \ast d) \;\Rightarrow\; {\cdot} = {\ast},\ \text{commutative}`,
-      text: "If a set carries two binary operations with neutral elements that satisfy the interchange law shown, then the two operations coincide and are commutative and associative. It explains why higher homotopy groups are abelian.",
-      proof: "Interchange with units gives that the two units are equal; then a · b = (a ∗ 1) · (1 ∗ b) = (a · 1) ∗ (1 · b) = a ∗ b, and similarly a · b = b ∗ a and associativity.",
-      concepts: ["monoid"],
-      year: 1962, who: "Eckmann, Hilton" },
   ],
 };

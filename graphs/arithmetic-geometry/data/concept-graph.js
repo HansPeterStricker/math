@@ -105,6 +105,9 @@ window.AR_CG = {
     { id: "fixed-prime-divisor", name: "Fixed prime divisor", kind: "eigenschaft", area: "11N", field: [11], msc: ["11N"], msc5: "11N32", uses: ["ca:polynomial-ring", "ent:prime-number", "ent:divisibility", "ent:integer"],
       formula: String.raw`p \mid f(n)`,
       text: "For a polynomial f with integer coefficients, a prime p that divides f(n) for every integer n; a polynomial without one is admissible in Bunyakovsky's and Schinzel's conjectures." },
+    { id: "smooth-number", name: "Smooth number", kind: "eigenschaft", area: "11N", field: [11], msc: ["11N", "11Y"], msc5: "11N25", uses: ["ent:prime-factorization"],
+      formula: String.raw`p \mid n \;\Rightarrow\; p \le B`,
+      text: "A natural number n is B-smooth if all its prime factors are at most B, and B-powersmooth if all prime powers dividing it are at most B. Ψ(x, y) counts the y-smooth numbers up to x. Smooth numbers are the raw material of all subexponential factoring and discrete logarithm algorithms." },
 
     // ------------------------------------------------------------ 11F Modular forms, automorphic forms
     { id: "modular-group", name: "Modular group", kind: "objekt", area: "11F", field: [11, 20], msc: ["11F", "20H"], msc5: "11F06", uses: ["ent:integer", "gt:group", "gt:group-action", "st:complex-number", "gt:general-linear-group", "gt:subgroup"],

@@ -12,7 +12,8 @@ window.CONCEPT_PAGE = {
     "20E": "#4f86c6",
     "20F": "#9b5de5",
     "20K": "#e76f51",
-    "20G": "#2a9d8f"
+    "20G": "#2a9d8f",
+    "20M": "#808a99"
   },
   "centre": [
     "group"

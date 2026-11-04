@@ -65,15 +65,9 @@ window.GAN_CONCEPTS = {
       text: "A smooth map f : X → Y between Banach manifolds whose differential df<sub>x</sub> is a Fredholm operator (finite-dimensional kernel and cokernel, closed image) at every point. On a connected X the index is constant; it is the expected dimension of the preimage of a regular value." },
 
     // ------------------------------------------------------------ 58C Calculus on manifolds
-    { id: "immersion", name: "Immersion", kind: "morphismus", area: "58C", field: [58, 57], msc: ["58C", "57R"], msc5: "58C25", uses: ["top:smooth-map", "top:differential"], isA: ["top:smooth-map"],
-      formula: String.raw`df_p : T_p M \to T_{f(p)} N \text{ injective}`,
-      text: "A smooth map whose differential is injective at every point. An immersion is locally an embedding but may cross itself, like a figure eight in the plane." },
     { id: "submersion", name: "Submersion", kind: "morphismus", area: "58C", field: [58, 57], msc: ["58C", "57R"], msc5: "58C25", uses: ["top:smooth-map", "top:differential"], isA: ["top:smooth-map"],
       formula: String.raw`df_p : T_p M \to T_{f(p)} N \text{ surjective}`,
       text: "A smooth map whose differential is surjective at every point; every point of the target is a regular value, and locally the map is a projection ℝ<sup>m</sup> → ℝ<sup>n</sup>." },
-    { id: "transversality", name: "Transversality", kind: "eigenschaft", area: "58C", field: [58, 57], msc: ["58C", "57R"], msc5: "58C25", uses: ["top:smooth-map", "top:submanifold", "top:differential", "top:tangent-space"],
-      formula: String.raw`df_p(T_p M) + T_{f(p)} Z = T_{f(p)} N`,
-      text: "A smooth map f : M → N is transverse to a submanifold Z of N, f ⋔ Z, if at every point p with f(p) ∈ Z the image of the differential and the tangent space of Z together span the tangent space of N. For Z a point this says that the point is a regular value; two submanifolds are transverse if the inclusion of one is transverse to the other." },
 
     // ------------------------------------------------------------ 58D Spaces of maps
     { id: "whitney-topology", name: "Whitney C^∞ topology", kind: "konstruktion", area: "58D", field: [58], msc: ["58D"], msc5: "58D15", uses: ["top:jet-bundle", "top:smooth-map", "top:topological-space"],
@@ -126,7 +120,7 @@ window.GAN_CONCEPTS = {
     { id: "cup-length", name: "Cup length", kind: "invariante", area: "58E", field: [58, 55], msc: ["58E", "55M"], msc5: "58E05", uses: ["top:cup-product", "top:singular-cohomology"],
       formula: String.raw`\operatorname{cl}(X) = \max \{ k : \alpha_1 \smile \dots \smile \alpha_k \ne 0,\ \deg \alpha_i \ge 1 \}`,
       text: "The largest number k of cohomology classes of positive degree whose cup product is not zero (for a chosen coefficient ring). The cup length of the n-torus is n, that of ℝP<sup>n</sup> with coefficients ℤ/2 is n." },
-    { id: "morse-smale-pair", name: "Morse–Smale pair", kind: "eigenschaft", area: "58E", field: [58, 37], msc: ["58E"], msc5: "58E05", uses: ["gradient-flow", "ds:stable-manifold", "transversality", "top:morse-function"],
+    { id: "morse-smale-pair", name: "Morse–Smale pair", kind: "eigenschaft", area: "58E", field: [58, 37], msc: ["58E"], msc5: "58E05", uses: ["gradient-flow", "ds:stable-manifold", "top:transversality", "top:morse-function"],
       formula: String.raw`W^u(p) \pitchfork W^s(q)`,
       text: "A Morse function f and a Riemannian metric on a closed manifold such that for all critical points p and q the unstable manifold of p and the stable manifold of q of the negative gradient flow intersect transversally. Then the flow lines from p to q form a manifold of dimension ind(p) − ind(q)." },
     { id: "morse-complex", name: "Morse complex", kind: "konstruktion", area: "58E", field: [58, 57], msc: ["58E"], msc5: "58E05", uses: ["morse-smale-pair", "morse-index", "ct:chain-complex"],

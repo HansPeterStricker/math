@@ -196,5 +196,9 @@ window.CV_CONCEPTS = {
     { id: "variational-symmetry", name: "Variational symmetry", kind: "eigenschaft", area: "49S", field: [49], msc: ["49S"], msc5: "49S05", uses: ["action-functional", "ana:diffeomorphism"],
       formula: String.raw`S[\Phi_s \circ q] = S[q]`,
       text: "A one-parameter group of diffeomorphisms Φ<sub>s</sub> of the configuration space (possibly also moving time) that leaves the action of every path, over every time interval, unchanged. Translations and rotations are symmetries of the action of free particles." },
+    // ------------------------------------------------------------ 49N Linear-quadratic problems (moved from optimization, 4 November 2026)
+    { id: "lqr-problem", name: "Linear-quadratic regulator problem", kind: "objekt", area: "49N", field: [49, 93], msc: ["49N", "93C"], msc5: "49N10", uses: ["opt:state-space-system", "la:positive-definite", "opt:optimization-problem"],
+      formula: String.raw`\min\ x(T)^{\mathsf T} S\, x(T) + \int_0^T \big( x^{\mathsf T} Q x + u^{\mathsf T} R u \big)\, dt`,
+      text: "For a linear system x′ = Ax + Bu with initial state x(0) = x<sub>0</sub>, find the input that minimizes a quadratic cost with Q and S positive semidefinite and R positive definite. The horizon T is finite, or T = ∞ without the terminal term." },
   ],
 };

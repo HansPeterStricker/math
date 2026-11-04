@@ -45,7 +45,7 @@ window.KT_CONCEPTS = {
 
   concepts: [
     // ------------------------------------------------------------ 19A Grothendieck groups and K_0
-    { id: "grothendieck-group", name: "Grothendieck group of a monoid", kind: "konstruktion", area: "19A", field: [19], msc: ["19A"], msc5: "19A99", uses: ["ga:commutative-monoid", "gt:abelian-group", "st:cartesian-product", "st:equivalence-class"],
+    { id: "grothendieck-group", name: "Grothendieck group of a monoid", kind: "konstruktion", area: "19A", field: [19], msc: ["19A"], msc5: "19A99", uses: ["gt:commutative-monoid", "gt:abelian-group", "st:cartesian-product", "st:equivalence-class"],
       formula: String.raw`K(M) = (M \times M)/\!\sim,\quad (a, b) \sim (c, d) \iff a + d + e = b + c + e`,
       text: "For a commutative monoid M, the abelian group of formal differences a − b, i.e. the equivalence classes of pairs (a, b) with (a, b) ∼ (c, d) if a + d + e = b + c + e for some e in M. It is the universal abelian group receiving a monoid homomorphism from M (group completion). K(ℕ) = ℤ." },
     { id: "k0-ring", name: "K₀ of a ring", kind: "invariante", area: "19A", field: [19], msc: ["19A"], msc5: "19A49", uses: ["grothendieck-group", "ca:projective-module", "ca:finitely-generated-module", "ca:direct-sum", "aa:ring"],

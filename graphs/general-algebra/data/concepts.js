@@ -3,10 +3,9 @@
 // Heyting and Boolean algebras, ordered algebraic structures). In English. Built on 3 November 2026.
 //
 // Moved here by rule 1 of ../../CLAUDE.md, with their ids: `lattice`, `boolean-algebra` and `complete-boolean-algebra`
-// from ../../set-theory/ (first class 06B resp. 06E). Kept here although their first class lies in a folder that
-// exists: semigroups and monoids (20M, group theory "gt:" has no semigroups; order of 3 November 2026), and
-// order-preserving maps, Galois connections and closure operators (06A, set theory "st:" has none of them yet). These
-// six may move later; see the report.
+// from ../../set-theory/ (first class 06B resp. 06E). Moved away on 4 November 2026 by the same rule: semigroups and
+// monoids (20M) to ../../group-theory/ ("gt:"), order-preserving maps, Galois connections and closure operators (06A)
+// to ../../set-theory/ ("st:"); see reports/2026-11-04 Offene Punkte Zusammenfuehren/bericht.md.
 //
 // Same model as ../../elementary-number-theory/data/concepts.js (see its header comment). `area` is the
 // three-character MSC class (08A, 08B, 06B, …); classes with few concepts share the sector "Smaller classes".
@@ -26,13 +25,11 @@ window.GA_CONCEPTS = {
   areas: {
     "08A": "08A Algebraic structures: operations, subalgebras, congruences, terms",
     "08B": "08B Varieties: identities, free algebras, subdirect products",
-    "06A": "06A Ordered sets: monotone maps, Galois connections (home set theory)",
     "06B": "06B Lattices",
     "06C": "06C Modular and complemented lattices",
     "06D": "06D Distributive lattices and Heyting algebras",
     "06E": "06E Boolean algebras",
     "06F": "06F Ordered algebraic structures",
-    "20M": "20M Semigroups and monoids",
   },
 
   kinds: {
@@ -129,16 +126,6 @@ window.GA_CONCEPTS = {
       formula: String.raw`\operatorname{Con}\mathbf A \ \text{distributive}`,
       text: "A variety in which the congruence lattice of every algebra is distributive. Lattices and Boolean algebras form congruence-distributive varieties; groups do not (the Klein four-group has the non-distributive congruence lattice M<sub>3</sub>)." },
 
-    // ------------------------------------------------------------ 06A Ordered sets (home set theory)
-    { id: "order-preserving-map", name: "Order-preserving map", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A06", uses: ["st:partial-order", "st:map"], isA: ["st:map"],
-      formula: String.raw`x \le y \;\Rightarrow\; f(x) \le f(y)`,
-      text: "A map f between partially ordered sets that preserves the order, also called monotone or isotone." },
-    { id: "galois-connection", name: "Galois connection", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A15", uses: ["order-preserving-map", "st:partial-order"],
-      formula: String.raw`f(x) \le y \iff x \le g(y)`,
-      text: "A pair of order-preserving maps f : P → Q and g : Q → P between partially ordered sets with the property shown (monotone form; f is the lower and g the upper adjoint). The classical antitone form, as between subgroups and intermediate fields in Galois theory, is a Galois connection between P and the opposite order of Q." },
-    { id: "closure-operator", name: "Closure operator", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A15", uses: ["order-preserving-map"], isA: ["order-preserving-map"],
-      formula: String.raw`x \le c(x),\quad c(c(x)) = c(x)`,
-      text: "An order-preserving map c of a partially ordered set to itself that is extensive and idempotent, as shown. Its fixed points are the closed elements. Examples: the generated subalgebra Sg on subsets of an algebra, the topological closure, g ∘ f for a Galois connection." },
 
     // ------------------------------------------------------------ 06B Lattices
     { id: "lattice", name: "Lattice", kind: "eigenschaft", area: "06B", field: [6], msc: ["06B"], msc5: "06B05", uses: ["st:supremum", "st:infimum", "st:partial-order"], isA: ["st:partial-order"],
@@ -167,7 +154,7 @@ window.GA_CONCEPTS = {
     { id: "formal-context", name: "Formal context", kind: "objekt", area: "06B", field: [6], msc: ["06B"], msc5: "06B99", uses: ["st:relation", "st:set"],
       formula: String.raw`(G, M, I),\quad I \subseteq G \times M`,
       text: "A set G of objects, a set M of attributes and a relation I between them, read “object g has attribute m”; the starting point of formal concept analysis (Wille 1982). A finite context is a cross table." },
-    { id: "formal-concept", name: "Formal concept", kind: "objekt", area: "06B", field: [6], msc: ["06B"], msc5: "06B99", uses: ["formal-context", "galois-connection"],
+    { id: "formal-concept", name: "Formal concept", kind: "objekt", area: "06B", field: [6], msc: ["06B"], msc5: "06B99", uses: ["formal-context", "st:galois-connection"],
       formula: String.raw`A' = B,\quad B' = A`,
       text: "A pair (A, B) of a set A of objects (extent) and a set B of attributes (intent) of a formal context such that B is the set A′ of attributes common to all objects of A and A is the set B′ of objects having all attributes of B. The derivation operators ′ form an antitone Galois connection between the power sets of G and M." },
     { id: "concept-lattice", name: "Concept lattice", kind: "konstruktion", area: "06B", field: [6], msc: ["06B"], msc5: "06B23", uses: ["formal-concept", "complete-lattice"],
@@ -238,21 +225,5 @@ window.GA_CONCEPTS = {
       formula: String.raw`1 < a \;\Rightarrow\; b < a^n,\ n \in \mathbb N`,
       text: "A totally ordered group in which no element is infinitely large compared with another: for any elements a > 1 and b there is a natural number n with b < a<sup>n</sup>. Subgroups of (ℝ, +) are Archimedean." },
 
-    // ------------------------------------------------------------ 20M Semigroups and monoids
-    { id: "semigroup", name: "Semigroup", kind: "objekt", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10", uses: ["st:set", "st:binary-operation"],
-      formula: String.raw`(xy)z = x(yz)`,
-      text: "A non-empty set with an associative binary operation. Semigroups form the variety of algebras of one binary operation defined by the associative law." },
-    { id: "monoid", name: "Monoid", kind: "objekt", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10", uses: ["semigroup"], isA: ["semigroup"],
-      formula: String.raw`ex = xe = x`,
-      text: "A semigroup with a neutral element e, as shown. The natural numbers under addition, the maps of a set to itself under composition and the words over an alphabet under concatenation are monoids. A group is a monoid in which every element has an inverse." },
-    { id: "commutative-monoid", name: "Commutative monoid", kind: "objekt", area: "20M", field: [20], msc: ["20M"], msc5: "20M14", uses: ["monoid"], isA: ["monoid"],
-      formula: String.raw`(M, +, 0),\quad a + b = b + a,\quad (a + b) + c = a + (b + c),\quad a + 0 = a`,
-      text: "A set with a commutative and associative binary operation and a neutral element; inverses need not exist. Examples: the natural numbers under addition, isomorphism classes of finitely generated projective modules under direct sum." },
-    { id: "free-monoid", name: "Free monoid", kind: "konstruktion", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M05", uses: ["monoid", "st:set", "ent:natural-number"],
-      formula: String.raw`X^* = \{ x_1 x_2 \cdots x_n : n \in \mathbb N,\ x_i \in X \}`,
-      text: "The set X<sup>*</sup> of finite words over an alphabet X, including the empty word, with concatenation as operation. It is the free algebra over X in the variety of monoids; formal languages are subsets of it." },
-    { id: "transformation-monoid", name: "Full transformation monoid", kind: "konstruktion", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M20", uses: ["monoid", "st:map", "st:composition"],
-      formula: String.raw`T_X = \{ f : X \to X \},\quad f \cdot g = f \circ g`,
-      text: "The set of all maps of a set X to itself with composition as operation and the identity map as neutral element. Its group of units is the symmetric group of X." },
   ],
 };

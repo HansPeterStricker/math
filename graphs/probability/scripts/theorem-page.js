@@ -21,7 +21,7 @@ window.CONCEPT_PAGE = {
   "hubs": [],
   "foreignOutside": true,
   "centre": [
-    "pi-lambda-theorem"
+    "markov-inequality"
   ],
   "sources": {
     "lo": {

@@ -626,6 +626,10 @@ window.DE_THEOREMS = {
     { id: "courant-fischer-minimax", name: "Minimax characterization of Dirichlet eigenvalues", kind: "theorem", area: "35P", field: [35], msc: ["35P"], msc5: "35P15",
       premises: ["dirichlet-eigenfunctions-basis"],
       proofName: "Expansion in the eigenbasis",
+      alternativeProofs: [
+        { name: "Special case of the Courant–Fischer principle", premises: ["cv:courant-fischer-min-max", "dirichlet-eigenfunctions-basis"],
+          idea: "The Dirichlet Laplacian with form domain H<sup>1</sup><sub>0</sub>(U) is self-adjoint, bounded below and has a compact resolvent, as its eigenfunctions form an orthonormal basis with eigenvalues tending to ∞; the general min-max principle applies. Domain monotonicity follows from the inclusion of the form domains." },
+      ],
       formula: String.raw`\lambda_k = \min_{\substack{V \subseteq H^1_0(U) \\ \dim V = k}}\ \max_{u \in V \setminus \{0\}} \frac{\int_U |\nabla u|^2}{\int_U u^2}`,
       text: "The k-th Dirichlet eigenvalue of a bounded open set is the minimum over k-dimensional subspaces of H<sup>1</sup><sub>0</sub>(U) of the maximum of the Rayleigh quotient on the subspace. Consequences: λ<sub>k</sub> decreases when the domain grows (domain monotonicity), and λ<sub>1</sub> is the minimum of the Rayleigh quotient.",
       proof: "In the orthonormal eigenbasis the Rayleigh quotient of u = Σ c<sub>j</sub>w<sub>j</sub> is Σ λ<sub>j</sub>c<sub>j</sub><sup>2</sup>/Σ c<sub>j</sub><sup>2</sup>. Every k-dimensional subspace contains a non-zero vector orthogonal to w<sub>1</sub>, …, w<sub>k−1</sub>, with quotient ≥ λ<sub>k</sub>; the span of w<sub>1</sub>, …, w<sub>k</sub> attains λ<sub>k</sub>. Domain monotonicity follows because H<sup>1</sup><sub>0</sub> of the smaller set embeds in that of the larger one.",

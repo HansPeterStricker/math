@@ -103,6 +103,11 @@ window.AR_THEOREMS = {
       formula: String.raw`\sum_{n \le x} a_n \sim A x`,
       text: "Let a Dirichlet series with coefficients a<sub>n</sub> ≥ 0 converge for Re s > 1, and let the series minus A/(s − 1) extend continuously to Re s ≥ 1. Then the sum of the a<sub>n</sub> with n ≤ x is asymptotic to Ax.",
       proof: "Integrating the boundary values of the series on the line Re s = 1 against the Fejér kernel and applying the Riemann–Lebesgue lemma gives the asymptotics of a smoothed sum of the a<sub>n</sub>; because the a<sub>n</sub> are non-negative, the smoothing can be removed. The proof rests on Fourier analysis, outside these graphs.",
+      alternativeProofs: [
+        { name: "From Wiener's general Tauberian theorem", premises: ["apt:wiener-tauberian-theorem"],
+          idea: "With n = e<sup>u</sup> the Dirichlet series becomes a Laplace transform. Its boundary values on Re s = 1 give a convolution identity with a kernel in L<sup>1</sup>(ℝ) whose Fourier transform has no zero, and Wiener's Tauberian theorem transfers the limit to the summatory function; non-negativity of the a<sub>n</sub> removes the smoothing.",
+          year: 1932, who: "Wiener" },
+      ],
       concepts: ["dirichlet-series", "ana:asymptotic-notation"],
       year: 1931, who: "Ikehara, Wiener" },
     { id: "newman-tauberian", name: "Newman's Tauberian theorem", kind: "theorem", area: "11M", field: [11, 40], msc: ["11M", "40E"], msc5: "11M45",
@@ -571,7 +576,7 @@ window.AR_THEOREMS = {
       formula: String.raw`\Psi\big(x, x^{1/u}\big) = x\, u^{-u(1 + o(1))}`,
       text: "The number Ψ(x, y) of y-smooth numbers up to x satisfies the asymptotic shown, uniformly for u = log x / log y → ∞ with u < (1 − ε) log x / log log x. For fixed u, Ψ(x, x<sup>1/u</sup>) ∼ ρ(u)x with Dickman's function ρ (Dickman 1930). This is the estimate behind the running times of all sieve factoring algorithms.",
       proof: "Rests on analytic number theory outside these graphs: a lower bound by counting products of primes from a suitable interval, and an upper bound by Rankin's method, Ψ(x, y) ≤ x<sup>σ</sup> ∏<sub>p≤y</sub> (1 − p<sup>−σ</sup>)<sup>−1</sup> with σ near 1 − (u log u)/log x, using the prime number theorem.",
-      concepts: ["fnt:smooth-number"],
+      concepts: ["smooth-number"],
       year: 1983, who: "Canfield, Erdős, Pomerance" },
   ],
 };

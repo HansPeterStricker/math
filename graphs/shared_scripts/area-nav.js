@@ -33,9 +33,12 @@
     return list.length ? `<div class="gruppe">${g.name ? `<div class="gruppe-name">${g.name}</div>` : ""}${list.map(entry).join("")}</div>` : "";
   }).join("");
   const onAreas = here === null && page === "areas.html", onClusters = here === null && page === "clusters.html";
-  nav.innerHTML = `<a class="alle" href="${root}index.html">All graphs</a>` +
+  // link to the local overview of the project, only on local pages (user, 4 November 2026)
+  nav.innerHTML = (location.protocol === "file:" ? `<a class="alle" href="${root}../index.html" title="Local overview of all pages of the project">⌂ Overview</a>` : "") +
+    `<a class="alle" href="${root}index.html">All graphs</a>` +
     `<a class="alle${onAreas ? " hier" : ""}" href="${root}areas.html"${onAreas ? ' aria-current="page"' : ""}>Graph of areas</a>` +
-    `<a class="alle${onClusters ? " hier" : ""}" href="${root}clusters.html"${onClusters ? ' aria-current="page"' : ""}>Pairs and triples</a>` + html;
+    // the pairs and triples are not published (user, 4 November 2026): the link only on local pages (file://)
+    (location.protocol === "file:" || onClusters ? `<a class="alle${onClusters ? " hier" : ""}" href="${root}clusters.html"${onClusters ? ' aria-current="page"' : ""}>Pairs and triples</a>` : "") + html;
   app.insertBefore(nav, app.firstChild);
   app.classList.add("mit-gebieten");
   // keep the area shown in view when the column scrolls

@@ -7,13 +7,11 @@ window.CONCEPT_PAGE = {
     "basic": "#d9d4ca",
     "08A": "#5b7fa6",
     "08B": "#6f9a8d",
-    "06A": "#9a8f6a",
     "06B": "#a8686a",
     "06C": "#b08a5a",
     "06D": "#7d6b9a",
     "06E": "#5f8f5a",
-    "06F": "#a67395",
-    "20M": "#808a99"
+    "06F": "#a67395"
   },
   "foreignArea": "basic",
   "foreignLabel": "proved outside general algebra",

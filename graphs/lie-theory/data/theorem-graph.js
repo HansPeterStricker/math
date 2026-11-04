@@ -686,7 +686,7 @@ window.LIE_THEOREMS = {
       text: "A finite-dimensional real division algebra, not necessarily associative or alternative, has dimension 1, 2, 4 or 8. Hopf (1940) had shown that the dimension is a power of 2.",
       proof: "A division algebra of dimension n makes the sphere S<sup>n−1</sup> parallelizable (the vectors x ↦ (xa<sub>i</sub>)(a<sub>1</sub>)<sup>−1</sup>-type construction gives n − 1 independent tangent fields). Bott periodicity determines the stable homotopy of the orthogonal groups, from which Bott, Milnor and Kervaire conclude that S<sup>n−1</sup> is parallelizable only for n = 1, 2, 4, 8. Adams (1960) gave a proof through the Hopf invariant one problem.",
       alternativeProofs: [
-        { name: "Hopf invariant one (Adams; Atiyah)", premises: ["kt:hopf-invariant-one"], year: 1960, who: "Adams; Atiyah (1966, with K-theory)",
+        { name: "Hopf invariant one (Adams; Atiyah)", premises: ["top:hopf-invariant-one"], year: 1960, who: "Adams; Atiyah (1966, with K-theory)",
           idea: "A division algebra of dimension n gives a map S<sup>2n−1</sup> → S<sup>n</sup> of Hopf invariant one by the Hopf construction; such maps exist only for n = 1, 2, 4, 8." },
       ],
       concepts: ["division-algebra", "top:sphere"],

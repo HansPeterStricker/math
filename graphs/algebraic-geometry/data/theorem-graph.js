@@ -510,6 +510,9 @@ window.AG_THEOREMS = {
       premises: ["scv:hodge-decomposition", "gaga"],
       proofName: "Bochner technique", proofYear: 1953, proofWho: "Kodaira",
       alternativeProofs: [
+        { name: "Case p = n of Akizuki–Nakano", premises: ["scv:akizuki-nakano-vanishing", "gaga"],
+          idea: "An ample line bundle is positive (pull back the Fubini–Study metric by an embedding of a power), and ω<sub>X</sub> ⊗ L = Ω<sup>n</sup> ⊗ L. The Akizuki–Nakano theorem with p = n gives the vanishing of analytic cohomology for q > 0, and GAGA identifies it with algebraic cohomology.",
+          year: 1954, who: "Akizuki, Nakano" },
         { name: "Deligne–Illusie: reduction to characteristic p", premises: ["serre-vanishing", "serre-duality"],
           idea: "Deligne and Illusie (1987): over a perfect field of characteristic p > dim X, a variety that lifts to W<sub>2</sub> has a decomposed de Rham complex, which gives injections H<sup>i</sup>(Ω ⊗ L<sup>−1</sup>) ↪ H<sup>i</sup>(Ω ⊗ L<sup>−p</sup>). Iterating and applying Serre's vanishing theorem and Serre duality gives the vanishing in characteristic p; spreading out a complex variety over a finitely generated ring transfers it to characteristic 0.",
           year: 1987, who: "Deligne; Illusie" },

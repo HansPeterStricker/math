@@ -323,6 +323,15 @@ window.TOP_CONCEPTS = {
     { id: "exotic-sphere", name: "Exotic sphere", kind: "eigenschaft", area: "57R", field: [57], msc: ["57R"], msc5: "57R60", uses: ["manifold", "sphere", "homeomorphism", "diffeomorphism"],
       formula: String.raw`\Sigma \approx S^n,\quad \Sigma \not\cong_{\mathrm{diff}} S^n`,
       text: "A smooth manifold that is homeomorphic but not diffeomorphic to the standard sphere S<sup>n</sup>." },
+    { id: "set-valued-map", name: "Set-valued map", kind: "morphismus", area: "54C", field: [54], msc: ["54C"], msc5: "54C60", uses: ["st:map", "st:power-set", "topological-space"],
+      formula: String.raw`F : X \to \mathcal P(Y),\quad \{(x, y) : y \in F(x)\}`,
+      text: "A map F that assigns to each point x of a topological space X a subset F(x) of a space Y (also called a correspondence or multifunction). Its graph is the set of pairs (x, y) with y in F(x); F has a closed graph if this set is closed in X × Y." },
+    { id: "immersion", name: "Immersion", kind: "morphismus", area: "57R", field: [57, 58], msc: ["57R", "58C"], msc5: "57R42", uses: ["smooth-map", "differential"], isA: ["smooth-map"],
+      formula: String.raw`df_p : T_p M \to T_{f(p)} N \text{ injective}`,
+      text: "A smooth map whose differential is injective at every point. An immersion is locally an embedding but may cross itself, like a figure eight in the plane." },
+    { id: "transversality", name: "Transversality", kind: "eigenschaft", area: "57R", field: [57, 58], msc: ["57R", "58C"], msc5: "57R35", uses: ["smooth-map", "submanifold", "differential", "tangent-space"],
+      formula: String.raw`df_p(T_p M) + T_{f(p)} Z = T_{f(p)} N`,
+      text: "A smooth map f : M → N is transverse to a submanifold Z of N, f ⋔ Z, if at every point p with f(p) ∈ Z the image of the differential and the tangent space of Z together span the tangent space of N. For Z a point this says that the point is a regular value; two submanifolds are transverse if the inclusion of one is transverse to the other." },
 
     // ------------------------------------------------------------ 58A Smooth manifolds and differential forms
     { id: "manifold", name: "Smooth manifold", kind: "objekt", area: "58A", field: [58, 57], msc: ["58A", "57R"], msc5: "58A05", uses: ["topological-manifold", "homeomorphism", "standard-topology-rn", "ana:continuously-differentiable"], isA: ["topological-manifold"],

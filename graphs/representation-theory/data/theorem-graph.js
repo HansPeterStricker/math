@@ -52,6 +52,10 @@ window.RT_THEOREMS = {
       text: "An intertwining map between two irreducible representations of a group is either zero or an isomorphism. The same holds for simple modules over any algebra, such as representations of a Lie algebra.",
       proof: "The kernel of f is a subrepresentation of V and the image a subrepresentation of W. Since V and W are irreducible, f ≠ 0 forces ker f = 0 and im f = W.",
       proofName: "Kernel and image",
+      alternativeProofs: [
+        { name: "Special case of Schur's lemma for modules", premises: ["aa:schur-lemma-modules"],
+          idea: "A representation of G over k is a module over the group algebra k[G], irreducible representations are simple modules and intertwining maps are module homomorphisms; Schur's lemma for modules applies." },
+      ],
       concepts: ["intertwining-map", "irreducible-representation"],
       year: 1905, who: "Schur" },
     { id: "schur-lemma-scalars", name: "Schur's lemma over an algebraically closed field", kind: "corollary", area: "20C", field: [20], msc: ["20C"], msc5: "20C15",

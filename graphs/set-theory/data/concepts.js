@@ -172,6 +172,15 @@ window.ST_CONCEPTS = {
     { id: "poset-moebius-function", name: "Möbius function of a partially ordered set", kind: "invariante", area: "06A", field: [6, 5], msc: ["06A"], msc5: "06A07", uses: ["incidence-algebra"],
       formula: String.raw`\mu(x, x) = 1,\quad \mu(x, y) = -\sum_{x \le z < y} \mu(x, z) \quad (x < y)`,
       text: "The inverse μ of the zeta function ζ in the incidence algebra of a locally finite partially ordered set, given by the recursion shown. For the divisibility order on the natural numbers μ(d, n) is the classical Möbius function of n/d." },
+    { id: "order-preserving-map", name: "Order-preserving map", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A06", uses: ["partial-order", "map"], isA: ["map"],
+      formula: String.raw`x \le y \;\Rightarrow\; f(x) \le f(y)`,
+      text: "A map f between partially ordered sets that preserves the order, also called monotone or isotone." },
+    { id: "galois-connection", name: "Galois connection", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A15", uses: ["order-preserving-map", "partial-order"],
+      formula: String.raw`f(x) \le y \iff x \le g(y)`,
+      text: "A pair of order-preserving maps f : P → Q and g : Q → P between partially ordered sets with the property shown (monotone form; f is the lower and g the upper adjoint). The classical antitone form, as between subgroups and intermediate fields in Galois theory, is a Galois connection between P and the opposite order of Q." },
+    { id: "closure-operator", name: "Closure operator", kind: "morphismus", area: "06A", field: [6], msc: ["06A"], msc5: "06A15", uses: ["order-preserving-map"], isA: ["order-preserving-map"],
+      formula: String.raw`x \le c(x),\quad c(c(x)) = c(x)`,
+      text: "An order-preserving map c of a partially ordered set to itself that is extensive and idempotent, as shown. Its fixed points are the closed elements. Examples: the generated subalgebra Sg on subsets of an algebra, the topological closure, g ∘ f for a Galois connection." },
 
     // ------------------------------------------------------------ 03E10 Ordinals and cardinals
     { id: "equinumerous", name: "Equinumerous sets", kind: "morphismus", area: "03E10", field: [3], msc: ["03E"], msc5: "03E10", uses: ["bijection"],

@@ -1,6 +1,7 @@
 // Data model: concepts (definitions) of group theory (MSC 2020 20) and their definitional dependencies: foundations
 // (20A), permutation groups and group actions (20B), finite groups up to the Sylow theorems (20D), structure and
-// products (20E), commutators and solvable and nilpotent groups (20F), abelian groups (20K).
+// products (20E), commutators and solvable and nilpotent groups (20F), abelian groups (20K), and semigroups and monoids
+// (20M; moved here from ../../general-algebra/ on 4 November 2026, rule 1 of ../../CLAUDE.md).
 //
 // Same model as ../../elementary-number-theory/data/concepts.js (see its header comment): id, name, kind, area, field,
 // msc, msc5, uses, isA, formula, text. Here `area` is the three-character MSC class (keys in `areas`); `msc5` gives
@@ -26,6 +27,7 @@ window.GT_CONCEPTS = {
     "20F": "20F Commutators, solvable and nilpotent groups",
     "20G": "20G Linear groups",
     "20K": "20K Abelian groups",
+    "20M": "20M Semigroups and monoids",
   },
 
   kinds: {
@@ -304,6 +306,22 @@ window.GT_CONCEPTS = {
         { name: "Maximal number of independent elements", uses: ["abelian-group", "ent:integer", "st:cardinality"], formula: String.raw`n_1 a_1 + \dots + n_r a_r = 0 \;\Rightarrow\; n_1 = \dots = n_r = 0`,
           text: "The largest number r such that A contains elements a<sub>1</sub>, …, a<sub>r</sub> that are linearly independent over ℤ: the only integers n<sub>i</sub> with n<sub>1</sub>a<sub>1</sub> + ⋯ + n<sub>r</sub>a<sub>r</sub> = 0 are n<sub>1</sub> = ⋯ = n<sub>r</sub> = 0. This definition also applies to abelian groups that are not finitely generated." },
       ], },
+    // ------------------------------------------------------------ 20M Semigroups and monoids (moved from general algebra, 4 November 2026)
+    { id: "semigroup", name: "Semigroup", kind: "objekt", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10", uses: ["st:set", "st:binary-operation"],
+      formula: String.raw`(xy)z = x(yz)`,
+      text: "A non-empty set with an associative binary operation. Semigroups form the variety of algebras of one binary operation defined by the associative law." },
+    { id: "monoid", name: "Monoid", kind: "objekt", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M10", uses: ["semigroup"], isA: ["semigroup"],
+      formula: String.raw`ex = xe = x`,
+      text: "A semigroup with a neutral element e, as shown. The natural numbers under addition, the maps of a set to itself under composition and the words over an alphabet under concatenation are monoids. A group is a monoid in which every element has an inverse." },
+    { id: "commutative-monoid", name: "Commutative monoid", kind: "objekt", area: "20M", field: [20], msc: ["20M"], msc5: "20M14", uses: ["monoid"], isA: ["monoid"],
+      formula: String.raw`(M, +, 0),\quad a + b = b + a,\quad (a + b) + c = a + (b + c),\quad a + 0 = a`,
+      text: "A set with a commutative and associative binary operation and a neutral element; inverses need not exist. Examples: the natural numbers under addition, isomorphism classes of finitely generated projective modules under direct sum." },
+    { id: "free-monoid", name: "Free monoid", kind: "konstruktion", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M05", uses: ["monoid", "st:set", "ent:natural-number"],
+      formula: String.raw`X^* = \{ x_1 x_2 \cdots x_n : n \in \mathbb N,\ x_i \in X \}`,
+      text: "The set X<sup>*</sup> of finite words over an alphabet X, including the empty word, with concatenation as operation. It is the free algebra over X in the variety of monoids; formal languages are subsets of it." },
+    { id: "transformation-monoid", name: "Full transformation monoid", kind: "konstruktion", area: "20M", field: [20, 8], msc: ["20M"], msc5: "20M20", uses: ["monoid", "st:map", "st:composition"],
+      formula: String.raw`T_X = \{ f : X \to X \},\quad f \cdot g = f \circ g`,
+      text: "The set of all maps of a set X to itself with composition as operation and the identity map as neutral element. Its group of units is the symmetric group of X." },
   ],
 
   theoremConcepts: {},

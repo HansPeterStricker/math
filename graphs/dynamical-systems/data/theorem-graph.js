@@ -494,6 +494,10 @@ window.DS_THEOREMS = {
     { id: "partition-entropy-properties", name: "Subadditivity and chain rule for partition entropy", kind: "lemma", area: "37A", field: [37], msc: ["37A", "94A"], msc5: "37A35",
       premises: ["ana:convexity-second-derivative"],
       proofName: "Concavity of −x log x",
+      alternativeProofs: [
+        { name: "Shannon entropy of the cell of a random point", premises: ["it:entropy-chain-rule", "it:entropy-subadditivity", "it:entropy-bounds"],
+          idea: "H(𝒫) is the Shannon entropy of the random variable that gives the cell of 𝒫 containing a μ-random point, and 𝒫 ∨ 𝒬 corresponds to the pair of the two variables. Subadditivity, the chain rule and the bound by log of the number of cells are then the corresponding statements for Shannon entropy; Fekete's lemma gives the limit." },
+      ],
       formula: String.raw`H(\mathcal P \vee \mathcal Q) \le H(\mathcal P) + H(\mathcal Q),\quad H(\mathcal P \vee \mathcal Q) = H(\mathcal P) + H(\mathcal Q \mid \mathcal P)`,
       text: "The entropy of finite partitions is subadditive, satisfies the chain rule with conditional entropy, and is at most log of the number of cells. Hence the limit (1/n) H(𝒫 ∨ … ∨ T<sup>−(n−1)</sup>𝒫) in the definition of Kolmogorov–Sinai entropy exists and equals the infimum.",
       proof: "The function −x log x is concave (its second derivative is negative), so Jensen's inequality for finite sums gives H(𝒬 | 𝒫) ≤ H(𝒬); the chain rule is a computation with logarithms. The sequence a<sub>n</sub> = H of the n-fold refinement is subadditive by invariance of μ, and a<sub>n</sub>/n converges to inf a<sub>n</sub>/n (Fekete's lemma, an elementary computation).",
