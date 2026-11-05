@@ -262,7 +262,7 @@ window.GEO_CONCEPTS = {
       text: "The area of a region R of a surface, the integral of √(EG − F<sup>2</sup>) over its preimage in a parametrization; it does not depend on the parametrization. Integrals ∬ f dA of functions are defined the same way." },
 
     // ------------------------------------------------------------ 53B Connections and curvature
-    { id: "riemannian-manifold", name: "Riemannian manifold", kind: "objekt", area: "53B", field: [53], msc: ["53B"], msc5: "53B20", uses: ["top:manifold", "top:tangent-space", "ana:inner-product-space"],
+    { id: "riemannian-manifold", name: "Riemannian manifold", kind: "objekt", area: "53B", field: [53], msc: ["53B"], msc5: "53B20", uses: ["top:manifold", "top:tangent-space", "fa:inner-product-space"],
       formula: String.raw`g_p : T_pM \times T_pM \to \mathbb R,\quad g_p(v, v) > 0 \ (v \ne 0)`,
       text: "A smooth manifold M with a Riemannian metric g: an inner product g<sub>p</sub> on each tangent space T<sub>p</sub>M that depends smoothly on p. A regular surface with its first fundamental form is a Riemannian manifold of dimension 2." },
     { id: "local-isometry", name: "Local isometry", kind: "morphismus", area: "53B", field: [53], msc: ["53B"], msc5: "53B20", uses: ["riemannian-manifold", "top:smooth-map"],
@@ -335,7 +335,7 @@ window.GEO_CONCEPTS = {
     { id: "lagrangian-submanifold", name: "Lagrangian submanifold", kind: "objekt", area: "53D", field: [53], msc: ["53D"], msc5: "53D12", uses: ["symplectic-manifold", "top:submanifold"],
       formula: String.raw`\omega|_L = 0,\quad \dim L = \tfrac12 \dim M`,
       text: "A submanifold L of a symplectic manifold, of half its dimension, on which the symplectic form vanishes: the zero section and the fibres of a cotangent bundle, graphs of symplectomorphisms." },
-    { id: "moment-map", name: "Moment map", kind: "konstruktion", area: "53D", field: [53], msc: ["53D"], msc5: "53D20", uses: ["symplectic-manifold", "rt:lie-group", "rt:lie-algebra-of-lie-group", "gt:group-action", "hamiltonian-vector-field"],
+    { id: "moment-map", name: "Moment map", kind: "konstruktion", area: "53D", field: [53], msc: ["53D"], msc5: "53D20", uses: ["symplectic-manifold", "lie:lie-group", "lie:lie-algebra-of-lie-group", "gt:group-action", "hamiltonian-vector-field"],
       formula: String.raw`d\langle \mu, \xi \rangle = \iota_{\xi_M} \omega`,
       text: "For an action of a Lie group G on a symplectic manifold, a map μ from M to the dual of the Lie algebra 𝔤, equivariant for the coadjoint action, such that for each ξ in 𝔤 the function ⟨μ, ξ⟩ is a Hamiltonian of the vector field ξ<sub>M</sub> generating the action; for rotations of ℝ<sup>3</sup> it is angular momentum." },
 

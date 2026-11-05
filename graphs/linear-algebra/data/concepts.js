@@ -155,7 +155,7 @@ window.LA_CONCEPTS = {
     { id: "kronecker-product", name: "Kronecker product of matrices", kind: "konstruktion", area: "matrices", field: [15], msc: ["15A"], msc5: "15A69", uses: ["matrix"],
       formula: String.raw`A \otimes B = \begin{pmatrix} a_{11} B & \cdots & a_{1n} B \\ \vdots & & \vdots \\ a_{m1} B & \cdots & a_{mn} B \end{pmatrix}`,
       text: "For an m × n matrix A and a p × q matrix B, the mp × nq block matrix with blocks a<sub>ij</sub>B. It is the matrix of the tensor product of the two linear maps in the product bases." },
-    { id: "matrix-norm", name: "Matrix norm", kind: "invariante", area: "forms", field: [15], msc: ["15A"], msc5: "15A60", uses: ["matrix-ring", "ana:normed-space"],
+    { id: "matrix-norm", name: "Matrix norm", kind: "invariante", area: "forms", field: [15], msc: ["15A"], msc5: "15A60", uses: ["matrix-ring", "fa:normed-space"],
       formula: String.raw`\|A\| = \max_{\|x\| = 1} \|A x\|,\quad \|A\|_F = \Big(\sum_{i,j} |a_{ij}|^2\Big)^{1/2}`,
       text: "A norm on the space of real or complex n × n matrices that is submultiplicative, ‖AB‖ ≤ ‖A‖‖B‖. The two standard examples are the operator norm induced by a vector norm and the Frobenius norm shown." },
 

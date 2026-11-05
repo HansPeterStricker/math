@@ -195,7 +195,7 @@ window.BIO_CONCEPTS = {
       text: "Under the infinitely-many-sites model (every mutation hits a new site), the number of sites at which a sample of n sequences is polymorphic; it equals the number of mutations on the coalescent tree of the sample." },
 
     // ------------------------------------------------------------ Phylogenetics
-    { id: "phylogenetic-tree", name: "Phylogenetic tree", kind: "objekt", area: "phylogenetics", field: [92], msc: ["92D", "05C"], msc5: "92D15", uses: ["co:tree", "st:finite-set"],
+    { id: "phylogenetic-tree", name: "Phylogenetic tree", kind: "objekt", area: "phylogenetics", field: [92], msc: ["92D", "05C"], msc5: "92D15", uses: ["gr:tree", "st:finite-set"],
       formula: String.raw`(T, \phi),\quad \phi : X \to L(T)`,
       text: "A tree T without vertices of degree 2 together with a bijection φ from a finite set X of taxa to its leaves; it is binary if every interior vertex has degree 3. A rooted phylogenetic tree has in addition a distinguished root, and its edges may carry positive lengths." },
     { id: "tree-metric", name: "Tree metric", kind: "eigenschaft", area: "phylogenetics", field: [92], msc: ["92D"], msc5: "92D15", uses: ["phylogenetic-tree", "top:metric-space"],
@@ -261,7 +261,7 @@ window.BIO_CONCEPTS = {
     { id: "reaction-complex", name: "Complex of a reaction network", kind: "objekt", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["st:finite-set", "ent:natural-number"],
       formula: String.raw`y = \sum_s y_s\, s,\quad y_s \in \mathbb N`,
       text: "A formal linear combination of the chemical species with non-negative integer coefficients, such as 2A + B; identified with its vector y in ℝ<sup>species</sup>." },
-    { id: "chemical-reaction-network", name: "Chemical reaction network", kind: "objekt", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["reaction-complex", "co:directed-graph"],
+    { id: "chemical-reaction-network", name: "Chemical reaction network", kind: "objekt", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["reaction-complex", "gr:directed-graph"],
       formula: String.raw`(\mathcal S, \mathcal C, \mathcal R),\quad y \to y'`,
       text: "A finite set of species 𝒮, a finite set of complexes 𝒞 and a set of reactions ℛ, each an ordered pair y → y′ of distinct complexes; the complexes and reactions form a directed graph, the reaction graph (Horn and Jackson 1972; Feinberg)." },
     { id: "mass-action-kinetics", name: "Mass-action kinetics", kind: "konstruktion", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["chemical-reaction-network", "de:autonomous-system"],
@@ -273,7 +273,7 @@ window.BIO_CONCEPTS = {
     { id: "stoichiometric-compatibility-class", name: "Stoichiometric compatibility class", kind: "konstruktion", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["stoichiometric-subspace"],
       formula: String.raw`(x_0 + S) \cap \mathbb R_{>0}^{\mathcal S}`,
       text: "The intersection of a coset x<sub>0</sub> + S of the stoichiometric subspace with the positive orthant (or its closure); it is fixed by the conserved quantities of the network." },
-    { id: "linkage-class", name: "Linkage class", kind: "konstruktion", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["chemical-reaction-network", "co:connected-graph"],
+    { id: "linkage-class", name: "Linkage class", kind: "konstruktion", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["chemical-reaction-network", "gr:connected-graph"],
       formula: String.raw`\ell = \#\text{linkage classes}`,
       text: "A connected component of the reaction graph of a network, with the orientation of the reactions ignored." },
     { id: "weak-reversibility", name: "Weakly reversible network", kind: "eigenschaft", area: "kinetics", field: [92], msc: ["92E"], msc5: "92E20", uses: ["linkage-class"],

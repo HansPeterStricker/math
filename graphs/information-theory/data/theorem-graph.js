@@ -341,7 +341,7 @@ window.IT_THEOREMS = {
       formula: String.raw`\Theta(C_5) = \sqrt 5`,
       text: "The zero-error capacity of the channel whose confusability graph is the 5-cycle is √5: two uses allow five distinguishable messages, and no number of uses does better.",
       proof: "The lower bound comes from the independent set {(i, 2i mod 5)} of size 5 in the strong square. For the upper bound Lovász defines θ(G) via orthonormal representations, shows α(G) ≤ θ(G) and θ(G ⊠ H) ≤ θ(G)θ(H), and computes θ(C<sub>5</sub>) = √5 with an umbrella of unit vectors; this is linear algebra outside these graphs.",
-      concepts: ["zero-error-capacity", "co:graph"],
+      concepts: ["zero-error-capacity", "gr:graph"],
       year: 1979, who: "Lovász; Shannon (1956)" },
 
     // ------------------------------------------------------------ 94A12, 94A20 Signals and sampling

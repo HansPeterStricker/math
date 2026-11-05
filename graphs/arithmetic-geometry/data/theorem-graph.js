@@ -309,7 +309,7 @@ window.AR_THEOREMS = {
     { id: "generalized-ramanujan-conjecture", name: "Ramanujan–Petersson conjecture for GLₙ", kind: "conjecture", area: "11F", field: [11, 22], msc: ["11F", "22E"], msc5: "11F70",
       formula: String.raw`\pi_v \text{ is tempered}`,
       text: "For a cuspidal automorphic representation π of GL<sub>n</sub> over a number field, every local component π<sub>v</sub> is tempered; at unramified places the Satake parameters have absolute value 1. Known for holomorphic modular forms (Deligne) and for regular algebraic, polarized representations at unramified places (Clozel, Harris, Taylor and others), open for Maass forms.",
-      concepts: ["automorphic-representation", "rt:tempered-representation"],
+      concepts: ["automorphic-representation", "lie:tempered-representation"],
       year: 1916, who: "Ramanujan; Langlands" },
     { id: "selberg-eigenvalue-conjecture", name: "Selberg's eigenvalue conjecture", kind: "conjecture", area: "11F", field: [11], msc: ["11F"], msc5: "11F72",
       formula: String.raw`\lambda_1\bigl(\Gamma_0(N)\backslash\mathbb H\bigr) \ge \tfrac14`,

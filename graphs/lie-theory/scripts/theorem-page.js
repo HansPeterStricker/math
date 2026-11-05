@@ -11,10 +11,15 @@ window.CONCEPT_PAGE = {
     "representations": "#9b5de5",
     "infinite": "#e76f51",
     "17C": "#d4a017",
-    "17D": "#8ab17d"
+    "17D": "#8ab17d",
+    "22A": "#b5838d",
+    "22B": "#6d9dc5",
+    "22C": "#a3b18a",
+    "22D": "#c9a227",
+    "22E": "#2a9d8f"
   },
   "foreignArea": "basic",
-  "foreignLabel": "proved outside Lie theory and nonassociative algebras",
+  "foreignLabel": "proved outside Lie theory: Lie groups, Lie algebras and nonassociative algebras",
   "hubs": [],
   "foreignOutside": true,
   "centre": [
@@ -25,6 +30,16 @@ window.CONCEPT_PAGE = {
       "data": "LO_THEOREMS",
       "page": "../logic/theorems.html",
       "title": "the theorem graph of mathematical logic"
+    },
+    "mt": {
+      "data": "MT_THEOREMS",
+      "page": "../model-theory/theorems.html",
+      "title": "the theorem graph of model theory"
+    },
+    "cc": {
+      "data": "CC_THEOREMS",
+      "page": "../computability/theorems.html",
+      "title": "the theorem graph of computability and complexity"
     },
     "st": {
       "data": "ST_THEOREMS",
@@ -64,12 +79,17 @@ window.CONCEPT_PAGE = {
     "fnt": {
       "data": "FNT_THEOREMS",
       "page": "../further-number-theory/theorems.html",
-      "title": "the theorem graph of further number theory"
+      "title": "the theorem graph of number theory: other topics"
     },
     "ft": {
       "data": "FT_THEOREMS",
       "page": "../field-theory/theorems.html",
       "title": "the theorem graph of field theory"
+    },
+    "gal": {
+      "data": "GAL_THEOREMS",
+      "page": "../galois-theory/theorems.html",
+      "title": "the theorem graph of Galois theory"
     },
     "ca": {
       "data": "CA_THEOREMS",
@@ -85,6 +105,11 @@ window.CONCEPT_PAGE = {
       "data": "AA_THEOREMS",
       "page": "../associative-algebras/theorems.html",
       "title": "the theorem graph of associative rings and algebras"
+    },
+    "ha": {
+      "data": "HA_THEOREMS",
+      "page": "../homological-algebra/theorems.html",
+      "title": "the theorem graph of homological algebra"
     },
     "kt": {
       "data": "KT_THEOREMS",
@@ -124,7 +149,12 @@ window.CONCEPT_PAGE = {
     "ana": {
       "data": "ANA_THEOREMS",
       "page": "../analysis/theorems.html",
-      "title": "the theorem graph of analysis"
+      "title": "the theorem graph of real and complex analysis"
+    },
+    "fa": {
+      "data": "FA_THEOREMS",
+      "page": "../functional-analysis/theorems.html",
+      "title": "the theorem graph of functional analysis"
     },
     "scv": {
       "data": "SCV_THEOREMS",
@@ -156,6 +186,11 @@ window.CONCEPT_PAGE = {
       "page": "../combinatorics/theorems.html",
       "title": "the theorem graph of combinatorics"
     },
+    "gr": {
+      "data": "GR_THEOREMS",
+      "page": "../graph-theory/theorems.html",
+      "title": "the theorem graph of graph theory"
+    },
     "num": {
       "data": "NUM_THEOREMS",
       "page": "../numerical-analysis/theorems.html",
@@ -169,7 +204,12 @@ window.CONCEPT_PAGE = {
     "opt": {
       "data": "OPT_THEOREMS",
       "page": "../optimization/theorems.html",
-      "title": "the theorem graph of optimization, games and control"
+      "title": "the theorem graph of optimization and control"
+    },
+    "gm": {
+      "data": "GM_THEOREMS",
+      "page": "../game-theory/theorems.html",
+      "title": "the theorem graph of game theory"
     },
     "it": {
       "data": "IT_THEOREMS",
@@ -205,6 +245,14 @@ window.CONCEPT_PAGE = {
     "lo": {
       "data": "LO_CONCEPTS",
       "page": "../logic/concepts.html"
+    },
+    "mt": {
+      "data": "MT_CONCEPTS",
+      "page": "../model-theory/concepts.html"
+    },
+    "cc": {
+      "data": "CC_CONCEPTS",
+      "page": "../computability/concepts.html"
     },
     "st": {
       "data": "ST_CONCEPTS",
@@ -242,6 +290,10 @@ window.CONCEPT_PAGE = {
       "data": "FT_CONCEPTS",
       "page": "../field-theory/concepts.html"
     },
+    "gal": {
+      "data": "GAL_CONCEPTS",
+      "page": "../galois-theory/concepts.html"
+    },
     "ca": {
       "data": "CA_CONCEPTS",
       "page": "../commutative-algebra/concepts.html"
@@ -253,6 +305,10 @@ window.CONCEPT_PAGE = {
     "aa": {
       "data": "AA_CONCEPTS",
       "page": "../associative-algebras/concepts.html"
+    },
+    "ha": {
+      "data": "HA_CONCEPTS",
+      "page": "../homological-algebra/concepts.html"
     },
     "kt": {
       "data": "KT_CONCEPTS",
@@ -286,6 +342,10 @@ window.CONCEPT_PAGE = {
       "data": "ANA_CONCEPTS",
       "page": "../analysis/concepts.html"
     },
+    "fa": {
+      "data": "FA_CONCEPTS",
+      "page": "../functional-analysis/concepts.html"
+    },
     "scv": {
       "data": "SCV_CONCEPTS",
       "page": "../several-complex-variables/concepts.html"
@@ -310,6 +370,10 @@ window.CONCEPT_PAGE = {
       "data": "CO_CONCEPTS",
       "page": "../combinatorics/concepts.html"
     },
+    "gr": {
+      "data": "GR_CONCEPTS",
+      "page": "../graph-theory/concepts.html"
+    },
     "num": {
       "data": "NUM_CONCEPTS",
       "page": "../numerical-analysis/concepts.html"
@@ -321,6 +385,10 @@ window.CONCEPT_PAGE = {
     "opt": {
       "data": "OPT_CONCEPTS",
       "page": "../optimization/concepts.html"
+    },
+    "gm": {
+      "data": "GM_CONCEPTS",
+      "page": "../game-theory/concepts.html"
     },
     "it": {
       "data": "IT_CONCEPTS",
@@ -365,3 +433,5 @@ window.CONCEPT_PAGE = {
     "levelHint": "Level 1: proved without other theorems of the area; level k: 1 + highest level among the theorems the proof uses. Results of other areas are not counted; their arrows come from outside."
   }
 };
+// both settings of the folder, for definitions and theorems in one picture (B94)
+window.CONCEPT_PAGES = Object.assign(window.CONCEPT_PAGES || {}, { theorems: window.CONCEPT_PAGE });

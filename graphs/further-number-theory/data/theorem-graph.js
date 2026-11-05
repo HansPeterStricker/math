@@ -1,4 +1,4 @@
-// Data of the theorem graph (theorems.html): theorems, lemmas, corollaries and conjectures of further number theory,
+// Data of the theorem graph (theorems.html): theorems, lemmas, corollaries and conjectures of number theory: other topics,
 // MSC 2020 11C (polynomials and matrices over ℤ), 11K (probabilistic number theory: distribution modulo 1, discrepancy,
 // normal numbers, metric theory of continued fractions, additive functions), 11L (exponential and character sums) and
 // 11Y (computational number theory). In English. Built on 3 November 2026. Moved here by rule 1 of ../../CLAUDE.md,
@@ -27,7 +27,7 @@
 // `foundation: true`, and its `proof` names that theory.
 
 window.FNT_THEOREMS = {
-  title: "Theorems of further number theory",
+  title: "Theorems of number theory: other topics",
 
   // areas: as in the concept graph of the folder (same sectors and colours)
   areas: {
@@ -183,7 +183,7 @@ window.FNT_THEOREMS = {
       concepts: ["kronecker-sequence", "discrepancy", "dio:irrationality-measure", "dio:badly-approximable-number"],
       year: 1922, who: "Hardy and Littlewood; Ostrowski (1922)" },
     { id: "roth-discrepancy-lower-bound", name: "Roth's lower bound for discrepancy", kind: "theorem", area: "11K", field: [11], msc: ["11K"], msc5: "11K38",
-      premises: ["ana:cauchy-schwarz-inequality", "ana:parseval-identity"],
+      premises: ["ana:cauchy-schwarz-inequality", "fa:parseval-identity"],
       proofName: "Orthogonal Haar functions",
       formula: String.raw`\int_{[0,1]^d} \big(A(t) - N t_1 \cdots t_d\big)^2 dt \ge c_d (\log N)^{d-1}`,
       text: "For every set of N points in [0, 1]<sup>d</sup> with d ≥ 2 the mean square of the local discrepancy is at least c<sub>d</sub>(log N)<sup>d−1</sup>; hence D<sub>N</sub><sup>*</sup> ≥ c<sub>d</sub>′(log N)<sup>(d−1)/2</sup>/N. For infinite sequences in [0, 1] the same argument in dimension 2 shows ND<sub>N</sub><sup>*</sup> ≥ c(log N)<sup>1/2</sup> infinitely often; Schmidt (1972) improved this to c log N.",
@@ -570,7 +570,7 @@ window.FNT_THEOREMS = {
       formula: String.raw`(X + a)^n \equiv X^n + a \pmod{X^r - 1,\ n},\quad 1 \le a \le \sqrt{\varphi(r)}\log_2 n`,
       text: "The AKS test decides primality deterministically in time polynomial in log n, originally Õ((log n)<sup>12</sup>), improved to Õ((log n)<sup>6</sup>) by Lenstra and Pomerance. The essential claim: if n is not a perfect power, has no prime factor up to r, where ord<sub>r</sub>(n) > (log<sub>2</sub> n)<sup>2</sup>, and satisfies the congruences shown, then n is prime. Such an r ≤ (log<sub>2</sub> n)<sup>5</sup> exists.",
       proof: "Let p | n be prime and h an irreducible factor of the cyclotomic polynomial Φ<sub>r</sub> over 𝔽<sub>p</sub>, of degree ord<sub>r</sub>(p), and F = 𝔽<sub>p</sub>[X]/(h). The exponents m = n<sup>i</sup>p<sup>j</sup> are introspective: f(X)<sup>m</sup> = f(X<sup>m</sup>) in F for all products f of the X + a. Counting distinct products of the X + a in F from below (distinct polynomials of small degree, since a polynomial has at most as many roots as its degree) and from above (via the many introspective exponents modulo r) gives a contradiction unless n is a power of p. The existence of r uses the bound lcm(1, …, m) ≥ 2<sup>m</sup>.",
-      concepts: ["aks-test", "ent:prime-number", "cs:class-p"],
+      concepts: ["aks-test", "ent:prime-number", "cc:class-p"],
       year: 2002, who: "Agrawal, Kayal, Saxena" },
     { id: "pocklington-criterion", name: "Pocklington's criterion", kind: "theorem", area: "11Y", field: [11], msc: ["11Y"], msc5: "11Y11",
       premises: ["ent:order-divides-exponent"],
@@ -658,7 +658,7 @@ window.FNT_THEOREMS = {
       premises: [],
       formula: String.raw`\text{factoring} \notin \mathrm{P}`,
       text: "There is no deterministic or probabilistic classical algorithm that factors integers in time polynomial in log n. The best known algorithms are subexponential (number field sieve, L<sub>n</sub>[1/3]); on a quantum computer Shor's algorithm (1994) factors in polynomial time. The security of RSA rests on this conjecture.",
-      concepts: ["integer-factorization-problem", "cs:class-p"],
+      concepts: ["integer-factorization-problem", "cc:class-p"],
       year: 1977, who: "folklore (Rivest, Shamir, Adleman)" },
 
     // ------------------------------------------------------------ 11Y Discrete logarithms
@@ -737,7 +737,7 @@ window.FNT_THEOREMS = {
       concepts: ["mahler-measure", "integer-polynomial"],
       year: 1960, who: "Mahler" },
     { id: "landau-inequality", name: "Landau's inequality", kind: "theorem", area: "11C", field: [11], msc: ["11C"], msc5: "11C08",
-      premises: ["jensen-formula-mahler", "pr:jensen-inequality", "ana:parseval-identity"],
+      premises: ["jensen-formula-mahler", "pr:jensen-inequality", "fa:parseval-identity"],
       proofName: "Concavity of the logarithm",
       formula: String.raw`M(f) \le \|f\|_2 = \Big(\sum_i |a_i|^2\Big)^{1/2}`,
       text: "For every polynomial f with complex coefficients a<sub>i</sub> the Mahler measure is at most the Euclidean norm of the coefficient vector. Together with the coefficient bound it shows that M(f), H(f) and L(f) agree up to factors depending only on the degree.",
@@ -786,7 +786,7 @@ window.FNT_THEOREMS = {
       concepts: ["mahler-measure", "ant:algebraic-integer"],
       year: 1979, who: "Dobrowolski" },
     { id: "smyth-theorem", name: "Smyth's theorem on non-reciprocal polynomials", kind: "theorem", area: "11C", field: [11], msc: ["11C", "11R"], msc5: "11C08",
-      premises: ["jensen-formula-mahler", "ana:parseval-identity"],
+      premises: ["jensen-formula-mahler", "fa:parseval-identity"],
       proofName: "Comparison of f with its reciprocal",
       formula: String.raw`M(f) \ge \theta_0 \approx 1.32472,\quad \theta_0^3 = \theta_0 + 1`,
       text: "If α ≠ 0 is an algebraic integer whose minimal polynomial is not reciprocal, then M(α) ≥ θ<sub>0</sub>, the real root of x<sup>3</sup> − x − 1 (the smallest Pisot number). So Lehmer's conjecture holds for non-reciprocal polynomials.",

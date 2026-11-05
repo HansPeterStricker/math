@@ -26,7 +26,8 @@
 .area-graph .knoten text { font-size: 15px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3.5px; stroke-linejoin: round; pointer-events: none; }
 .area-graph.klassen .knoten text { font-size: 11.5px; stroke-width: 3px; }
 .area-graph .knoten.grau text { fill: #6d655a; font-style: italic; }
-.area-graph.ohne-namen .knoten:not(.hell) text { display: none; }
+.area-graph.ohne-namen .knoten:not(.hell) > text { display: none; }
+.area-graph.ohne-gruppennamen text.gruppe-name { display: none; }
 .area-graph .sektor { fill-opacity: .08; stroke: none; }
 .area-graph .sektor-name { font-size: 17px; fill: #6d655a; font-weight: 600; }
 
@@ -65,3 +66,116 @@ table.matrix th { font-weight: 600; color: var(--leise); cursor: pointer; backgr
 table.matrix thead th { height: 34px; vertical-align: bottom; }
 table.matrix thead th span { display: inline-block; writing-mode: vertical-rl; transform: rotate(180deg); padding: 2px 0; }
 table.matrix tbody th { text-align: right; padding: 0 3px; width: auto; }
+
+/* groups of the areas (todo B92, 4 November 2026) */
+.area-graph .gruppe-flaeche { stroke: none; }
+.area-graph text.gruppe-name { font-size: 15px; font-weight: 600; fill: #5a4a36; paint-order: stroke; stroke: #fbfaf6; stroke-width: 4px; pointer-events: none; }
+.area-graph.unterwegs .knoten text { opacity: 0; }
+/* names keep their size on the screen while zooming (4 November 2026) */
+.area-graph .knoten text { font-size: calc(15px * var(--zf, 1)); }
+.area-graph.klassen .knoten text { font-size: calc(11.5px * var(--zf, 1)); }
+.area-graph text.gruppe-name { font-size: calc(15px * var(--zf, 1)); }
+/* marks of the areas (4 November 2026) */
+.area-graph text.symbol { fill: #fff; stroke: none; font-weight: 600; text-anchor: middle; dominant-baseline: central; font-family: "Cambria Math", "Segoe UI Symbol", serif; pointer-events: none; }
+.area-graph .knoten path.form { stroke: #fff; stroke-width: 1; }
+#controls .stufen.marken { margin-top: 6px; }
+#legend .gruppe-legende { display: flex; align-items: center; gap: 5px; margin-top: 6px; }
+#legend .gebiet-legende { display: flex; align-items: center; gap: 4px; padding-left: 12px; font-size: 12.5px; }
+#legend .gebiet-legende .msc { color: var(--leise); font-size: 11px; }
+#legend svg.mini { width: 15px; height: 15px; flex: none; }
+#legend svg.mini .m-shapes, #legend svg.mini .m-symbols { display: none; }
+.area-graph .symbol-mark, .area-graph .symbol-drawing { pointer-events: none; }
+body.marken-shapes #legend svg.mini .m-shades, body.marken-symbols #legend svg.mini .m-shades { display: none; }
+body.marken-shapes #legend svg.mini .m-shapes { display: inline; }
+body.marken-symbols #legend svg.mini .m-symbols { display: inline; }
+
+/* toolbar at the top (user, 5 November 2026; the same look as the header of the sketch): the title with ⓘ and the
+   overview in the first row, all controls side by side in the second, separated by thin vertical lines; green for the
+   active buttons, sliders and switches; it wraps only in narrow windows. The columns at the left (areas, search,
+   legend) and right (panel) have width 0 for now */
+header.leiste { position: sticky; top: 0; z-index: 20; max-width: none; margin: 0; padding: 6px 14px 7px; background: #fbfaf6; border-bottom: 1px solid #e3ddd1; font-size: 13px; }
+header.leiste .leiste-kopf { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 4px; }
+header.leiste h1 { font-size: 18px; margin: 0; font-weight: 600; white-space: nowrap; }
+header.leiste h1 .info { font-size: 14px; font-weight: 400; color: #8a8076; cursor: help; margin-left: 3px; }
+header.leiste #controls { display: flex; flex-direction: row; flex-wrap: wrap; justify-content: flex-start; align-items: center; row-gap: 6px; column-gap: 0; }
+header.leiste #controls > * { flex: none; width: auto; margin: 0; }
+header.leiste .leiste-gruppe { display: flex; align-items: center; gap: 8px; padding: 0 12px; white-space: nowrap; }
+header.leiste #controls > .leiste-gruppe:first-child { padding-left: 0; }
+header.leiste #controls > * + * { border-left: 1px solid #d8d0c2; }
+header.leiste .stufen { margin: 0; display: inline-flex; }
+header.leiste .stufen button { margin: 0; font: inherit; font-size: 13px; padding: 2px 8px; border: 1px solid var(--linie); background: #fff; cursor: pointer; white-space: nowrap; flex: none; }
+header.leiste .stufen button:first-child { border-radius: 4px 0 0 4px; }
+header.leiste .stufen button:last-child { border-radius: 0 4px 4px 0; }
+header.leiste .stufen button + button { border-left: 0; }
+header.leiste .stufen button.an { background: #6b8f5e; border-color: #6b8f5e; color: #fff; font-weight: 600; }
+header.leiste .toggle { display: inline-flex; align-items: center; gap: 4px; white-space: nowrap; margin: 0; }
+header.leiste .schwelle input[type=range] { width: 80px; }
+header.leiste input[type=range], header.leiste input[type=checkbox] { accent-color: #6b8f5e; }
+header.leiste details.mehr { position: relative; padding-left: 12px; }
+header.leiste details.mehr summary { cursor: pointer; list-style: none; white-space: nowrap; }
+header.leiste details.mehr summary::-webkit-details-marker { display: none; }
+header.leiste details.mehr .mehr-inhalt { position: absolute; left: 0; top: 24px; z-index: 30; background: #fffdf8; border: 1px solid #e3ddd1; border-radius: 6px; padding: 10px 12px; display: flex; flex-direction: column; gap: 10px; min-width: 300px; box-shadow: 0 4px 14px rgba(0,0,0,.12); }
+header.leiste details.mehr .mehr-inhalt .leiste-gruppe { flex-direction: column; align-items: flex-start; gap: 4px; padding: 0; border: 0; }
+header.leiste .leiste-titel { font-size: 11px; text-transform: uppercase; letter-spacing: .04em; color: #8a8076; }
+header.leiste a.uebersicht { white-space: nowrap; text-decoration: none; color: inherit; padding: 2px 8px; border: 1px solid var(--linie); border-radius: 4px; background: #fff; font-size: 13px; }
+body.vollbild .app, body.vollbild .app.mit-gebieten { grid-template-columns: minmax(0, 1fr); height: calc(100vh - var(--leiste-h, 48px)); }
+body.vollbild .app > nav.gebiete, body.vollbild .app > #side, body.vollbild .app > #panel { display: none; }
+.area-graph .zell-grenze { fill: none; stroke: #a89a86; stroke-width: .5; }
+.area-graph .gruppe-rand { fill: none; stroke: #7d6e5c; stroke-width: 1.2; stroke-opacity: .6; }
+header.leiste details.mehr .mehr-kopf { cursor: move; font-weight: 600; font-size: 12px; color: #6f665a; border-bottom: 1px solid #e3ddd1; padding-bottom: 4px; width: 100%; user-select: none; }
+header.leiste .toggle i.farbe { width: 12px; height: 6px; border-radius: 3px; }
+
+/* zoom into an area (todo B101 step 1, shared_scripts/area-zoom.js; 5 November 2026) */
+.area-graph .zoom-region { cursor: zoom-in; }
+.area-graph .zoom-flaeche { fill: #000; fill-opacity: 0; stroke: none; }
+.area-graph .zoom-umriss { fill: none; stroke-width: 2.5px; vector-effect: non-scaling-stroke; opacity: 0; pointer-events: none; }
+.area-graph .zoom-region.zeige .zoom-umriss { opacity: .95; }
+.area-graph .zoom-region.zeige .zoom-flaeche { fill-opacity: .05; }
+.area-graph.gezoomt .kanten { display: none; }
+.area-graph.gezoomt .knoten.zoom-eigen { display: none; }
+.area-graph.gezoomt .zell-grenze, .area-graph.gezoomt .gruppe-rand { vector-effect: non-scaling-stroke; }
+.area-graph.gezoomt .knoten > * { transform: scale(var(--zp, 1)); }
+.area-graph.gezoomt .knoten > text { font-size: calc(15px * var(--zf, 1) / var(--zp, 1)); }
+.area-graph.zoom-unterwegs .zoom-ebene { display: none; }
+.area-graph .zoom-ebene { animation: zoom-ein .35s ease-out; }
+@keyframes zoom-ein { from { opacity: 0; } to { opacity: 1; } }
+.area-graph .zoom-umriss-ellipse { fill: #fffdf8; fill-opacity: .95; stroke-width: 2px; vector-effect: non-scaling-stroke; }
+.area-graph .zoom-sektor { fill-opacity: .42; stroke: none; }
+.area-graph .zoom-kante { stroke: #a99e8c; stroke-width: 1px; vector-effect: non-scaling-stroke; }
+.area-graph .zoom-aussen-kante { stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-opacity: .2; pointer-events: none; }
+.area-graph .zknoten { cursor: pointer; }
+.area-graph .zknoten .form { stroke: #4b443b; stroke-width: .8px; vector-effect: non-scaling-stroke; }
+.area-graph .zname { fill: var(--tinte); paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
+.area-graph .zoom-titel { fill: #4b443b; font-weight: 600; paint-order: stroke; stroke: #fbfaf6; stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+.area-graph .zoom-ebene.fokus .zknoten:not(.zhell) { opacity: .18; }
+.area-graph .zoom-ebene.fokus .zoom-kante:not(.zhell) { opacity: .12; }
+.area-graph .zoom-ebene.fokus .zoom-aussen-kante:not(.zhell) { opacity: .1; }
+.area-graph .zoom-kante.zhell { stroke: #b5541f; stroke-width: 1.6px; }
+.area-graph .zoom-aussen-kante.zhell { stroke-opacity: .85; stroke-width: 1.6px; }
+.area-graph .zoom-aussen.fokus .zoom-aussen-kante:not(.zhell) { stroke-opacity: .06; }
+.area-graph .zknoten.zwahl .form { stroke-width: 2.4px; }
+.area-graph .zmarke { cursor: zoom-in; }
+.area-graph .zbogen { fill: none; stroke-linecap: round; opacity: .75; }
+.area-graph .zmarke:hover .zbogen { opacity: 1; }
+.area-graph .zmarke-name { fill: #3d372f; stroke: none; }
+.area-graph .zmarke-halo { fill: none; stroke: #fbfaf6; stroke-linejoin: round; }
+.area-graph .zmarke:hover .zmarke-name { font-weight: 600; }
+header.leiste .zoom-leiste button[data-zoom-out], header.leiste .zoom-leiste button[data-zoom-open] { font: inherit; font-size: 13px; padding: 2px 8px; border: 1px solid var(--linie); border-radius: 4px; background: #fff; cursor: pointer; white-space: nowrap; }
+header.leiste .zoom-leiste button[data-zoom-out] { font-weight: 600; }
+#panel .zoom-liste { list-style: none; padding: 0; margin: 4px 0; font-size: 14px; }
+#panel .zoom-liste i.farbe { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
+
+/* names of the groups on the map (user, 5 November 2026): outside the map along the border, or inside along the main
+   axis; no halo in the same text, since with a text path the browser paints stroke and fill letter by letter */
+.area-graph text.gruppe-name.aussen, .area-graph text.gruppe-name.innen { stroke: none; paint-order: normal; font-variant: small-caps; letter-spacing: .06em; font-weight: 600; }
+.area-graph text.gruppe-name.innen { fill-opacity: .5; }
+.area-graph .gruppe-linie { fill: none; stroke-width: 1px; vector-effect: non-scaling-stroke; stroke-opacity: .55; pointer-events: none; }
+.area-graph.ohne-gruppennamen .gruppe-linie { display: none; }
+.area-graph.gezoomt text.gruppe-name, .area-graph.gezoomt .gruppe-linie { display: none; }
+/* halos of all names with rounded joins and ends and a slightly thinner stroke (user, 5 November 2026: jagged halo) */
+.area-graph text.gruppe-name { stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round; }
+.area-graph .knoten text, .area-graph .zname, .area-graph .zmarke-halo, .area-graph .zoom-titel { stroke-linejoin: round; stroke-linecap: round; }
+.area-graph .knoten text { stroke-width: 3px; }
+.area-graph .zoom-titel { stroke-width: 3px; }
+.area-graph text.gruppe-name.aussen { font-size: calc(17px * var(--zf, 1)); }
+.area-graph text.gruppe-name.innen { font-size: calc(19px * var(--zf, 1)); fill-opacity: .6; }

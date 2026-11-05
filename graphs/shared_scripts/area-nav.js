@@ -23,10 +23,13 @@
     const current = a.folder === here && page === file;
     return `<a href="${root}${a.folder}/${file}"${current ? ' class="hier" aria-current="page"' : ""}>${label}</a>`;
   };
+  // remark `note` of the register ("without graph theory"): small and grey after the name, its own line in the tooltip
+  const tipOf = (a) => `MSC ${a.msc}` + (a.note ? `&#10;${a.note}` : "");
+  const nameOf = (a) => a.name + (a.note ? ` <span class="note">(${a.note})</span>` : "");
   const entry = (a) => a.folder === here
-    ? `<div class="gebiet hier"><div class="gebiet-name" title="MSC ${a.msc}">${a.name}</div>` +
+    ? `<div class="gebiet hier"><div class="gebiet-name" title="${tipOf(a)}">${nameOf(a)}</div>` +
       `<div class="gebiet-links">${link(a, "concepts.html", "Concepts")}${link(a, "theorems.html", "Theorems")}${link(a, "bipartite.html", "In theorems")}</div></div>`
-    : `<div class="gebiet"><a class="gebiet-name" href="${root}${a.folder}/${kind}" title="MSC ${a.msc}">${a.name}</a></div>`;
+    : `<div class="gebiet"><a class="gebiet-name" href="${root}${a.folder}/${kind}" title="${tipOf(a)}">${nameOf(a)}</a></div>`;
   const groups = window.GRAPH_AREA_GROUPS || [{ key: undefined, name: "" }];
   const html = groups.map((g) => {
     const list = areas.filter((a) => a.group === g.key || (!window.GRAPH_AREA_GROUPS));

@@ -7,11 +7,6 @@ window.CONCEPT_PAGE = {
   "colors": {
     "basic": "#d9d4ca",
     "20C": "#c0392b",
-    "22B": "#4f86c6",
-    "22A": "#b08968",
-    "22D": "#e9c46a",
-    "22E": "#2a9d8f",
-    "22C": "#8ab17d",
     "11E": "#c77dba"
   },
   "centre": [
@@ -29,6 +24,16 @@ window.CONCEPT_PAGE = {
       "data": "LO_CONCEPTS",
       "page": "../logic/concepts.html",
       "title": "the concept graph of mathematical logic"
+    },
+    "mt": {
+      "data": "MT_CONCEPTS",
+      "page": "../model-theory/concepts.html",
+      "title": "the concept graph of model theory"
+    },
+    "cc": {
+      "data": "CC_CONCEPTS",
+      "page": "../computability/concepts.html",
+      "title": "the concept graph of computability and complexity"
     },
     "st": {
       "data": "ST_CONCEPTS",
@@ -68,12 +73,17 @@ window.CONCEPT_PAGE = {
     "fnt": {
       "data": "FNT_CONCEPTS",
       "page": "../further-number-theory/concepts.html",
-      "title": "the concept graph of further number theory"
+      "title": "the concept graph of number theory: other topics"
     },
     "ft": {
       "data": "FT_CONCEPTS",
       "page": "../field-theory/concepts.html",
       "title": "the concept graph of field theory"
+    },
+    "gal": {
+      "data": "GAL_CONCEPTS",
+      "page": "../galois-theory/concepts.html",
+      "title": "the concept graph of Galois theory"
     },
     "ca": {
       "data": "CA_CONCEPTS",
@@ -93,7 +103,12 @@ window.CONCEPT_PAGE = {
     "lie": {
       "data": "LIE_CONCEPTS",
       "page": "../lie-theory/concepts.html",
-      "title": "the concept graph of Lie theory and nonassociative algebras"
+      "title": "the concept graph of Lie theory: Lie groups, Lie algebras and nonassociative algebras"
+    },
+    "ha": {
+      "data": "HA_CONCEPTS",
+      "page": "../homological-algebra/concepts.html",
+      "title": "the concept graph of homological algebra"
     },
     "kt": {
       "data": "KT_CONCEPTS",
@@ -128,7 +143,12 @@ window.CONCEPT_PAGE = {
     "ana": {
       "data": "ANA_CONCEPTS",
       "page": "../analysis/concepts.html",
-      "title": "the concept graph of analysis"
+      "title": "the concept graph of real and complex analysis"
+    },
+    "fa": {
+      "data": "FA_CONCEPTS",
+      "page": "../functional-analysis/concepts.html",
+      "title": "the concept graph of functional analysis"
     },
     "scv": {
       "data": "SCV_CONCEPTS",
@@ -160,6 +180,11 @@ window.CONCEPT_PAGE = {
       "page": "../combinatorics/concepts.html",
       "title": "the concept graph of combinatorics"
     },
+    "gr": {
+      "data": "GR_CONCEPTS",
+      "page": "../graph-theory/concepts.html",
+      "title": "the concept graph of graph theory"
+    },
     "num": {
       "data": "NUM_CONCEPTS",
       "page": "../numerical-analysis/concepts.html",
@@ -173,7 +198,12 @@ window.CONCEPT_PAGE = {
     "opt": {
       "data": "OPT_CONCEPTS",
       "page": "../optimization/concepts.html",
-      "title": "the concept graph of optimization, games and control"
+      "title": "the concept graph of optimization and control"
+    },
+    "gm": {
+      "data": "GM_CONCEPTS",
+      "page": "../game-theory/concepts.html",
+      "title": "the concept graph of game theory"
     },
     "it": {
       "data": "IT_CONCEPTS",
@@ -202,3 +232,5 @@ window.CONCEPT_PAGE = {
     }
   }
 };
+// both settings of the folder, for definitions and theorems in one picture (B94)
+window.CONCEPT_PAGES = Object.assign(window.CONCEPT_PAGES || {}, { concepts: window.CONCEPT_PAGE });

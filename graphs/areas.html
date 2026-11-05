@@ -13,6 +13,19 @@
 <link rel="stylesheet" href="shared_scripts/area-graph.css">
 </head>
 <body class="vollbild">
+<!-- toolbar (user, 5 November 2026): all controls in one bar at the top; the columns at the left and right are hidden
+     for now (their code stays) -->
+<header class="leiste">
+  <div class="leiste-kopf">
+  <h1>Graph of the areas <span class="info" tabindex="0" title="Each point is one of the areas of these graphs; at the second level (More ▾) each area splits into its MSC classes. A band leads from X to Y when Y uses X: in a definition, in the statement of a theorem, in a proof, or because a node of Y also carries an MSC class of X. A click on a point marks it with its neighbours, a click on a band marks that connection; Escape or a click beside the points clears the marking. The contents were compiled with the help of a language model and have not been checked by a specialist.">ⓘ</span></h1>
+    <a class="uebersicht" href="index.html" title="Overview of all graphs">⌂ Overview</a>
+  </div>
+  <div id="controls"></div>
+</header>
+<script>
+  // height of the toolbar for the height of the graph below it
+  (function () { const h = document.querySelector("header.leiste"), set = () => document.documentElement.style.setProperty("--leiste-h", h.offsetHeight + "px"); set(); if (window.ResizeObserver) new ResizeObserver(set).observe(h); else window.addEventListener("resize", set); })();
+</script>
 <div class="app">
   <aside id="side">
     <div class="kopf">
@@ -27,7 +40,6 @@
       <input id="search" type="search" placeholder="Search area or class …" autocomplete="off" aria-label="Search area or class">
       <ul id="search-results" role="listbox"></ul>
     </div>
-    <div id="controls"></div>
     <div id="legend"></div>
   </aside>
   <div class="graph"><svg id="areas" role="img" aria-label="Graph of the areas"></svg></div>
@@ -40,6 +52,12 @@
 <script src="logic/data/concepts.js"></script>
 <script src="logic/data/theorem-graph.js"></script>
 <script src="logic/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="model-theory/data/concepts.js"></script>
+<script src="model-theory/data/theorem-graph.js"></script>
+<script src="model-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="computability/data/concepts.js"></script>
+<script src="computability/data/theorem-graph.js"></script>
+<script src="computability/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="set-theory/data/concepts.js"></script>
 <script src="set-theory/data/theorem-graph.js"></script>
 <script src="set-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -67,6 +85,9 @@
 <script src="field-theory/data/concepts.js"></script>
 <script src="field-theory/data/theorem-graph.js"></script>
 <script src="field-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="galois-theory/data/concepts.js"></script>
+<script src="galois-theory/data/theorem-graph.js"></script>
+<script src="galois-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="commutative-algebra/data/concepts.js"></script>
 <script src="commutative-algebra/data/theorem-graph.js"></script>
 <script src="commutative-algebra/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -79,6 +100,9 @@
 <script src="lie-theory/data/concepts.js"></script>
 <script src="lie-theory/data/theorem-graph.js"></script>
 <script src="lie-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="homological-algebra/data/concepts.js"></script>
+<script src="homological-algebra/data/theorem-graph.js"></script>
+<script src="homological-algebra/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="k-theory/data/concepts.js"></script>
 <script src="k-theory/data/theorem-graph.js"></script>
 <script src="k-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -103,6 +127,9 @@
 <script src="analysis/data/concepts.js"></script>
 <script src="analysis/data/theorem-graph.js"></script>
 <script src="analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="functional-analysis/data/concepts.js"></script>
+<script src="functional-analysis/data/theorem-graph.js"></script>
+<script src="functional-analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="several-complex-variables/data/concepts.js"></script>
 <script src="several-complex-variables/data/theorem-graph.js"></script>
 <script src="several-complex-variables/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -121,6 +148,9 @@
 <script src="combinatorics/data/concepts.js"></script>
 <script src="combinatorics/data/theorem-graph.js"></script>
 <script src="combinatorics/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="graph-theory/data/concepts.js"></script>
+<script src="graph-theory/data/theorem-graph.js"></script>
+<script src="graph-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="numerical-analysis/data/concepts.js"></script>
 <script src="numerical-analysis/data/theorem-graph.js"></script>
 <script src="numerical-analysis/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -130,6 +160,9 @@
 <script src="optimization/data/concepts.js"></script>
 <script src="optimization/data/theorem-graph.js"></script>
 <script src="optimization/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="game-theory/data/concepts.js"></script>
+<script src="game-theory/data/theorem-graph.js"></script>
+<script src="game-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
 <script src="information-theory/data/concepts.js"></script>
 <script src="information-theory/data/theorem-graph.js"></script>
 <script src="information-theory/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
@@ -145,8 +178,13 @@
 <script src="mathematical-biology/data/concepts.js"></script>
 <script src="mathematical-biology/data/theorem-graph.js"></script>
 <script src="mathematical-biology/scripts/bipartite-page.js"></script><script>AREA_CFG.push(BIPARTITE_PAGE);</script>
+<script src="shared_scripts/area-interiors.js"></script>
+<script src="shared_scripts/area-zoom.js"></script>
 <!-- data:end -->
 <script src="shared_scripts/area-nav.js"></script>
+<script src="shared_scripts/area-colours.js"></script>
+<script src="shared_scripts/area-layout.js"></script>
+<script src="shared_scripts/area-cells.js"></script>
 <script src="shared_scripts/area-graph.js"></script>
 <a href="../index.html" title="Start page" style="position:fixed;left:10px;bottom:10px;z-index:2147483000;font:14px/1.2 Georgia,serif;color:#3b3328;background:#fbf7eeee;border:1px solid #b9ad9a;border-radius:6px;padding:4px 9px;text-decoration:none;box-shadow:0 1px 3px #0002">&#8962; Home</a>
 </body>

@@ -176,7 +176,7 @@ window.CA_CONCEPTS = {
       text: "A direct summand of a free module: P ⊕ Q is isomorphic to a free module for some module Q. Over local rings finitely generated projective modules are free.",
       definitionName: "Direct summand of a free module",
       alternativeDefinitions: [
-        { name: "Lifting property", uses: ["module", "module-homomorphism", "st:surjective", "ct:projective-object"], formula: String.raw`g \circ \tilde f = f`,
+        { name: "Lifting property", uses: ["module", "module-homomorphism", "st:surjective", "ha:projective-object"], formula: String.raw`g \circ \tilde f = f`,
           text: "A module P such that for every surjective module homomorphism g : M → N and every module homomorphism f : P → N there is a module homomorphism f̃ : P → M with g ∘ f̃ = f; that is, a projective object in the category of modules." },
         { name: "Exact Hom functor", uses: ["hom-module", "ct:exact-functor"], formula: String.raw`\operatorname{Hom}_R(P, -)\ \text{exact}`,
           text: "A module P for which the functor Hom<sub>R</sub>(P, −) into modules is exact." },
@@ -206,7 +206,7 @@ window.CA_CONCEPTS = {
       text: "For a finitely generated module M over a noetherian local ring (R, 𝔪): the length of a maximal M-regular sequence in the maximal ideal 𝔪; at most the dimension." },
 
     // ------------------------------------------------------------ 13D Homological methods
-    { id: "projective-dimension", name: "Projective dimension", kind: "invariante", area: "13D", field: [13], msc: ["13D"], msc5: "13D05", uses: ["projective-module", "ct:resolution"],
+    { id: "projective-dimension", name: "Projective dimension", kind: "invariante", area: "13D", field: [13], msc: ["13D"], msc5: "13D05", uses: ["projective-module", "ha:resolution"],
       formula: String.raw`\operatorname{pd} M = \min\{n : 0 \to P_n \to \dots \to P_0 \to M \to 0\}`,
       text: "The shortest length of a projective resolution. By Auslander–Buchsbaum and Serre it characterises regular local rings." },
     { id: "global-dimension", name: "Global dimension", kind: "invariante", area: "13D", field: [13], msc: ["13D"], msc5: "13D05", uses: ["projective-dimension", "module", "st:supremum"],

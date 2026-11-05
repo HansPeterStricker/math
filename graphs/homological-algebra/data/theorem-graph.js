@@ -1,0 +1,175 @@
+// Data of the theorem graph (theorems.html): theorems, lemmas, corollaries and conjectures of homological algebra, MSC 2020
+// 18G. In English. Moved on 4 November 2026 from ../../category-theory/data/theorem-graph.js (user: homological algebra is
+// an area of its own); all fields are unchanged, except that `area` is now one of the groupings in `groupAreas` (one sector each; the
+// five-character classes of `msc5` grouped) instead of the single class 18G.
+//
+// Model as in ../../algebraic-number-theory/data/theorem-graph.js (see its header comment): `premises` and `proof` are
+// the standard textbook proof, named in `proofName`; further proofs in `alternativeProofs`; `foundation: true` marks
+// general tools and results resting on theory outside these graphs; `fromDefinitions: true` marks a theorem whose
+// usual proof uses only definitions and axioms of its area and no theorem. `concepts` are ids of data/concepts.js or
+// carry the prefix of another folder.
+//
+// References to other folders: category theory "ct:" (abelian categories, exact sequences, functors), commutative algebra "ca:", set theory "st:" and others.
+// Prefix for references from other folders: "ha:<id>".
+// Sources: Weibel, An Introduction to Homological Algebra (1994); Cartan and Eilenberg, Homological Algebra (1956); Gelfand
+// and Manin, Methods of Homological Algebra (2nd ed. 2003). Not checked by a specialist.
+// Checked by ../../tests/check-theorems.js.
+
+window.HA_THEOREMS = {
+  title: "Theorems of homological algebra",
+
+  // areas: as in the concept graph of the folder (same sectors and colours)
+  areas: {
+    basic: "Results from other areas without a home folder yet",
+    complexes: "18G35 Chain complexes and homology",
+    derived: "18G05–18G20 Resolutions, derived functors, Ext and Tor",
+    triangulated: "18G40, 18G80 Spectral sequences and derived categories",
+  },
+  groupAreas: ["complexes", "derived", "triangulated"],
+
+  kinds: { axiom: "Axiom", theorem: "Theorem", lemma: "Lemma", corollary: "Corollary", conjecture: "Conjecture" },
+
+  theorems: [
+    // ------------------------------------------------------------ 18G35 Chain complexes and homology
+    { id: "long-exact-homology-sequence", name: "Long exact homology sequence", kind: "theorem", area: "complexes", field: [18], msc: ["18G"], msc5: "18G35",
+      premises: ["ct:snake-lemma"],
+      proofName: "Snake lemma",
+      alternativeProofs: [
+        { name: "Direct diagram chase", premises: ["ct:member-chasing"], idea: "Define δ[c] by lifting a cycle c of C to B, applying the differential and pulling the result back to a cycle of A; check well-definedness and exactness at each of the three places by a diagram chase." },
+      ],
+      formula: String.raw`\cdots \to H_n(A) \to H_n(B) \to H_n(C) \xrightarrow{\ \delta\ } H_{n-1}(A) \to \cdots`,
+      text: "A short exact sequence 0 → A → B → C → 0 of chain complexes in an abelian category gives a long exact sequence of homology objects with natural connecting morphisms δ.",
+      proof: "Apply the snake lemma to the maps induced by the differentials between the cokernels of the boundaries and the kernels in the next degree; its connecting morphism is δ.",
+      concepts: ["chain-complex", "homology", "ct:exact-sequence"] },
+    { id: "homotopic-maps-same-homology", name: "Homotopic maps induce the same map on homology", kind: "lemma", area: "complexes", field: [18], msc: ["18G"], msc5: "18G35",
+      premises: [],
+      fromDefinitions: true,
+      foundation: true,
+      formula: String.raw`f - g = d s + s d \;\Rightarrow\; H_n(f) = H_n(g)`,
+      text: "Chain homotopic maps of chain complexes induce the same morphisms on homology; a chain homotopy equivalence is a quasi-isomorphism.",
+      proof: "On a cycle z the difference f(z) − g(z) = d(s(z)) is a boundary.",
+      concepts: ["chain-homotopy", "homology", "quasi-isomorphism"] },
+    { id: "cone-acyclic-iff-quasi-isomorphism", name: "A chain map is a quasi-isomorphism if and only if its cone is acyclic", kind: "lemma", area: "complexes", field: [18], msc: ["18G"], msc5: "18G35",
+      premises: ["long-exact-homology-sequence"],
+      proofName: "Long exact sequence of the cone",
+      formula: String.raw`\cdots \to H_n(D) \to H_n(\operatorname{cone} f) \to H_{n-1}(C) \xrightarrow{\ H_{n-1}(f)\ } H_{n-1}(D) \to \cdots`,
+      text: "A chain map f: C → D of chain complexes in an abelian category is a quasi-isomorphism if and only if its mapping cone has zero homology in every degree.",
+      proof: "The short exact sequence 0 → D → cone(f) → C[−1] → 0 gives a long exact homology sequence whose connecting morphism is H(f), up to sign. Its terms H<sub>n</sub>(cone f) vanish for all n exactly when every H<sub>n</sub>(f) is an isomorphism.",
+      concepts: ["mapping-cone", "quasi-isomorphism", "homology"] },
+
+    // ------------------------------------------------------------ 18G05–18G20 Resolutions, derived functors, Ext and Tor
+    { id: "comparison-theorem", name: "Comparison theorem", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["ct:abelian-epi-pullback"],
+      text: "Every morphism A → B extends to a chain map from any resolution of A to an injective resolution of B, and any two such extensions are chain homotopic. Dually for projective resolutions.",
+      proof: "Construct the chain map and the homotopy degree by degree. At each step the map to be extended vanishes on the image of the previous differential, so it factors through the cokernel of that differential; by exactness of the resolution and the factorisation through the image in an abelian category, this cokernel embeds into the next term of the resolution, and injectivity of the target extends the map along this monomorphism.",
+      concepts: ["resolution", "injective-object", "chain-homotopy"] },
+    { id: "horseshoe-lemma", name: "Horseshoe lemma", kind: "lemma", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["ct:snake-lemma"],
+      proofName: "Extension degree by degree", proofYear: 1956, proofWho: "Cartan and Eilenberg",
+      formula: String.raw`I_B^n = I_A^n \oplus I_C^n`,
+      text: "For a short exact sequence 0 → A → B → C → 0 and injective resolutions of A and C, there is an injective resolution of B by the direct sums of the given terms, fitting into a short exact sequence of resolutions.",
+      proof: "Extend A → I<sub>A</sub><sup>0</sup> to B by injectivity and combine it with B → C → I<sub>C</sub><sup>0</sup>; the snake lemma shows that the cokernels again form a short exact sequence, and one continues by induction.",
+      concepts: ["resolution", "injective-object", "ct:exact-sequence"],
+      year: 1956, who: "Cartan and Eilenberg" },
+    { id: "derived-functors-well-defined", name: "Existence and uniqueness of derived functors", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["comparison-theorem", "homotopic-maps-same-homology"],
+      proofName: "Comparison of injective resolutions", proofYear: 1956, proofWho: "Cartan and Eilenberg",
+      alternativeProofs: [
+        { name: "Total derived functor on the derived category", premises: ["derived-category-triangulated", "comparison-theorem"], idea: "Every bounded below complex is quasi-isomorphic to a bounded below complex of injectives, and the argument of the comparison theorem shows that quasi-isomorphisms between such complexes are homotopy equivalences; so RF, defined by applying F to such a replacement, is well defined, and R<sup>i</sup>F is its i-th cohomology.", who: "Verdier" },
+      ],
+      formula: String.raw`R^{i}F(A) = H^{i}\big(F(I^{\bullet})\big)`,
+      text: "In an abelian category with enough injectives, the right derived functors R<sup>i</sup>F of an additive left exact functor F are well defined up to canonical isomorphism, independent of the chosen injective resolutions, and R<sup>0</sup>F ≅ F.",
+      proof: "Two injective resolutions are chain homotopy equivalent by the comparison theorem; additive functors preserve chain homotopies, so the homology of F applied to them is canonically isomorphic.",
+      concepts: ["derived-functor", "resolution", "injective-object", "ct:exact-functor"],
+      year: 1956, who: "Cartan and Eilenberg" },
+    { id: "long-exact-sequence-derived-functors", name: "Long exact sequence of derived functors", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["horseshoe-lemma", "long-exact-homology-sequence", "derived-functors-well-defined"],
+      proofName: "Horseshoe lemma", proofYear: 1956, proofWho: "Cartan and Eilenberg",
+      alternativeProofs: [
+        { name: "Distinguished triangles", premises: ["derived-category-triangulated", "derived-functors-well-defined"], idea: "The short exact sequence gives a distinguished triangle A → B → C → A[1] in the derived category; the total derived functor RF, computed on injective replacements, sends it to a distinguished triangle, and the cohomology of a distinguished triangle is a long exact sequence.", who: "Verdier" },
+      ],
+      formula: String.raw`0 \to FA \to FB \to FC \xrightarrow{\ \delta\ } R^{1}F(A) \to R^{1}F(B) \to \cdots`,
+      text: "For a left exact additive functor F on an abelian category with enough injectives, every short exact sequence 0 → A → B → C → 0 gives a long exact sequence of right derived functors with natural connecting morphisms.",
+      proof: "The horseshoe lemma gives a short exact sequence of injective resolutions that is split in each degree, so it stays exact after applying F; the long exact homology sequence of the result is the required sequence.",
+      concepts: ["derived-functor", "ct:exact-sequence", "ct:exact-functor"],
+      year: 1956, who: "Cartan and Eilenberg" },
+    { id: "derived-functors-universal-delta-functor", name: "Derived functors are universal δ-functors", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["long-exact-sequence-derived-functors"],
+      proofName: "Effaceability and dimension shifting", proofYear: 1957, proofWho: "Grothendieck",
+      text: "The right derived functors of a left exact functor form a universal cohomological δ-functor: every other δ-functor receives a unique morphism extending a given transformation in degree 0. Any δ-functor whose higher terms vanish on injectives is isomorphic to it.",
+      proof: "The long exact sequences make the derived functors a δ-functor whose higher terms vanish on injective objects; such an effaceable δ-functor is universal by dimension shifting along 0 → A → I → A/I → 0.",
+      concepts: ["derived-functor", "injective-object", "delta-functor"],
+      year: 1957, who: "Grothendieck" },
+    { id: "cartan-eilenberg-resolutions", name: "Cartan–Eilenberg resolutions", kind: "lemma", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["horseshoe-lemma"],
+      proofName: "Horseshoe lemma for boundaries, cycles and cohomology",
+      text: "In an abelian category with enough injectives every bounded below cochain complex has a Cartan–Eilenberg resolution: a double complex of injectives whose rows resolve the terms, the boundaries, the cycles and the cohomology of the complex.",
+      proof: "Choose injective resolutions of the boundaries and the cohomology objects and build those of the cycles and the terms with the horseshoe lemma, applied to 0 → B → Z → H → 0 and 0 → Z → C → B → 0.",
+      concepts: ["resolution", "chain-complex", "injective-object"],
+      year: 1956, who: "Cartan and Eilenberg" },
+    { id: "acyclic-resolutions-compute-derived-functors", name: "Acyclic resolutions compute derived functors", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G10",
+      premises: ["long-exact-sequence-derived-functors"],
+      proofName: "Dimension shifting",
+      formula: String.raw`R^i F(A) \cong H^i\big(F(J^{\bullet})\big)`,
+      text: "Let F be a left exact additive functor on an abelian category with enough injectives. For every resolution 0 → A → J<sup>0</sup> → J<sup>1</sup> → ⋯ of A by F-acyclic objects, the derived functors of F are the cohomology of F applied to it.",
+      proof: "Split the resolution into short exact sequences 0 → K<sup>i</sup> → J<sup>i</sup> → K<sup>i+1</sup> → 0. Their long exact sequences of derived functors, with R<sup>j</sup>F(J<sup>i</sup>) = 0 for j > 0, give R<sup>j</sup>F(K<sup>i+1</sup>) ≅ R<sup>j+1</sup>F(K<sup>i</sup>) for j ≥ 1 and identify R<sup>1</sup>F(K<sup>i</sup>) with the cokernel of F(J<sup>i</sup>) → F(K<sup>i+1</sup>); by induction this is the cohomology of F(J<sup>•</sup>).",
+      concepts: ["acyclic-object", "resolution", "derived-functor"] },
+    { id: "ext-tor-balanced", name: "Balance of Ext and Tor", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G15",
+      premises: ["derived-functors-universal-delta-functor"],
+      proofName: "Universal δ-functors",
+      alternativeProofs: [
+        { name: "Double complex", premises: ["spectral-sequence-double-complex"], idea: "For a projective resolution P of A and an injective resolution I of B, the double complex Hom(P, I) has exact rows and columns away from the edges; both spectral sequences degenerate, so both one-sided computations agree with the cohomology of the total complex (Weibel 2.7 uses the acyclic assembly lemma instead).", year: 1956, who: "Cartan and Eilenberg" },
+      ],
+      formula: String.raw`\operatorname{Ext}^{n}(A, B) \cong R^{n}\operatorname{Hom}(A, -)(B) \cong R^{n}\operatorname{Hom}(-, B)(A)`,
+      text: "For modules A and B, the groups Ext<sup>n</sup>(A, B) can be computed by an injective resolution of B or by a projective resolution of A, with the same result; similarly Tor<sub>n</sub>(A, B) can be computed by resolving either variable.",
+      proof: "Both families are δ-functors in A with the same value Hom(A, B) in degree 0 and vanish on projective A in positive degrees; by universality they are isomorphic.",
+      concepts: ["ext", "tor", "resolution", "ca:module"],
+      year: 1956, who: "Cartan and Eilenberg" },
+    { id: "ext-classifies-extensions", name: "Ext<sup>1</sup> classifies extensions", kind: "theorem", area: "derived", field: [18], msc: ["18G"], msc5: "18G15",
+      premises: ["long-exact-sequence-derived-functors"],
+      proofName: "Connecting morphism of Hom(−, A)",
+      formula: String.raw`\operatorname{Ext}^{1}(C, A) \cong \{0 \to A \to E \to C \to 0\} / \cong`,
+      text: "In an abelian category with enough injectives, the equivalence classes of extensions 0 → A → E → C → 0 correspond bijectively to the elements of Ext<sup>1</sup>(C, A); the split extension corresponds to 0.",
+      proof: "An extension gives, through the long exact sequence of Hom(−, A), the element δ(id<sub>A</sub>) of Ext<sup>1</sup>(C, A); conversely an element is realised as a pullback of the extension 0 → A → I → I/A → 0 with I injective.",
+      concepts: ["ext", "ct:exact-sequence"] },
+
+    // ------------------------------------------------------------ 18G40, 18G80 Spectral sequences and derived categories
+    { id: "spectral-sequence-filtered-complex", name: "Spectral sequence of a filtered complex", kind: "theorem", area: "triangulated", field: [18], msc: ["18G"], msc5: "18G40",
+      premises: ["long-exact-homology-sequence"],
+      proofName: "Exact couple of the filtration",
+      formula: String.raw`E_1^{p,q} = H^{p+q}\big(F^p C / F^{p+1} C\big) \Rightarrow H^{p+q}(C)`,
+      text: "A filtration of a cochain complex C in an abelian category by subcomplexes F<sup>p</sup>C gives a spectral sequence whose E<sub>1</sub>-term is the cohomology of the graded pieces. If the filtration is finite in each degree, the spectral sequence converges to the cohomology of C.",
+      proof: "The long exact cohomology sequences of the short exact sequences 0 → F<sup>p+1</sup>C → F<sup>p</sup>C → F<sup>p</sup>C / F<sup>p+1</sup>C → 0 form an exact couple; its derived couples give the pages E<sub>r</sub>, and for a filtration that is finite in each degree the pages become stationary and compute the graded pieces of the cohomology of C.",
+      concepts: ["chain-complex", "homology", "spectral-sequence"],
+      year: 1950, who: "Massey (exact couples), Koszul, Leray" },
+    { id: "spectral-sequence-double-complex", name: "Spectral sequences of a double complex", kind: "theorem", area: "triangulated", field: [18], msc: ["18G"], msc5: "18G40",
+      premises: ["spectral-sequence-filtered-complex"],
+      proofName: "Filtrations by columns and by rows",
+      formula: String.raw`E_2^{p,q} = H^{p}_{\mathrm{I}} H^{q}_{\mathrm{II}}(C) \Rightarrow H^{p+q}(\operatorname{Tot} C)`,
+      text: "A first-quadrant double complex has two spectral sequences, one for each filtration of its total complex, and both converge to the cohomology of the total complex.",
+      proof: "Each filtration of the total complex by columns or rows gives an exact couple; the filtration is finite in each degree, so the spectral sequence converges.",
+      concepts: ["double-complex", "spectral-sequence", "homology"] },
+    { id: "grothendieck-spectral-sequence", name: "Grothendieck spectral sequence", kind: "theorem", area: "triangulated", field: [18], msc: ["18G"], msc5: "18G40",
+      premises: ["cartan-eilenberg-resolutions", "spectral-sequence-double-complex", "derived-functors-well-defined"],
+      proofName: "Cartan–Eilenberg resolution of F(I)", proofYear: 1957, proofWho: "Grothendieck",
+      formula: String.raw`E_2^{p,q} = R^{p}G\big(R^{q}F(A)\big) \Rightarrow R^{p+q}(G \circ F)(A)`,
+      text: "Let F and G be left exact additive functors between abelian categories with enough injectives, such that F sends injective objects to objects on which the higher derived functors of G vanish. Then for every object A there is a convergent spectral sequence as shown.",
+      proof: "Apply G to a Cartan–Eilenberg resolution of F(I<sup>•</sup>) for an injective resolution I<sup>•</sup> of A; one spectral sequence of this double complex degenerates to R<sup>n</sup>(GF)(A), the other has the E<sub>2</sub>-term shown.",
+      concepts: ["derived-functor", "spectral-sequence", "injective-object"],
+      year: 1957, who: "Grothendieck" },
+    { id: "homotopy-category-triangulated", name: "Homotopy category of complexes is triangulated", kind: "theorem", area: "triangulated", field: [18], msc: ["18G"], msc5: "18G80",
+      premises: [],
+      fromDefinitions: true,
+      text: "For an additive category, the category of chain complexes with homotopy classes of chain maps is a triangulated category: the shift is the translation functor, and the distinguished triangles are those isomorphic to the triangles of mapping cones.",
+      proof: "The axioms are verified with explicit homotopies between mapping cones; the octahedral axiom uses the cones of a composite of two maps.",
+      concepts: ["triangulated-category", "chain-complex", "chain-homotopy", "mapping-cone"],
+      who: "Verdier" },
+    { id: "derived-category-triangulated", name: "Derived category is triangulated", kind: "theorem", area: "triangulated", field: [18], msc: ["18G"], msc5: "18G80",
+      premises: ["homotopy-category-triangulated", "long-exact-homology-sequence"],
+      proofName: "Verdier quotient by the acyclic complexes", proofWho: "Verdier",
+      text: "For an abelian category A, the derived category D(A), obtained from the homotopy category by inverting the quasi-isomorphisms, exists and is triangulated, and the localisation functor is exact. Every short exact sequence of complexes gives a distinguished triangle.",
+      proof: "A map is a quasi-isomorphism exactly when its cone is acyclic, by the long exact homology sequence; the acyclic complexes form a thick triangulated subcategory, and the Verdier quotient by it is D(A).",
+      concepts: ["derived-category", "triangulated-category", "quasi-isomorphism"],
+      who: "Verdier" },
+  ],
+};

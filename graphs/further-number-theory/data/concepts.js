@@ -1,4 +1,4 @@
-// Data of the concept graph (concepts.html): concepts (definitions) of further number theory, MSC 2020 11C
+// Data of the concept graph (concepts.html): concepts (definitions) of number theory: other topics, MSC 2020 11C
 // (polynomials and matrices over ℤ), 11K (probabilistic number theory: distribution modulo 1, discrepancy, normal
 // numbers, metric theory of continued fractions, additive functions), 11L (exponential sums and character sums) and
 // 11Y (computational number theory: primality tests, factorization, discrete logarithms). In English. Built on
@@ -31,7 +31,7 @@
 // Checked by ../../tests/check-concepts.js.
 
 window.FNT_CONCEPTS = {
-  title: "Concepts of further number theory",
+  title: "Concepts of number theory: other topics",
 
   areas: {
     basic: "Defined elsewhere, no home folder entry yet",
@@ -132,7 +132,7 @@ window.FNT_CONCEPTS = {
     { id: "modular-exponentiation", name: "Modular exponentiation (square and multiply)", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y16", uses: ["ent:residue-class-ring", "ent:base-representation"],
       formula: String.raw`a^{e} = \prod_{j : e_j = 1} a^{2^j},\quad e = \sum_j e_j 2^j`,
       text: "The algorithm that computes a<sup>e</sup> modulo n from the binary digits of e by repeated squaring and multiplication, with at most 2 log<sub>2</sub> e multiplications modulo n." },
-    { id: "primality-test", name: "Primality test", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y11", uses: ["ent:prime-number", "cs:running-time"],
+    { id: "primality-test", name: "Primality test", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y11", uses: ["ent:prime-number", "cc:running-time"],
       text: "An algorithm that decides for a given natural number n whether it is prime. A probabilistic test may declare a composite number prime with small probability (a probable prime); a deterministic test makes no error; a primality proof outputs a certificate that can be checked quickly." },
     { id: "fermat-test", name: "Fermat primality test", kind: "konstruktion", area: "11Y", field: [11], msc: ["11Y"], msc5: "11Y11", uses: ["primality-test", "ent:fermat-pseudoprime", "modular-exponentiation"], isA: ["primality-test"],
       formula: String.raw`a^{n-1} \not\equiv 1 \pmod n \;\Rightarrow\; n \text{ composite}`,
@@ -146,7 +146,7 @@ window.FNT_CONCEPTS = {
     { id: "aks-test", name: "AKS primality test", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y11", uses: ["primality-test", "ca:polynomial-ring", "ent:residue-class-ring", "ent:multiplicative-order"], isA: ["primality-test"],
       formula: String.raw`(X + a)^n \equiv X^n + a \pmod{X^r - 1,\ n}`,
       text: "The deterministic test of Agrawal, Kayal and Saxena: rule out perfect powers, find the least r with ord<sub>r</sub>(n) > (log<sub>2</sub> n)<sup>2</sup>, check that n has no factor up to r, and verify the congruence shown in the ring (ℤ/nℤ)[X]/(X<sup>r</sup> − 1) for a = 1, …, ⌊√φ(r) log<sub>2</sub> n⌋." },
-    { id: "integer-factorization-problem", name: "Integer factorization problem", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y05", uses: ["ent:prime-factorization", "cs:running-time"],
+    { id: "integer-factorization-problem", name: "Integer factorization problem", kind: "konstruktion", area: "11Y", field: [11, 68], msc: ["11Y"], msc5: "11Y05", uses: ["ent:prime-factorization", "cc:running-time"],
       text: "The computational problem to find, for a given composite natural number n, a non-trivial divisor, and by repetition the prime factorization of n. Running times are measured in the number of digits log n; the best known algorithms are subexponential." },
     { id: "factor-base", name: "Factor base", kind: "konstruktion", area: "11Y", field: [11], msc: ["11Y"], msc5: "11Y05", uses: ["ent:prime-number", "ar:smooth-number"],
       text: "The finite set of primes up to a bound B (sometimes with −1, or restricted to primes with a given property) over which smooth values are factored. Each B-smooth value gives a vector of exponents, its relation." },

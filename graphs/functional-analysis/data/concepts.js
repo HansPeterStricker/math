@@ -1,0 +1,156 @@
+// Data of the concept graph (concepts.html): concepts (definitions) of functional analysis, MSC 2020
+// 46 and 47. In English. Moved on 4 November 2026 from ../../analysis/data/concepts.js (user: functional analysis is
+// an area of its own); all fields are unchanged, except that `area` is now one of four groupings in `groupAreas` instead of the two
+// groupings functional (46) and operators (47) of the analysis.
+//
+// Same model as ../../elementary-number-theory/data/concepts.js (see its header comment). Every concept that a
+// definition (name, formula, defining prose) uses explicitly is in `uses`.
+//
+// References to other folders: analysis "ana:" (limits, measure and integration, Fourier analysis), linear algebra "la:", topology "top:", set theory "st:" and others.
+// Prefix for references from other folders: "fa:<id>".
+// Sources: Rudin, Functional Analysis (2nd ed. 1991); Brezis, Functional Analysis, Sobolev Spaces and Partial Differential
+// Equations (2011); Reed and Simon, Methods of Modern Mathematical Physics I (1980); Conway, A Course in Functional
+// Analysis (2nd ed. 1990). Not checked by a specialist.
+// Checked by ../../tests/check-concepts.js.
+
+window.FA_CONCEPTS = {
+  title: "Concepts of functional analysis",
+
+  areas: {
+    basic: "Defined elsewhere, no home folder yet",
+    banach: "46A, 46B, 46C, 46G Topological vector, Banach and Hilbert spaces",
+    "function-spaces": "46E, 46F Function spaces and distributions",
+    algebras: "46H, 46J, 46L Banach algebras and operator algebras",
+    operators: "47 Operator theory",
+  },
+  groupAreas: ["banach", "function-spaces", "algebras", "operators"],
+
+  kinds: {
+    objekt: "Object",
+    eigenschaft: "Property",
+    morphismus: "Relation or morphism",
+    konstruktion: "Construction",
+    invariante: "Invariant",
+  },
+
+  concepts: [
+    // ------------------------------------------------------------ 46A, 46B, 46C, 46G Topological vector, Banach and Hilbert spaces
+    { id: "normed-space", name: "Normed space", kind: "objekt", area: "banach", field: [46], msc: ["46B"], msc5: "46B99", uses: ["ca:module", "st:real-number", "st:complex-number"],
+      formula: String.raw`\|x\| = 0 \Leftrightarrow x = 0,\quad \|\lambda x\| = |\lambda|\, \|x\|,\quad \|x + y\| \le \|x\| + \|y\|`,
+      text: "A vector space over ℝ or ℂ (a module over the field) with a norm, a map x ↦ ‖x‖ to the non-negative reals that vanishes only at 0, is absolutely homogeneous and satisfies the triangle inequality; d(x, y) = ‖x − y‖ makes it a metric space." },
+    { id: "banach-space", name: "Banach space", kind: "objekt", area: "banach", field: [46], msc: ["46B"], msc5: "46B99", uses: ["normed-space", "top:complete-metric-space"], isA: ["normed-space"],
+      formula: String.raw`\|x_n - x_m\| \to 0 \;\Rightarrow\; x_n \to x`,
+      text: "A normed space that is complete for the metric of its norm: every Cauchy sequence converges." },
+    { id: "weak-convergence", name: "Weak convergence", kind: "eigenschaft", area: "banach", field: [46], msc: ["46B"], msc5: "46B10", uses: ["dual-space", "ana:sequence-limit"],
+      formula: String.raw`u_n \rightharpoonup u \iff \ell(u_n) \to \ell(u) \;\; (\ell \in X^*)`,
+      text: "A sequence (u<sub>n</sub>) in a normed space X converges weakly to u if ℓ(u<sub>n</sub>) → ℓ(u) for every continuous linear functional ℓ in the dual space X*. Norm convergence implies weak convergence; in infinite dimensions the converse fails." },
+    { id: "reflexive-space", name: "Reflexive Banach space", kind: "eigenschaft", area: "banach", field: [46], msc: ["46B"], msc5: "46B10", uses: ["banach-space", "dual-space"], isA: ["banach-space"],
+      formula: String.raw`J: X \to X^{**},\quad J(x)(\ell) = \ell(x),\quad J(X) = X^{**}`,
+      text: "A Banach space X for which the canonical isometric embedding J into its bidual X** is surjective. Hilbert spaces and L<sup>p</sup> and W<sup>1,p</sup> for 1 < p < ∞ are reflexive, L<sup>1</sup> and L<sup>∞</sup> are not." },
+    { id: "frechet-derivative", name: "Fréchet derivative", kind: "konstruktion", area: "banach", field: [46], msc: ["46G"], msc5: "46G05", uses: ["normed-space", "bounded-linear-operator", "ana:function-limit"],
+      formula: String.raw`\lim_{h \to 0} \frac{\|J(u + h) - J(u) - DJ(u)h\|}{\|h\|} = 0`,
+      text: "A map J between normed spaces is Fréchet differentiable at u if there is a bounded linear operator DJ(u) such that the limit shown is 0. For a functional, a point with DJ(u) = 0 is a critical point." },
+    { id: "frechet-space", name: "Fréchet space", kind: "objekt", area: "banach", field: [46], msc: ["46A"], msc5: "46A04", uses: ["la:vector-space", "top:complete-metric-space"],
+      formula: String.raw`d(x, y) = \sum_{k} 2^{-k} \min\big(1, \|x - y\|_k\big)`,
+      text: "A real vector space with a countable family of seminorms ‖·‖<sub>k</sub> that separates points and is complete for the metric shown. C<sup>∞</sup>(M) of a compact manifold, with the C<sup>k</sup> norms, is the basic example." },
+    { id: "inner-product-space", name: "Inner product space", kind: "objekt", area: "banach", field: [46], msc: ["46C"], msc5: "46C05", uses: ["ca:module", "st:complex-number", "st:real-number"],
+      formula: String.raw`\langle x, x \rangle > 0 \;(x \ne 0),\quad \langle y, x \rangle = \overline{\langle x, y \rangle},\quad \|x\| = \langle x, x \rangle^{1/2}`,
+      text: "A vector space over ℝ or ℂ with an inner product ⟨·, ·⟩: linear in the first argument, conjugate symmetric and positive definite; ‖x‖ = ⟨x, x⟩<sup>1/2</sup> is a norm." },
+    { id: "hilbert-space", name: "Hilbert space", kind: "objekt", area: "banach", field: [46], msc: ["46C"], msc5: "46C05", uses: ["inner-product-space", "top:complete-metric-space"], isA: ["inner-product-space"],
+      formula: String.raw`\|v\| = \langle v, v\rangle^{1/2}`,
+      text: "An inner product space over ℝ or ℂ that is complete for the norm ‖v‖ = ⟨v, v⟩<sup>1/2</sup>; examples are ℂ<sup>n</sup>, the space ℓ<sup>2</sup> of square-summable sequences and L<sup>2</sup>(μ)." },
+    { id: "orthonormal-basis", name: "Orthonormal basis", kind: "konstruktion", area: "banach", field: [46], msc: ["46C"], msc5: "46C05", uses: ["hilbert-space", "st:maximal-element"],
+      formula: String.raw`\langle e_i, e_j \rangle = \delta_{ij}`,
+      text: "A maximal orthonormal system (e<sub>i</sub>) in a Hilbert space: pairwise orthogonal vectors of norm 1 such that no non-zero vector is orthogonal to all of them; in general not a basis in the algebraic sense." },
+    { id: "dual-space", name: "Dual space", kind: "konstruktion", area: "banach", field: [46], msc: ["46B"], msc5: "46B10", uses: ["normed-space", "bounded-linear-operator"],
+      formula: String.raw`X' = \{\varphi: X \to \mathbb K \text{ linear and bounded}\},\quad \|\varphi\| = \sup_{\|x\| \le 1} |\varphi(x)|`,
+      text: "The space of bounded linear functionals on a normed space X over 𝕂 = ℝ or ℂ, with the operator norm; it is always a Banach space." },
+    { id: "weak-star-topology", name: "Weak-* topology", kind: "konstruktion", area: "banach", field: [46], msc: ["46B"], msc5: "46B10", uses: ["dual-space", "top:topological-space"],
+      formula: String.raw`\varphi_\alpha \to \varphi \iff \varphi_\alpha(x) \to \varphi(x)`,
+      text: "The coarsest topology on the dual space X′ for which every evaluation φ ↦ φ(x) at a point x of X is continuous; convergence in it is pointwise convergence of functionals." },
+
+    // ------------------------------------------------------------ 46E, 46F Function spaces and distributions
+    { id: "lp-space", name: "Lᵖ space", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E30", uses: ["ana:lebesgue-integral", "ana:null-set", "normed-space"],
+      formula: String.raw`\|f\|_p = \Big(\int |f|^p\, d\mu\Big)^{1/p}`,
+      text: "For 1 ≤ p < ∞ and a measure space: the measurable functions f with ∫|f|<sup>p</sup> dμ < ∞, two of them identified when they agree almost everywhere, with the norm ‖f‖<sub>p</sub>; L<sup>∞</sup> uses the essential supremum." },
+    { id: "continuous-function-space", name: "Space of continuous functions C(K)", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E15", uses: ["ana:continuous-function", "top:compact-space", "normed-space"],
+      formula: String.raw`\|f\|_\infty = \max_{x \in K} |f(x)|`,
+      text: "The continuous real or complex functions on a compact space K with the supremum norm; convergence in it is uniform convergence." },
+    { id: "schwartz-space", name: "Schwartz space", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46F"], msc5: "46F05", uses: ["ana:continuously-differentiable", "st:real-number"],
+      formula: String.raw`\sup_{x} |x^\alpha \partial^\beta f(x)| < \infty`,
+      text: "The smooth functions f on ℝ<sup>n</sup> all of whose derivatives decrease faster than any power of |x|: x<sup>α</sup>∂<sup>β</sup>f is bounded for all multi-indices α and β. The Fourier transform maps it bijectively to itself." },
+    { id: "distribution", name: "Distribution", kind: "objekt", area: "function-spaces", field: [46], msc: ["46F"], msc5: "46F05", uses: ["ana:continuously-differentiable", "ca:module-homomorphism", "ana:uniform-convergence"],
+      formula: String.raw`T: C_c^\infty(U) \to \mathbb C,\quad \langle T', \varphi \rangle = -\langle T, \varphi' \rangle`,
+      text: "A linear functional T on the smooth functions with compact support in an open set U that is continuous: T(φ<sub>k</sub>) → 0 whenever the φ<sub>k</sub> have supports in one compact set and all their derivatives converge uniformly to 0. Derivatives are defined by moving them to the test function." },
+    { id: "test-function", name: "Test function", kind: "objekt", area: "function-spaces", field: [46], msc: ["46F"], msc5: "46F05", uses: ["ana:continuously-differentiable", "top:compact-space"],
+      formula: String.raw`\varphi \in C_c^\infty(U)`,
+      text: "A smooth function on an open set U ⊆ ℝ<sup>n</sup> whose support, the closure of the set where it is non-zero, is a compact subset of U. Distributions are continuous linear functionals on the test functions." },
+    { id: "weak-derivative", name: "Weak derivative", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E35", uses: ["test-function", "ana:lebesgue-integral", "ana:partial-derivative"],
+      formula: String.raw`\int_U u\, \partial^\alpha \varphi \, dx = (-1)^{|\alpha|} \int_U v\, \varphi \, dx`,
+      text: "For locally integrable functions u and v on an open set U: v is the weak derivative ∂<sup>α</sup>u of u if the formula of integration by parts holds with every test function φ. It is unique up to a null set and agrees with the classical derivative for C<sup>k</sup> functions." },
+    { id: "sobolev-space", name: "Sobolev space", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E35", uses: ["weak-derivative", "lp-space"],
+      formula: String.raw`W^{k,p}(U),\quad \|u\|_{W^{k,p}} = \Big(\sum_{|\alpha| \le k} \|\partial^\alpha u\|_{L^p}^p\Big)^{1/p},\quad H^k = W^{k,2}`,
+      text: "For an integer k ≥ 0 and 1 ≤ p ≤ ∞: the functions u in L<sup>p</sup>(U) all of whose weak derivatives of order at most k exist and lie in L<sup>p</sup>(U), with the norm shown. It is a Banach space, and H<sup>k</sup> = W<sup>k,2</sup> is a Hilbert space." },
+    { id: "sobolev-space-zero", name: "Sobolev space with zero boundary values", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E35", uses: ["sobolev-space", "test-function", "top:closure"],
+      formula: String.raw`H^1_0(U) = \overline{C_c^\infty(U)}^{\,H^1}`,
+      text: "The closure of the test functions in the Sobolev space H<sup>1</sup>(U) (more generally W<sup>k,p</sup><sub>0</sub>(U) in W<sup>k,p</sup>(U)). For a bounded domain with C<sup>1</sup> boundary it consists of the H<sup>1</sup> functions whose boundary trace vanishes; it is the space of the Dirichlet problem." },
+    { id: "holder-space", name: "Hölder space", kind: "konstruktion", area: "function-spaces", field: [46], msc: ["46E"], msc5: "46E15", uses: ["ana:continuously-differentiable", "normed-space"],
+      formula: String.raw`[u]_{C^{0,\alpha}} = \sup_{x \ne y} \frac{|u(x) - u(y)|}{|x - y|^\alpha},\quad C^{k,\alpha}(\overline U)`,
+      text: "For 0 < α ≤ 1: the functions of class C<sup>k</sup> on the closure of U whose derivatives of order k are Hölder continuous with exponent α, i.e. have finite Hölder seminorm, with the norm given by the sum of the supremum norms of the derivatives and these seminorms. A Banach space; the natural space of the Schauder theory." },
+
+    // ------------------------------------------------------------ 46H, 46J, 46L Banach algebras and operator algebras
+    { id: "banach-algebra", name: "Banach algebra", kind: "objekt", area: "algebras", field: [46], msc: ["46H"], msc5: "46H05", uses: ["banach-space", "ca:algebra"], isA: ["banach-space"],
+      formula: String.raw`\|xy\| \le \|x\|\, \|y\|`,
+      text: "An algebra over ℂ that is a Banach space whose norm is submultiplicative; usually with a unit of norm 1. Example: the bounded operators on a Banach space." },
+    { id: "c-star-algebra", name: "C*-algebra", kind: "objekt", area: "algebras", field: [46], msc: ["46L"], msc5: "46L05", uses: ["banach-algebra"], isA: ["banach-algebra"],
+      formula: String.raw`\|x^* x\| = \|x\|^2`,
+      text: "A Banach algebra over ℂ with an involution x ↦ x* (conjugate linear, antimultiplicative, of order 2) satisfying the C*-identity ‖x*x‖ = ‖x‖<sup>2</sup>. Examples: C(K) and the bounded operators on a Hilbert space." },
+    { id: "gelfand-transform", name: "Gelfand transform", kind: "konstruktion", area: "algebras", field: [46], msc: ["46J"], msc5: "46J05", uses: ["banach-algebra", "weak-star-topology"],
+      formula: String.raw`\hat a(\chi) = \chi(a),\quad \chi \in \Delta(A)`,
+      text: "For a commutative Banach algebra A, the space Δ(A) of its characters (non-zero multiplicative linear functionals) carries the weak-* topology; the Gelfand transform sends a ∈ A to the continuous function â on Δ(A)." },
+    { id: "reduced-group-c-star-algebra", name: "Reduced group C*-algebra", kind: "konstruktion", area: "algebras", field: [46], msc: ["46L"], msc5: "46L05", uses: ["c-star-algebra", "hilbert-space", "bounded-linear-operator", "gt:group"],
+      formula: String.raw`C^*_r G = \overline{\lambda(\mathbb C[G])} \subseteq B\big(\ell^2 G\big)`,
+      text: "For a discrete group G, the norm closure of the group ring ℂ[G] acting on the Hilbert space ℓ<sup>2</sup>(G) by left translation λ; a C*-algebra." },
+
+    // ------------------------------------------------------------ 47 Operator theory
+    { id: "bounded-linear-operator", name: "Bounded linear operator", kind: "morphismus", area: "operators", field: [47], msc: ["47A"], msc5: "47A05", uses: ["normed-space", "ca:module-homomorphism", "st:supremum"],
+      formula: String.raw`\|T\| = \sup_{\|x\| \le 1} \|Tx\| < \infty`,
+      text: "A linear map T between normed spaces that maps the unit ball to a bounded set; ‖T‖ is its operator norm. A linear map is bounded if and only if it is continuous." },
+    { id: "adjoint-operator", name: "Adjoint operator", kind: "konstruktion", area: "operators", field: [47], msc: ["47A"], msc5: "47A05", uses: ["bounded-linear-operator", "hilbert-space"],
+      formula: String.raw`\langle Tx, y \rangle = \langle x, T^* y \rangle`,
+      text: "For a bounded operator T on a Hilbert space H: the bounded operator T* on H with ⟨Tx, y⟩ = ⟨x, T*y⟩ for all x and y." },
+    { id: "self-adjoint-operator", name: "Self-adjoint operator", kind: "eigenschaft", area: "operators", field: [47], msc: ["47B"], msc5: "47B15", uses: ["adjoint-operator"],
+      formula: String.raw`T^* = T`,
+      text: "A bounded operator on a Hilbert space that equals its adjoint; then ⟨Tx, x⟩ is real for every x. (For unbounded operators the domains must agree as well.)" },
+    { id: "trace-class-operator", name: "Trace-class operator", kind: "eigenschaft", area: "operators", field: [47], msc: ["47B"], msc5: "47B10", uses: ["compact-operator", "hilbert-space", "orthonormal-basis"],
+      formula: String.raw`\operatorname{tr} |T| = \textstyle\sum_n \langle |T| e_n, e_n\rangle < \infty`,
+      text: "A compact operator T on a Hilbert space whose singular values are summable; then tr T = Σ ⟨T e<sub>n</sub>, e<sub>n</sub>⟩ is finite and independent of the orthonormal basis." },
+    { id: "unbounded-self-adjoint-operator", name: "Unbounded self-adjoint operator", kind: "eigenschaft", area: "operators", field: [47], msc: ["47B"], msc5: "47B25", uses: ["hilbert-space", "adjoint-operator", "top:dense-subset"],
+      formula: String.raw`A = A^*,\quad D(A) = D(A^*)`,
+      text: "A linear operator A defined on a dense subspace D(A) of a Hilbert space that equals its adjoint, including the domains. Position, momentum and energy of quantum mechanics are of this kind." },
+    { id: "one-parameter-unitary-group", name: "Strongly continuous one-parameter unitary group", kind: "objekt", area: "operators", field: [47], msc: ["47D"], msc5: "47D03", uses: ["hilbert-space", "bounded-linear-operator"],
+      formula: String.raw`U(t+s) = U(t)\,U(s),\quad U(t)^* = U(t)^{-1},\quad t \mapsto U(t)\psi \text{ continuous}`,
+      text: "A family U(t), t ∈ ℝ, of unitary operators on a Hilbert space with U(0) = 1 and U(t + s) = U(t)U(s), such that t ↦ U(t)ψ is continuous for each vector ψ." },
+    { id: "normal-operator", name: "Normal operator", kind: "eigenschaft", area: "operators", field: [47], msc: ["47B"], msc5: "47B15", uses: ["adjoint-operator"],
+      formula: String.raw`T^* T = T T^*`,
+      text: "A bounded operator on a Hilbert space that commutes with its adjoint; self-adjoint and unitary operators are normal." },
+    { id: "compact-operator", name: "Compact operator", kind: "eigenschaft", area: "operators", field: [47], msc: ["47B"], msc5: "47B07", uses: ["bounded-linear-operator", "top:compact-space"],
+      formula: String.raw`\overline{T(B_1)} \text{ compact}`,
+      text: "A linear operator between Banach spaces that maps the unit ball to a set with compact closure; equivalently every bounded sequence (x<sub>n</sub>) has a subsequence with (Tx<sub>n</sub>) convergent." },
+    { id: "spectrum", name: "Spectrum", kind: "invariante", area: "operators", field: [47], msc: ["47A"], msc5: "47A10", uses: ["bounded-linear-operator", "banach-space"],
+      formula: String.raw`\sigma(T) = \{\lambda \in \mathbb C : T - \lambda I \text{ not invertible}\}`,
+      text: "For a bounded operator T on a complex Banach space (or an element of a Banach algebra): the set of complex λ for which T − λI has no bounded inverse; it contains the eigenvalues. Its complement is the resolvent set, and r(T) = max |σ(T)| is the spectral radius." },
+    { id: "fredholm-operator", name: "Fredholm operator and index", kind: "invariante", area: "operators", field: [47], msc: ["47A"], msc5: "47A53", uses: ["bounded-linear-operator", "la:vector-space-dimension"],
+      formula: String.raw`\operatorname{ind} T = \dim \ker T - \dim \operatorname{coker} T`,
+      text: "A bounded operator between Banach spaces with finite-dimensional kernel and cokernel; its index is the difference of their dimensions." },
+    { id: "spectral-measure", name: "Spectral measure (projection-valued measure)", kind: "konstruktion", area: "operators", field: [47], msc: ["47B"], msc5: "47B15", uses: ["ana:borel-sigma-algebra", "self-adjoint-operator", "hilbert-space"],
+      formula: String.raw`E(A \cap B) = E(A) E(B),\quad E(\mathbb R) = I`,
+      text: "A map E from the Borel sets of ℝ (or ℂ) to the orthogonal projections, that is the self-adjoint idempotent operators, of a Hilbert space, multiplicative on intersections, with E(ℝ) = I, and countably additive in the strong sense." },
+    { id: "invariant-subspace", name: "Invariant subspace", kind: "eigenschaft", area: "operators", field: [47], msc: ["47A"], msc5: "47A15", uses: ["bounded-linear-operator"],
+      formula: String.raw`T(M) \subseteq M`,
+      text: "A closed linear subspace M of a Banach space that a bounded operator T maps into itself; it is non-trivial if it is neither 0 nor the whole space." },
+    { id: "contraction-mapping", name: "Contraction", kind: "eigenschaft", area: "operators", field: [47], msc: ["47H"], msc5: "47H10", uses: ["top:metric-space", "st:map"],
+      formula: String.raw`d(Tx, Ty) \le q\, d(x, y),\quad q < 1`,
+      text: "A map T of a metric space into itself that shrinks all distances by at least a fixed factor q < 1." },
+  ],
+};

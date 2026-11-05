@@ -23,7 +23,9 @@
 // Layout: the nodes on a circle; the order makes the sum of strength × angular distance small (pairs exchanged as long
 // as the sum falls; deterministic). At the level of classes the folders keep the order of the level of areas and only
 // the classes within a sector are exchanged. Edges are bands curved towards the centre, wide at X and narrow at Y.
-// Address: #level=areas|classes, &min=<n>, &sel=<node key> or &pair=<from key>><to key>.
+// Address: #level=areas|classes, &layout=force, &min=<n>, &sel=<node key> or &pair=<from key>><to key>.
+// Since 4 November 2026 (todo B92) the level of areas uses shared_scripts/area-layout.js: seven groups with colours,
+// layout A (circle sorted by group) and C₃ (force-directed), switched with an animated change.
 (function () {
   "use strict";
   const KINDS = [
@@ -81,7 +83,7 @@
     // and theorem classes), else from the register
     const folders = W.GRAPH_AREAS.filter((a) => W[a.concepts] && W[a.theorems]).map((a, i) => {
       const cfg = (W.AREA_CFG || []).find((c) => c.folder === a.folder) || {};
-      return { i, folder: a.folder, name: a.name, msc: a.msc, codes: a.msc.split(/,\s*/), prefix: a.prefix, colors: cfg.colors || a.colors || {}, C: W[a.concepts], T: W[a.theorems], color: ORIGIN_COLORS[a.prefix] || "#8a7f6e" };
+      return { i, folder: a.folder, name: a.name, msc: a.msc, codes: a.msc.split(/,\s*/), prefix: a.prefix, note: a.note, colors: cfg.colors || a.colors || {}, C: W[a.concepts], T: W[a.theorems], color: ORIGIN_COLORS[a.prefix] || "#8a7f6e" };
     });
     const items = [], cIndex = new Map(), tIndex = new Map();
     folders.forEach((f) => {
@@ -118,7 +120,7 @@
     const mainName = (m) => MAIN[m] || "MSC " + m;
     const grayUnit = (level, m) => unit(level, "msc." + m, () => ({ gray: true, main: m, code: m, areaKey: "msc." + m, label: m + " " + mainName(m).split(";")[0], name: m + " " + mainName(m), color: "#9a9286" }));
     const otherUnit = (level) => unit(level, "msc.other", () => ({ gray: true, other: true, main: "other", code: "oth", areaKey: "msc.other", label: "Other MSC classes", name: "Other MSC classes without a folder and without nodes", color: "#9a9286", codes: new Set() }));
-    const areaUnit = (f) => unit("areas", f.prefix, () => ({ folder: f, code: f.prefix, areaKey: f.prefix, label: f.name, name: f.name, color: f.color }));
+    const areaUnit = (f) => unit("areas", f.prefix, () => ({ folder: f, code: f.prefix, areaKey: f.prefix, label: f.name, name: f.name, note: f.note, color: f.color }));
     const className = (f, cls) => {
       for (const g of [f].concat(folders)) for (const A of [g.C && g.C.areas, g.T && g.T.areas]) if (A && A[cls]) return A[cls].replace(/^\S+\s+/, "");
       return CLASS_NAMES[cls] || mainName(cls.slice(0, 2));
@@ -200,7 +202,7 @@
   const plain = (n) => n.replace(/<sup>(.*?)<\/sup>/g, (m, t) => conv(t, SUP, "^")).replace(/<sub>(.*?)<\/sub>/g, (m, t) => conv(t, SUB, "_")).replace(/<[^>]+>/g, "");
   const KIND = new Map(G.KINDS.map((k, i) => [k.key, Object.assign(k, { i })]));
 
-  const state = { level: "areas", min: { areas: 3, classes: 2 }, kinds: new Set(G.KINDS.map((k) => k.key)), alt: true, sel: null, pair: null };
+  const state = { level: "areas", min: { areas: 3, classes: 2 }, kinds: new Set(G.KINDS.map((k) => k.key)), alt: false, sel: null, pair: null, layout: "e2", mix: 1, marks: "symbols", bysize: true, scale: 1, frame: "ellipse", organic: true, gap: 20 };
   const strength = (e) => e.singles.length - (state.alt ? 0 : e.alt);
   const shown = (e) => state.kinds.has(e.kind) && strength(e) > 0 && strength(e) >= state.min[state.level];
 
@@ -247,11 +249,31 @@
   }
   const byCode = (a, b) => (a.code < b.code ? -1 : a.code > b.code ? 1 : 0);
   const grayList = (level) => [...G.units[level].values()].filter((u) => u.gray).sort(byCode);
-  // level of areas: the folders in one group (exchanged among themselves), the grey nodes in a second one
-  const areaGroups = [G.folders.map((f) => G.units.areas.get(f.prefix)).filter(Boolean), grayList("areas")].filter((g) => g.length);
-  optimise("areas", areaGroups.length > 1 ? areaGroups : areaGroups);
-  // with the folders as one group, the order is a single sequence; turned so that the grey block is at the bottom left
-  const folderOrder = areaGroups[0].map((u) => u.folder);
+  // level of areas (todo B92, user, 4 November 2026): with shared_scripts/area-layout.js the areas stand in seven
+  // groups, each a shade of the colour of its group, on the circle sorted by group (layout A); a switch moves them to
+  // the force-directed layout C₃ and back. Without that file the old order (one group, arc length only) stays.
+  const AL = window.AREA_LAYOUT;
+  const pairsAreas = (() => {
+    const w = new Map();
+    G.edges.areas.forEach((e) => { const [a, b] = e.from.key < e.to.key ? [e.from, e.to] : [e.to, e.from], k = a.key + "\n" + b.key; const x = w.get(k) || { a, b, w: 0 }; x.w += e.singles.length; w.set(k, x); });
+    return [...w.values()];
+  })();
+  let areaGroups;
+  // The layouts are computed exactly as in the sketch (skizzen/area-layouts.js; user, 4 November 2026: "do it just like
+  // the sketch"): without the grey points (they are not drawn at all; their edges stay in the data), the start of C
+  // from the angles of A as the sketch computes them.
+  const allAreas = [...G.units.areas.values()].filter((u) => !u.gray);
+  const pairsColoured = pairsAreas.filter((p) => !p.a.gray && !p.b.gray);
+  if (AL) {
+    G.units.areas.forEach((u) => { u.F = u.gray ? AL.GRAY : AL.groupOf(u.folder.folder); const c = !u.gray && AL.shade(u.folder.folder); if (c) u.color = c; });
+    areaGroups = AL.circleSorted(allAreas, pairsColoured);
+    areaGroups.forEach((g) => { g.F = g[0].F; });
+    slots("areas", areaGroups);
+  } else {
+    areaGroups = [G.folders.map((f) => G.units.areas.get(f.prefix)).filter(Boolean), grayList("areas")].filter((g) => g.length);
+    optimise("areas", areaGroups);
+  }
+  const folderOrder = areaGroups.flat().filter((u) => !u.gray).map((u) => u.folder);
   // level of classes: one sector per folder in the order of the level of areas, the grey nodes last
   const classGroups = folderOrder.map((f) => {
     const g = [...G.units.classes.values()].filter((u) => u.folder === f).sort(byCode);
@@ -271,19 +293,78 @@
     areas: { R: 300, r: (n) => 5 + 2.2 * Math.sqrt(n), w: (n) => 1 + 1.25 * Math.sqrt(n), side: 330, pad: 70 },
     classes: { R: 470, r: (n) => 2.5 + 1.15 * Math.sqrt(n), w: (n) => 0.7 + 0.9 * Math.sqrt(n), side: 250, pad: 245 },
   };
+  // size of a point (level of areas: switches "point size" and "size by number", as in the sketch; user, 4 November
+  // 2026): by the number of concepts and theorems, or the same for all (larger with symbols, which need room)
+  const R0 = { areas: GEO.areas.R, classes: GEO.classes.R };
+  const radius = (u, level) => {
+    const g = GEO[level];
+    if (level !== "areas") return g.r(Math.max(1, u.items.length));
+    return state.scale * (state.bysize ? g.r(Math.max(1, u.items.length)) : state.marks === "symbols" ? 20 : 13);
+  };
   // more than thirty areas (3 November 2026): the circle of each level grows until neighbouring points no longer
-  // overlap (with 13 areas the fixed radii were large enough and stay as they were)
-  for (const [level, g] of Object.entries(GEO)) {
-    const units = GROUPS[level].flat().slice().sort((a, b) => a.angle - b.angle), gap = level === "areas" ? 6 : 1.5;
-    units.forEach((u, i) => {
-      const v = units[(i + 1) % units.length];
-      if (v === u) return;
-      let d = Math.abs(v.angle - u.angle);
-      if (d > Math.PI) d = 2 * Math.PI - d;
-      const need = (g.r(Math.max(1, u.items.length)) + g.r(Math.max(1, v.items.length)) + gap) / (2 * Math.sin(d / 2) || 1e-9);
-      if (need > g.R) g.R = Math.ceil(need);
-    });
+  // overlap (with 13 areas the fixed radii were large enough and stay as they were); again after a change of size
+  function growCircles() {
+    for (const [level, g] of Object.entries(GEO)) {
+      g.R = R0[level];
+      const units = GROUPS[level].flat().slice().sort((a, b) => a.angle - b.angle), gap = level === "areas" ? 6 : 1.5;
+      units.forEach((u, i) => {
+        const v = units[(i + 1) % units.length];
+        if (v === u) return;
+        let d = Math.abs(v.angle - u.angle);
+        if (d > Math.PI) d = 2 * Math.PI - d;
+        const need = (radius(u, level) + radius(v, level) + gap) / (2 * Math.sin(d / 2) || 1e-9);
+        if (need > g.R) g.R = Math.ceil(need);
+      });
+    }
   }
+  growCircles();
+  // Layout E2 (user, 5 November 2026: the default of this page; C₃ is no longer offered here): cells without gaps,
+  // every group with κ ≥ 0.8, computed exactly as E2 of the sketch skizzen/area-layouts.html (shared_scripts/area-cells.js:
+  // the same start from the angles of A with a gap of 1.2 between the groups, the same parameters), so that the
+  // measures agree. Frame "circle" (default) or "ellipse" (1.7 : 1, as E4 of the sketch). Scaled so that the disk has
+  // 1.2 times the radius of the circle A. Computed once per frame (again after a change of the size of the points, which
+  // changes only the scale).
+  let posE = {};
+  const startAngles = (() => {
+    const gap = 1.2, total = areaGroups.reduce((s, g) => s + g.length, 0) + gap * areaGroups.length, m = new Map();
+    let pos = gap / 2;
+    areaGroups.forEach((g) => { g.forEach((u) => { m.set(u, -Math.PI / 2 + (2 * Math.PI * (pos + 0.5)) / total); pos += 1; }); pos += gap; });
+    return m;
+  })();
+  const layoutE = () => {
+    const key = state.frame;
+    if (!posE[key] && window.AREA_CELLS && AL) {
+      const C = window.AREA_CELLS, keep = allAreas.map((u) => u.angle);
+      allAreas.forEach((u) => { u.angle = startAngles.get(u); });
+      const S = C.forceStart(allAreas, pairsColoured, 150, 700, 0.25, 10);
+      allAreas.forEach((u, i) => { u.angle = keep[i]; });
+      const idx = new Map(allAreas.map((u, i) => [u, i]));
+      const pairs = pairsColoured.map((p) => ({ a: idx.get(p.a), b: idx.get(p.b), w: p.w }));
+      const res = C.layout(allAreas.map((u, i) => ({ x: S[i].x, y: S[i].y, group: u.F.key, key: u.key })), pairs,
+        Object.assign({ N: 800, lambda: 0.3, lambdaUnit: 0.06, spread: 0.75, compact: 0, sweeps: 800, kappaMin: 0.8 }, key === "ellipse" ? { aspect: 1.7 } : {}));
+      const scale = (GEO.areas.R * 1.2) / res.R;
+      const pos = new Map(allAreas.map((u, i) => [u, { x: res.positions[i].x * scale, y: res.positions[i].y * scale }]));
+      posE[key] = { res, scale, pos, segs: C.groupBorderSegments(res).map((s) => s.map((x) => x * scale)) };
+    }
+    return posE[key];
+  };
+  // largest drawn radius of a point in E2 (only the drawing): neighbouring points and the borders of the groups stay
+  // free, but never below 40 % of the intended radius (as in the sketch)
+  const segDist = (p, [x1, y1, x2, y2]) => { const dx = x2 - x1, dy = y2 - y1, t = Math.max(0, Math.min(1, ((p.x - x1) * dx + (p.y - y1) * dy) / (dx * dx + dy * dy || 1))); return Math.hypot(p.x - x1 - t * dx, p.y - y1 - t * dy); };
+  function capsE(EL, shapes) {
+    const caps = new Map();
+    EL.pos.forEach((p, u) => {
+      let d = Infinity;
+      EL.pos.forEach((q, w) => { if (w !== u) d = Math.min(d, Math.hypot(p.x - q.x, p.y - q.y) / 2); });
+      EL.segs.forEach((s) => { d = Math.min(d, segDist(p, s)); });
+      if (shapes) d = Math.min(d, shapes.dist(p));
+      const full = radius(u, "areas");
+      caps.set(u, Math.max(0.4 * full, Math.min(full, d - 2)));
+    });
+    return caps;
+  }
+  // functions of the zoom into an area (shared_scripts/area-zoom.js), set at the end
+  const hooks = {};
   const tip = document.createElement("div");
   tip.className = "knoten-tip mehrzeilig";
   tip.hidden = true;
@@ -298,11 +379,19 @@
   // nodes and the four kinds bend a little apart
   function band(e, geo) {
     const a = e.from, b = e.to, k = KIND.get(e.kind).i;
-    const p0 = P(geo.R - a.r - 1, a.angle), p2 = P(geo.R - b.r - 1, b.angle);
+    let p0 = P(geo.R - a.r - 1, a.angle), p2 = P(geo.R - b.r - 1, b.angle);
     const dx = p2.x - p0.x, dy = p2.y - p0.y, len = Math.hypot(dx, dy) || 1;
     const beta = 0.62 - 0.08 * k;
     const off = (state.level === "areas" ? 9 : 5) * (1 + k * 0.6);
-    const c = { x: ((p0.x + p2.x) / 2) * beta - (dy / len) * off, y: ((p0.y + p2.y) / 2) * beta + (dx / len) * off };
+    let c = { x: ((p0.x + p2.x) / 2) * beta - (dy / len) * off, y: ((p0.y + p2.y) / 2) * beta + (dx / len) * off };
+    // between the circle (A) and the force-directed layout (C): ends at the border of the points, slightly bent
+    if (state.level === "areas" && state.mix) {
+      const m = state.mix, ddx = b.x - a.x, ddy = b.y - a.y, L = Math.hypot(ddx, ddy) || 1, ux = ddx / L, uy = ddy / L, bend = L * 0.08 + off * 0.4;
+      const q0 = { x: a.x + ux * (a.r + 1), y: a.y + uy * (a.r + 1) }, q2 = { x: b.x - ux * (b.r + 1), y: b.y - uy * (b.r + 1) };
+      const qc = { x: (q0.x + q2.x) / 2 - uy * bend, y: (q0.y + q2.y) / 2 + ux * bend };
+      const lerp = (u, v) => ({ x: u.x + (v.x - u.x) * m, y: u.y + (v.y - u.y) * m });
+      p0 = lerp(p0, q0); p2 = lerp(p2, q2); c = lerp(c, qc);
+    }
     const w0 = geo.w(strength(e)), N = 28, left = [], right = [];
     for (let i = 0; i <= N; i++) {
       const t = i / N, u = 1 - t;
@@ -324,7 +413,41 @@
     const gSectors = el("g", { class: "sektoren" }, svg), gEdges = el("g", { class: "kanten" }, svg), gNodes = el("g", { class: "knoten-alle" }, svg);
     Object.assign(layers, { gEdges, gNodes });
     const units = GROUPS[level].flat();
-    units.forEach((u) => { u.r = geo.r(Math.max(1, u.items.length)); const p = P(R, u.angle); u.x = p.x; u.y = p.y; });
+    const EL = level === "areas" && AL && state.mix ? layoutE() : null, C = EL && EL.pos;
+    const shapes = EL && (state.organic || state.gap > 0) ? window.AREA_CELLS.organicShapes(EL.res, EL.scale, state.gap / 2, state.organic) : null;
+    const caps = EL ? capsE(EL, shapes) : null;
+    units.forEach((u) => {
+      u.r = radius(u, level);
+      if (caps && caps.has(u)) u.r += (caps.get(u) - u.r) * state.mix;
+      const p = P(R, u.angle), q = C && C.get(u);
+      u.x = q ? p.x + (q.x - p.x) * state.mix : p.x; u.y = q ? p.y + (q.y - p.y) * state.mix : p.y;
+    });
+    // groups (level of areas): pale arcs on the circle (A), fading into pale areas around the points (C)
+    if (level === "areas" && AL) {
+      const step = (2 * Math.PI) / GROUPS.areas.total, fadeA = 1 - state.mix;
+      GROUPS.areas.forEach((g) => {
+        if (!g.F || g.F.gray || fadeA < 0.02) return;
+        const a0 = -Math.PI / 2 + (g.from - 0.4) * step, a1 = -Math.PI / 2 + (g.to + 0.4) * step, rIn = R - 26, rOut = R + 24, large = a1 - a0 > Math.PI ? 1 : 0;
+        const path = el("path", { class: "gruppe-flaeche", d: `M${fmt(P(rIn, a0))}L${fmt(P(rOut, a0))}A${rOut},${rOut} 0 ${large} 1 ${fmt(P(rOut, a1))}L${fmt(P(rIn, a1))}A${rIn},${rIn} 0 ${large} 0 ${fmt(P(rIn, a0))}Z`, fill: g.F.pale, "fill-opacity": (0.16 * fadeA).toFixed(3) }, gSectors);
+        groupTip(path, g.F);
+        const m = (a0 + a1) / 2, t = el("text", { class: "gruppe-name", x: (R * 0.8 * Math.cos(m)).toFixed(1), y: (R * 0.8 * Math.sin(m)).toFixed(1), "text-anchor": "middle", opacity: fadeA.toFixed(3) }, gSectors);
+        t.textContent = g.F.name;
+      });
+      // E2: the regions of the groups from the cells, with organic borders and gaps as in the sketch (only the drawing)
+      if (EL && state.mix > 0.02) {
+        const ps = window.AREA_CELLS.paths(EL.res, EL.scale), r = EL.res;
+        AL.GROUPS.forEach((F) => {
+          const g = r.groupKeys.indexOf(F.key);
+          if (g < 0) return;
+          groupTip(el("path", { class: "gruppe-flaeche", d: shapes ? shapes.d[g] : ps.fill.get(g), "fill-rule": "evenodd", fill: F.pale, "fill-opacity": (0.16 * state.mix).toFixed(3) }, gSectors), F);
+        });
+        // borders between the areas: organic with "organic borders", cut to the drawn regions of the groups
+        let clip = null;
+        if (shapes) { const id = "e2-clip"; const cp = el("clipPath", { id }, el("defs", {}, gSectors)); el("path", { d: shapes.d.join(""), "clip-rule": "evenodd" }, cp); clip = `url(#${id})`; }
+        el("path", Object.assign({ class: "zell-grenze", d: shapes && shapes.units ? shapes.units : ps.unitBorder, opacity: state.mix.toFixed(3) }, clip ? { "clip-path": clip } : {}), gSectors);
+        el("path", { class: "gruppe-rand", d: shapes ? shapes.d.join("") : ps.groupBorder, opacity: state.mix.toFixed(3) }, gSectors);
+      }
+    }
     // sectors (level of classes): pale wedges in the colour of the folder, the name on an arc outside the names
     if (level === "classes") {
       const step = (2 * Math.PI) / GROUPS.classes.total;
@@ -343,7 +466,8 @@
     }
     // bands, the widest first so that thin ones stay visible on top
     G.edges[level].forEach((e) => { e.path = null; });
-    [...G.edges[level].values()].filter(shown).sort((x, y) => strength(y) - strength(x)).forEach((e) => {
+    const drawn = new Set(units);
+    [...G.edges[level].values()].filter((e) => shown(e) && drawn.has(e.from) && drawn.has(e.to)).sort((x, y) => strength(y) - strength(x)).forEach((e) => {
       e.path = el("path", { class: "band k-" + e.kind, d: band(e, geo), fill: KIND.get(e.kind).color }, gEdges);
       e.path.addEventListener("mouseenter", (ev) => { tip.textContent = edgeTip(e); tip.hidden = false; moveTip(ev); });
       e.path.addEventListener("mousemove", moveTip);
@@ -353,8 +477,17 @@
     // nodes and names
     units.forEach((u) => {
       const g = el("g", { class: "knoten" + (u.gray ? " grau" : "") + (u.items.length ? "" : " leer"), "data-key": u.key, transform: `translate(${u.x.toFixed(1)},${u.y.toFixed(1)})` }, gNodes);
-      el("circle", { r: u.r, class: "form", fill: u.gray || !u.items.length ? "#fbfaf6" : u.color }, g);
-      const deg = (u.angle * 180) / Math.PI, c = Math.cos(u.angle), s = Math.sin(u.angle);
+      const folder = u.folder && u.folder.folder;
+      if (level === "areas" && AL && !u.gray && state.marks === "shapes") el("path", { d: AL.shapePath(AL.shapeOf(folder), u.r), class: "form", fill: u.F.color }, g);
+      else if (level === "areas" && AL && !u.gray && state.marks === "symbols") {
+        el("circle", { r: u.r, class: "form", fill: u.F.color }, g);
+        // a text or a drawing (AL.symbolMarkup)
+        const gs = el("g", { class: "symbol-mark" }, g);
+        gs.innerHTML = AL.symbolMarkup(AL.SYMBOL[folder], u.r, u.F.color);
+      } else el("circle", { r: u.r, class: "form", fill: u.gray || !u.items.length ? "#fbfaf6" : u.color }, g);
+      // names point away from the middle: on the circle by the angle, in the force-directed layout by the position
+      const la = level === "areas" && state.mix > 0.5 ? Math.atan2(u.y, u.x) : u.angle;
+      const deg = (la * 180) / Math.PI, c = Math.cos(la), s = Math.sin(la);
       let t;
       if (level === "areas") {
         // names centred only at the very top and bottom, so that the names of neighbouring points do not run into
@@ -371,17 +504,169 @@
       g.addEventListener("mouseenter", (ev) => { tip.textContent = unitTip(u); tip.hidden = false; moveTip(ev); clearTimeout(hoverTimer); hoverTimer = setTimeout(() => hover(u), 500); });
       g.addEventListener("mousemove", moveTip);
       g.addEventListener("mouseleave", () => { tip.hidden = true; clearTimeout(hoverTimer); hover(null); });
-      g.addEventListener("click", (ev) => { ev.stopPropagation(); if (dragged()) return; select(state.sel === u.key ? null : u.key); });
+      // a click stops the pending highlight of the hover, which would otherwise light the point again after Escape
+      g.addEventListener("click", (ev) => { ev.stopPropagation(); clearTimeout(hoverTimer); if (dragged()) return; select(state.sel === u.key ? null : u.key); });
     });
+    if (EL && state.mix > 0.02) groupNames(EL, gSectors);
     view = fit();
     applyView();
     mark();
+    if (hooks.afterDraw) hooks.afterDraw();
+  }
+
+  // ------------------------------------------------------------ names of the groups on the map (E2)
+  // User, 5 November 2026: a group whose region touches the border of the map (the ellipse of the cells) has its name
+  // outside the map, on an arc parallel to the border (a text path on a slightly larger concentric ellipse), centred
+  // over its stretch of the border; small capitals, slightly spaced, in a dark shade of the colour of the group; always
+  // readable from left to right (on the lower half the path runs the other way and lies further out). A group inside
+  // has its name in its region along its main axis, slightly bent, pale and behind the points, if it fits (wholly in the
+  // region, over no name of an area and at most two points); otherwise a thin line leads from inside the region to the
+  // border and the name stands outside there. Names outside do not overlap: blocks along the border, overlapping blocks
+  // merged and centred on their wishes.
+  const TAU = 2 * Math.PI;
+  const darkOf = (c) => {
+    const m = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(c);
+    if (!m) return "#4b3f33";
+    const [r, g, b] = m.slice(1).map((h) => parseInt(h, 16) / 255), mx = Math.max(r, g, b), mn = Math.min(r, g, b), l = (mx + mn) / 2, d = mx - mn;
+    let h = 0, sat = 0;
+    if (d) { sat = d / (1 - Math.abs(2 * l - 1)); h = mx === r ? ((g - b) / d) % 6 : mx === g ? (b - r) / d + 2 : (r - g) / d + 4; h *= 60; if (h < 0) h += 360; }
+    return `hsl(${Math.round(h)},${Math.round(Math.min(60, 100 * sat))}%,26%)`;
+  };
+  let groupLabelInfo = [];
+  function groupNames(EL, layer) {
+    const r = EL.res, sc = EL.scale, asp = r.aspect || 1, FS = 17, FI = 19, op = state.mix.toFixed(3);
+    // the border of the map: ellipse of the cells (distance x²/aspect + y²·aspect = R², in cell units)
+    const ea = r.R * Math.sqrt(asp) * sc, eb = (r.R / Math.sqrt(asp)) * sc;
+    const ray = (t, extra) => { const a = ea + extra, b = eb + extra, d = (a * b) / Math.hypot(b * Math.cos(t), a * Math.sin(t)); return { x: d * Math.cos(t), y: d * Math.sin(t), d }; };
+    const nodeBoxes = [], nameBoxes = [];
+    GROUPS.areas.flat().forEach((u) => {
+      if (!u.g) return;
+      nodeBoxes.push({ x0: u.x - u.r, x1: u.x + u.r, y0: u.y - u.r, y1: u.y + u.r });
+      const t = u.g.querySelector("text:not(.symbol)");
+      if (t) { const b = t.getBBox(); nameBoxes.push({ x0: u.x + b.x, x1: u.x + b.x + b.width, y0: u.y + b.y, y1: u.y + b.y + b.height }); }
+    });
+    const hit = (a, b) => a.x0 < b.x1 && b.x0 < a.x1 && a.y0 < b.y1 && b.y0 < a.y1;
+    const outside = [];
+    groupLabelInfo = [];
+    AL.GROUPS.forEach((F) => {
+      const g = r.groupKeys.indexOf(F.key);
+      if (g < 0) return;
+      const idx = r.cells.map((c, i) => i).filter((i) => r.group[i] === g);
+      const pts = idx.map((i) => ({ x: r.cells[i].x * sc, y: r.cells[i].y * sc }));
+      const cx = pts.reduce((t, p) => t + p.x, 0) / pts.length, cy = pts.reduce((t, p) => t + p.y, 0) / pts.length;
+      const info = { key: F.key, name: F.name, cx, cy, cells: pts };
+      groupLabelInfo.push(info);
+      // stretches of the border: the border cells of the group by angle, in clusters; the largest one
+      const border = idx.filter((i) => r.nb[i].some((d) => d < 0)).map((i) => Math.atan2(r.cells[i].y, r.cells[i].x)).sort((a, b) => a - b);
+      if (border.length) {
+        let cut = 0, gmax = -1;
+        border.forEach((a, i) => { const nx = border[(i + 1) % border.length], gp = (((nx - a) % TAU) + TAU) % TAU || TAU; if (gp > gmax) { gmax = gp; cut = (i + 1) % border.length; } });
+        const seq = border.slice(cut).concat(border.slice(0, cut)), runs = [[seq[0]]];
+        for (let i = 1; i < seq.length; i++) { const gp = (((seq[i] - seq[i - 1]) % TAU) + TAU) % TAU; if (gp > 0.3) runs.push([seq[i]]); else runs[runs.length - 1].push(seq[i]); }
+        const run = runs.sort((a, b) => b.length - a.length)[0], a0 = run[0];
+        const span = (((run[run.length - 1] - a0) % TAU) + TAU) % TAU;
+        outside.push({ F, info, want: a0 + span / 2, kind: "outer" });
+        return;
+      }
+      // inside: along the main axis (principal component of the cells), slightly bent
+      let sxx = 0, syy = 0, sxy = 0;
+      pts.forEach((p) => { sxx += (p.x - cx) ** 2; syy += (p.y - cy) ** 2; sxy += (p.x - cx) * (p.y - cy); });
+      let ang = 0.5 * Math.atan2(2 * sxy, sxx - syy);
+      if (Math.cos(ang) < 0) ang += Math.PI;
+      if (ang > Math.PI) ang -= TAU;
+      if (Math.abs(ang) > Math.PI / 3) ang = 0; // nearly upright regions: the name stays horizontal
+      const ux = Math.cos(ang), uy = Math.sin(ang), proj = pts.map((p) => (p.x - cx) * ux + (p.y - cy) * uy), across = pts.map((p) => -(p.x - cx) * uy + (p.y - cy) * ux);
+      const len = Math.max(...proj) - Math.min(...proj) + sc, wid = Math.max(...across) - Math.min(...across) + sc;
+      const tw = F.name.length * FI * 0.62, half = tw / 2 + 6, bend = 0.06 * tw;
+      const id = "gruppe-bahn-" + g, p0 = { x: cx - ux * half, y: cy - uy * half }, p1 = { x: cx + ux * half, y: cy + uy * half };
+      const box = { x0: Math.min(p0.x, p1.x) - FI * 0.6, x1: Math.max(p0.x, p1.x) + FI * 0.6, y0: Math.min(p0.y, p1.y) - FI * 0.9, y1: Math.max(p0.y, p1.y) + FI * 0.5 };
+      const inRegion = [p0, p1, { x: cx, y: cy }].every((q) => pts.some((p) => Math.hypot(p.x - q.x, p.y - q.y) < sc * 0.75));
+      const fits = tw <= 0.9 * len && wid >= 1.6 * FI && inRegion && !nameBoxes.some((b) => hit(b, box)) && nodeBoxes.filter((b) => hit(b, box)).length <= 2;
+      if (fits) {
+        el("path", { id, d: `M${p0.x.toFixed(1)},${p0.y.toFixed(1)}Q${(cx + uy * bend).toFixed(1)},${(cy - ux * bend).toFixed(1)} ${p1.x.toFixed(1)},${p1.y.toFixed(1)}`, fill: "none", stroke: "none" }, layer);
+        const t = el("text", { class: "gruppe-name innen", opacity: op }, layer);
+        t.style.fill = darkOf(F.color);
+        el("textPath", { href: "#" + id, startOffset: "50%", "text-anchor": "middle" }, t).textContent = F.name;
+        Object.assign(info, { kind: "inner", x: cx, y: cy });
+        return;
+      }
+      // a thin line to the nearest stretch of the border, the name outside there
+      let best = Infinity, tb = 0;
+      for (let k = 0; k < 360; k++) { const t = (k * TAU) / 360, q = ray(t, 0), d = Math.hypot(q.x - cx, q.y - cy); if (d < best) { best = d; tb = t; } }
+      outside.push({ F, info, want: tb, kind: "leader", from: { x: cx, y: cy } });
+    });
+    // names outside: room along the label ellipse, blocks merged where they overlap (as the marks of the zoom)
+    const OFF = 16, halfOf = (o) => ((o.F.name.length * FS * 0.62) / 2 + 14) / ray(o.want, OFF).d;
+    const list = outside.sort((a, b) => a.want - b.want);
+    if (list.length) {
+      let cut = 0, gmax = -1;
+      list.forEach((o, i) => { const nx = list[(i + 1) % list.length], gp = list.length === 1 ? TAU : (((nx.want - o.want) % TAU) + TAU) % TAU; if (gp > gmax) { gmax = gp; cut = (i + 1) % list.length; } });
+      const seq = list.slice(cut).concat(list.slice(0, cut)), want = [];
+      let prev = null;
+      seq.forEach((o) => { let w = o.want; if (prev != null) while (w < prev) w += TAU; want.push(w); prev = w; });
+      const width = seq.map((o) => 2 * halfOf(o)), blocks = [];
+      const place = (bk) => { let off = 0, sum = 0; bk.items.forEach((j) => { sum += want[j] - (off + width[j] / 2); off += width[j]; }); bk.start = sum / bk.items.length; };
+      seq.forEach((o, i) => {
+        let blk = { items: [i], width: width[i] };
+        place(blk);
+        while (blocks.length && blocks[blocks.length - 1].start + blocks[blocks.length - 1].width > blk.start) { const pb = blocks.pop(); blk = { items: pb.items.concat(blk.items), width: pb.width + blk.width }; place(blk); }
+        blocks.push(blk);
+      });
+      blocks.forEach((bk) => { let off = bk.start; bk.items.forEach((j) => { seq[j].a = off + width[j] / 2; off += width[j]; }); });
+    }
+    list.forEach((o, k) => {
+      const low = Math.sin(o.a) > 0, extra = OFF + (low ? FS * 0.75 : 0), dl = halfOf(o) * 1.4, pts = [];
+      for (let j = 0; j <= 24; j++) { const t = low ? o.a + dl - (2 * dl * j) / 24 : o.a - dl + (2 * dl * j) / 24, q = ray(t, extra); pts.push(q.x.toFixed(1) + "," + q.y.toFixed(1)); }
+      const id = "gruppe-rand-bahn-" + k;
+      el("path", { id, d: "M" + pts.join("L"), fill: "none", stroke: "none" }, layer);
+      const t = el("text", { class: "gruppe-name aussen", opacity: op }, layer);
+        t.style.fill = darkOf(o.F.color);
+      el("textPath", { href: "#" + id, startOffset: "50%", "text-anchor": "middle" }, t).textContent = o.F.name;
+      const at = ray(o.a, OFF);
+      Object.assign(o.info, { kind: o.kind, x: at.x, y: at.y, a: o.a, want: o.want, from: o.from });
+      if (o.kind === "leader") { const q = ray(o.a, 4); el("path", { class: "gruppe-linie", d: `M${o.from.x.toFixed(1)},${o.from.y.toFixed(1)}L${q.x.toFixed(1)},${q.y.toFixed(1)}`, stroke: darkOf(o.F.color), opacity: op }, layer); }
+    });
   }
 
   // ------------------------------------------------------------ view box, pan and zoom (as in the circle graphs)
   let view = null;
-  const fit = () => { const g = GEO[state.level], R = g.R; return { x: -R - g.side, y: -R - g.pad, w: 2 * (R + g.side), h: 2 * (R + g.pad) }; };
-  const applyView = () => svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+  const fit = () => {
+    const g = GEO[state.level], R = g.R, b = { x: -R - g.side, y: -R - g.pad, w: 2 * (R + g.side), h: 2 * (R + g.pad) };
+    // E2 (above all in the ellipse) can be wider than the circle
+    const EL = state.level === "areas" && state.mix > 0 && posE[state.frame];
+    if (EL) {
+      const ps = [...EL.pos.values()], ex = Math.max(...ps.map((p) => Math.abs(p.x))) + g.side, ey = Math.max(...ps.map((p) => Math.abs(p.y))) + g.pad;
+      if (ex > -b.x) { b.x = -ex; b.w = 2 * ex; }
+      if (ey > -b.y) { b.y = -ey; b.h = 2 * ey; }
+    }
+    return b;
+  };
+  // Names by zoom level, as on the maps (user, 4 November 2026): names keep their size on the screen; a name is shown
+  // only where it has room, the names of the groups first, then the larger points; the points are always shown
+  let declutterPending = false;
+  function declutter() {
+    declutterPending = false;
+    if (svg.classList.contains("ohne-namen") || svg.classList.contains("unterwegs")) return;
+    const taken = [], free = (r) => taken.every((t) => r.right < t.left || r.left > t.right || r.bottom < t.top || r.top > t.bottom);
+    const groups = [...svg.querySelectorAll("text.gruppe-name")].filter((t) => +(t.getAttribute("opacity") || 1) > 0.5);
+    const names = GROUPS[state.level].flat().filter((u) => u.g).sort((a, b) => b.items.length - a.items.length).map((u) => [u, u.g.querySelector("text:not(.symbol)")]).filter(([, t]) => t);
+    groups.concat(names.map(([, t]) => t)).forEach((t) => { t.style.visibility = ""; });
+    groups.forEach((t) => { const r = t.getBoundingClientRect(); if (r.width && free(r)) taken.push(r); else t.style.visibility = "hidden"; });
+    names.forEach(([u, t]) => {
+      if (u.g.classList.contains("hell")) { taken.push(t.getBoundingClientRect()); return; } // marked points keep their names
+      const r = t.getBoundingClientRect();
+      if (!r.width) return;
+      const q = { left: r.left - 2, right: r.right + 2, top: r.top - 1, bottom: r.bottom + 1 };
+      if (free(q)) taken.push(q); else t.style.visibility = "hidden";
+    });
+  }
+  const applyView = () => {
+    svg.setAttribute("viewBox", `${view.x} ${view.y} ${view.w} ${view.h}`);
+    const f = fit();
+    svg.style.setProperty("--zf", (view.w / f.w).toFixed(4));
+    if (hooks.onView) hooks.onView();
+    if (!declutterPending) { declutterPending = true; requestAnimationFrame(declutter); }
+  };
   svg.setAttribute("preserveAspectRatio", "xMidYMid meet");
   const scale = () => Math.max(view.w / svg.clientWidth, view.h / svg.clientHeight);
   svg.addEventListener("wheel", (ev) => {
@@ -424,10 +709,10 @@
     const c = u.items.filter((it) => it.type === "c").length, t = u.items.length - c;
     return `${c} concept${c === 1 ? "" : "s"}, ${t} theorem${t === 1 ? "" : "s"}`;
   };
-  function unitTip(u) {
-    const top = partners(u).slice(0, 3).map((p) => `  ${p.u.label}: ${p.in} in, ${p.out} out`);
-    return [u.name, itemCount(u) + (u.gray ? " without a home folder" : ""), top.length ? "Strongest connections:" : "No connections of the kinds shown"].concat(top).join("\n");
-  }
+  // tooltip of a node: only its name (user, 5 November 2026)
+  function unitTip(u) { return u.name; }
+  // remark `note` of the register after the name of an area ("without graph theory"), small and grey
+  const noteOf = (u) => (u.note ? ` <span class="note">(${esc(u.note)})</span>` : "");
   const edgeTip = (e) => `${KIND.get(e.kind).name}: ${e.from.label} → ${e.to.label}, ${strength(e)}` + (e.kind === "proof" && e.alt ? ` (${e.singles.length - e.alt} standard, ${e.alt} alternative only)` : "");
 
   // ------------------------------------------------------------ selection
@@ -471,8 +756,8 @@
     state.pair = { from, to };
     update();
   }
-  function clear() { state.sel = null; state.pair = null; update(); }
-  function update() { mark(); panel.innerHTML = state.sel ? unitPanel(G.units[state.level].get(state.sel)) : state.pair ? pairPanel() : overview(); writeHash(); }
+  function clear() { clearTimeout(hoverTimer); state.sel = null; state.pair = null; update(); }
+  function update() { mark(); if (!declutterPending) { declutterPending = true; requestAnimationFrame(declutter); } panel.innerHTML = (hooks.panel && hooks.panel()) || (state.sel ? unitPanel(G.units[state.level].get(state.sel)) : state.pair ? pairPanel() : overview()); writeHash(); }
 
   // ------------------------------------------------------------ panel
   const panel = document.getElementById("panel");
@@ -491,7 +776,7 @@
   const singlesList = (e) => `<ul class="einzel">${e.singles.filter((s) => state.alt || !s.alt).map((s) => `<li>${singleText(s)}</li>`).join("")}</ul>`;
   const kindHead = (k) => `<h3 class="art"><i style="background:${k.color}"></i>${k.name}</h3>`;
   function unitPanel(u) {
-    let html = `<h2>${esc(u.name)}</h2><div class="meta">${u.other ? "MSC " + [...u.codes].sort().join(", ") + "; classes named only in the MSC lists of other nodes. " : u.gray ? "MSC " + u.main + "; no folder of these graphs yet. " : u.level === "classes" ? "MSC " + u.cls + " in " + esc(u.folder.name) + ". " : "MSC " + esc(u.folder.msc) + ". "}${itemCount(u)}.</div>`;
+    let html = `<h2>${esc(u.name)}${noteOf(u)}</h2><div class="meta">${u.other ? "MSC " + [...u.codes].sort().join(", ") + "; classes named only in the MSC lists of other nodes. " : u.gray ? "MSC " + u.main + "; no folder of these graphs yet. " : u.level === "classes" ? "MSC " + u.cls + " in " + esc(u.folder.name) + ". " : "MSC " + esc(u.folder.msc) + ". "}${itemCount(u)}.</div>`;
     if (!u.gray && u.level === "areas") html += `<p class="meta"><a href="${u.folder.folder}/concepts.html">Concepts</a> · <a href="${u.folder.folder}/theorems.html">Theorems</a> · <a href="${u.folder.folder}/bipartite.html">In theorems</a></p>`;
     if (u.gray || u.items.some((it) => it.moved)) {
       const list = u.items.filter((it) => u.gray || it.moved);
@@ -536,7 +821,7 @@
       max = Math.max(max, v);
     });
     const used = A.filter((u) => A.some((v) => m.get(u.key + ">" + v.key) || m.get(v.key + ">" + u.key)));
-    const head = (u) => `<th title="${esc(u.name)}" data-unit="${u.key}"><span>${esc(u.code)}</span></th>`;
+    const head = (u) => `<th title="${esc(u.name)}${u.note ? "&#10;" + esc(u.note) : ""}" data-unit="${u.key}"><span>${esc(u.code)}</span></th>`;
     const rows = used.map((x) => `<tr>${head(x)}${used.map((y) => {
       const v = m.get(x.key + ">" + y.key) || 0;
       return x === y ? `<td class="leer"></td>` : `<td${v ? ` data-from="${x.key}" data-to="${y.key}" title="${esc(x.label)} → ${esc(y.label)}: ${v}" style="background:rgba(120,90,50,${(0.08 + 0.75 * Math.log(1 + v) / Math.log(1 + max)).toFixed(2)})${Math.log(1 + v) / Math.log(1 + max) > 0.55 ? ";color:#fff" : ""}"` : ""}>${v || ""}</td>`;
@@ -546,11 +831,11 @@
       return `<span class="summe"><i style="background:${k.color}"></i>${k.name}: ${n}</span>`;
     }).join("");
     return `<h2>Graph of the areas</h2>
-      <p class="meta">${G.folders.length} areas, ${grayList("areas").length} MSC classes without a folder (grey). Single edges between different areas of the kinds shown:</p><p>${totals}</p>
+      <p class="meta">${G.folders.length} areas${AL ? "" : `, ${grayList("areas").length} MSC classes without a folder (grey)`}. Single edges between different areas of the kinds shown:</p><p>${totals}</p>
       <h3>From row to column</h3>
       <p class="meta">Row X, column Y: how often Y uses X. A click on a number marks these edges; a click on a name selects the area.</p>
       <div class="matrix-box"><table class="matrix"><thead><tr><th></th>${used.map(head).join("")}</tr></thead><tbody>${rows}</tbody></table></div>
-      <p class="meta">${used.map((u) => (u.gray ? esc(u.label) : `<b>${esc(u.code)}</b> ${esc(u.label)}`)).join(" · ")}</p>
+      <p class="meta">${used.map((u) => (u.gray ? esc(u.label) : `<b>${esc(u.code)}</b> ${esc(u.label)}${noteOf(u)}`)).join(" · ")}</p>
       <p class="meta">The contents were compiled with the help of a language model and have not been checked by a specialist.</p>`;
   }
   panel.addEventListener("click", (ev) => {
@@ -572,33 +857,118 @@
   const block = (title, items, o = {}) =>
     `<details class="block"${o.closed ? "" : " open"}><summary class="block-titel">${title}</summary><div class="eintraege">${items.join("")}</div></details>`;
   const controls = document.getElementById("controls");
+  // Toolbar (user, 5 November 2026): layout, grouping, display, threshold, the overview; seldom used things in "More ▾"
+  // Simplified toolbar (user, 5 November 2026): layout (Circle | Map), grouping, the names of the groups and of the
+  // areas, the threshold, the kinds of edges, "More ▾" (size of the points). Fixed: organic borders, gap 20, frame
+  // ellipse 1.7 : 1, one colour per group, symbols, level of areas, without alternative proofs and definitions.
+  const GROUPINGS = [
+    ["msc", "MSC (7)", "Main groups of the MSC; number theory together with combinatorics and graph theory"],
+    ["msc8", "MSC (8)", "As before, but number theory and discrete mathematics (combinatorics, graph theory, computer science) as separate groups"],
+    ["themes", "By subject (8)", "Foundations, numbers, structures, space, change, chance, discrete and computation, applications"],
+  ];
+  let moreOpen = false, morePos = null;
   function drawControls() {
     const total = (k) => [...G.edges[state.level].values()].filter((e) => e.kind === k).reduce((s, e) => s + strength(e), 0);
+    const seg = (items) => `<div class="stufen">${items.join("")}</div>`;
+    const btn = (attr, val, on, label, title) => `<button ${attr}="${val}" class="${on ? "an" : ""}"${title ? ` title="${esc(title)}"` : ""}>${label}</button>`;
+    const sw = (id, on, label, title) => `<label class="toggle"${title ? ` title="${esc(title)}"` : ""}><input type="checkbox" id="${id}"${on ? " checked" : ""}><span class="regler"></span>${label}</label>`;
     controls.innerHTML =
-      `<div class="stufen" role="group" aria-label="Level"><button data-level="areas" class="${state.level === "areas" ? "an" : ""}">Areas</button><button data-level="classes" class="${state.level === "classes" ? "an" : ""}">MSC classes</button></div>` +
-      block("Kinds of edges", G.KINDS.map((k) => `<label class="toggle" title="${esc(k.text)}"><input type="checkbox" data-kind="${k.key}"${state.kinds.has(k.key) ? " checked" : ""}><span class="regler"></span><i class="farbe" style="background:${k.color}"></i>${k.name} <span class="meta">${total(k.key)}</span></label>`).concat([
-        `<label class="toggle"><input type="checkbox" id="c-alt"${state.alt ? " checked" : ""}><span class="regler"></span>alternative proofs and definitions</label>`,
-      ])) +
-      block("Display", [
-        `<label class="schwelle">at least <input type="range" id="c-min" min="1" max="20" value="${state.min[state.level]}"> <b id="c-min-wert">${state.min[state.level]}</b> single edges</label>`,
-        `<label class="toggle"><input type="checkbox" id="c-names"${svg.classList.contains("ohne-namen") ? "" : " checked"}><span class="regler"></span>names</label>`,
-      ]);
+      (AL ? `<div class="leiste-gruppe">${seg([btn("data-layout", "circle", state.layout === "circle", "Circle", "the areas on a circle, sorted by group"), btn("data-layout", "e2", state.layout === "e2", "Map", "a map: every group a region without gaps (layout E2 of the sketch)")])}</div>` : "") +
+      (AL ? `<div class="leiste-gruppe">${seg(GROUPINGS.map(([k, label, t]) => btn("data-fields", k, AL.GROUPING === k, label, t)))}</div>` : "") +
+      `<div class="leiste-gruppe">${sw("c-groupnames", !svg.classList.contains("ohne-gruppennamen"), "group names", "names of the regions of the groups")}${sw("c-names", !svg.classList.contains("ohne-namen"), "area names", "names of the areas at the points")}</div>` +
+      // the slider of the gap between the groups of the map (user, 5 November 2026: wanted back); only the drawing changes
+      `<div class="leiste-gruppe"><label class="schwelle" title="white space between the groups of the map (0: none)">gap <input type="range" id="c-gap" min="0" max="40" step="1" value="${state.gap}"> <b id="c-gap-wert">${state.gap}</b></label></div>` +
+      `<div class="leiste-gruppe"><label class="schwelle" title="bands with at least this number of single edges">at least <input type="range" id="c-min" min="1" max="20" value="${state.min[state.level]}"> <b id="c-min-wert">${state.min[state.level]}</b> edges</label></div>` +
+      `<div class="leiste-gruppe">` + G.KINDS.map((k) => `<label class="toggle" title="${esc(k.name + ": " + k.text)}"><input type="checkbox" data-kind="${k.key}"${state.kinds.has(k.key) ? " checked" : ""}><span class="regler"></span><i class="farbe" style="background:${k.color}"></i>${esc(k.short || k.name)}</label>`).join("") + `</div>` +
+      `<details class="mehr"${moreOpen ? " open" : ""}><summary>More ▾</summary><div class="mehr-inhalt"${morePos ? ` style="left:${morePos.x}px;top:${morePos.y}px"` : ""}>` +
+      `<div class="mehr-kopf" title="drag to move">More</div>` +
+      `<div class="leiste-gruppe"><span class="leiste-titel">Points</span>` +
+      `<label class="toggle"><input type="checkbox" id="c-bysize"${state.bysize ? " checked" : ""}><span class="regler"></span>size by number of concepts and theorems</label>` +
+      `<label class="schwelle">point size <input type="range" id="c-scale" min="0.4" max="1.8" step="0.1" value="${state.scale}"> <b id="c-scale-wert">${state.scale.toFixed(1)}</b></label></div>` +
+      `</div></details>`;
+    if (hooks.afterControls) hooks.afterControls();
+    const det = controls.querySelector("details.mehr");
+    // closing the menu forgets where it was dragged
+    det.addEventListener("toggle", () => { moreOpen = det.open; if (!det.open) morePos = null; });
+    // the panel of "More" can be dragged at its head (user, 5 November 2026)
+    const box = det.querySelector(".mehr-inhalt"), head = det.querySelector(".mehr-kopf");
+    head.addEventListener("pointerdown", (ev) => {
+      ev.preventDefault();
+      const x0 = ev.clientX, y0 = ev.clientY, l0 = box.offsetLeft, t0 = box.offsetTop;
+      const move = (e) => { morePos = { x: l0 + e.clientX - x0, y: t0 + e.clientY - y0 }; box.style.left = morePos.x + "px"; box.style.top = morePos.y + "px"; };
+      const up = () => { window.removeEventListener("pointermove", move); window.removeEventListener("pointerup", up); };
+      window.addEventListener("pointermove", move);
+      window.addEventListener("pointerup", up);
+    });
   }
-  controls.addEventListener("click", (ev) => { const b = ev.target.closest("button[data-level]"); if (b) setLevel(b.dataset.level); });
+  controls.addEventListener("click", (ev) => {
+    const b = ev.target.closest("button[data-level]");
+    if (b) { setLevel(b.dataset.level); return; }
+    const l = ev.target.closest("button[data-layout]");
+    if (l) { setLayout(l.dataset.layout); return; }
+    // grouping and colours: the page reloads (shared_scripts/area-layout.js reads them from the address)
+    const f = ev.target.closest("button[data-fields]");
+    if (f) { writeHash(); location.hash = location.hash.replace(/&?fields=\w+/, "") + (f.dataset.fields === "msc" ? "" : "&fields=" + f.dataset.fields); location.reload(); return; }
+
+    const m = ev.target.closest("button[data-marks]");
+    if (m) { state.marks = m.dataset.marks; resize(); }
+  });
+  // animated change between A and C (about 1.4 seconds); the picture is drawn again for every frame
+  const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
+  let animating = false;
+  function setLayout(layout, instant) {
+    if (!AL || animating || layout === state.layout) return;
+    state.layout = layout;
+    const from = state.mix, to = layout === "e2" ? 1 : 0;
+    if (instant) { state.mix = to; redraw(); return; }
+    layoutE();
+    animating = true;
+    svg.classList.add("unterwegs");
+    const t0 = performance.now();
+    const step = (now) => {
+      const x = Math.min(1, (now - t0) / 1400);
+      state.mix = from + (to - from) * ease(x);
+      draw();
+      if (x < 1) { requestAnimationFrame(step); return; }
+      animating = false;
+      svg.classList.remove("unterwegs");
+      redraw();
+    };
+    requestAnimationFrame(step);
+  }
+  // tooltip on the pale area of a group
+  function groupTip(path, F) {
+    // only the name of the group (user, 5 November 2026)
+    path.addEventListener("mouseenter", (ev) => { tip.textContent = F.name; tip.hidden = false; moveTip(ev); });
+    path.addEventListener("mousemove", moveTip);
+    path.addEventListener("mouseleave", () => { tip.hidden = true; });
+  }
   controls.addEventListener("change", (ev) => {
     const t = ev.target;
     if (t.dataset.kind) { if (t.checked) state.kinds.add(t.dataset.kind); else state.kinds.delete(t.dataset.kind); redraw(); }
     else if (t.id === "c-alt") { state.alt = t.checked; redraw(); }
-    else if (t.id === "c-names") svg.classList.toggle("ohne-namen", !t.checked);
+    else if (t.id === "c-names") { svg.classList.toggle("ohne-namen", !t.checked); writeHash(); }
+    else if (t.id === "c-groupnames") { svg.classList.toggle("ohne-gruppennamen", !t.checked); writeHash(); }
+    else if (t.id === "c-gap") { state.gap = +t.value; draw(); update(); }
+    else if (t.id === "c-bysize") { state.bysize = t.checked; resize(); }
+    else if (t.id === "c-scale") { state.scale = +t.value; resize(); }
   });
+  // a change of the size of the points: circle and force-directed layout are computed again
+  function resize() { growCircles(); posE = {}; redraw(); }
   controls.addEventListener("input", (ev) => {
+    if (ev.target.id === "c-scale") { const w = document.getElementById("c-scale-wert"); if (w) w.textContent = (+ev.target.value).toFixed(1); return; }
+    if (ev.target.id === "c-gap") { const w = document.getElementById("c-gap-wert"); if (w) w.textContent = ev.target.value; return; }
     if (ev.target.id !== "c-min") return;
     state.min[state.level] = +ev.target.value;
     document.getElementById("c-min-wert").textContent = ev.target.value;
     draw();
     update();
   });
-  function redraw() { draw(); drawControls(); update(); }
+  function redraw() {
+    document.body.classList.remove("marken-shades", "marken-shapes", "marken-symbols");
+    document.body.classList.add("marken-" + state.marks);
+    draw(); drawControls(); update();
+  }
   function setLevel(level) {
     if (level !== "areas" && level !== "classes") level = "areas";
     if (level === state.level) return;
@@ -608,6 +978,11 @@
     redraw();
   }
   document.getElementById("legend").innerHTML =
+    (AL ? block("Groups", AL.GROUPS.map((F) => `<span class="gruppe-legende"><i style="background:${F.color}"></i><b>${esc(F.name)}</b></span>` + F.folders.map((f) => {
+      const a = (window.GRAPH_AREAS || []).find((x) => x.folder === f) || { name: f };
+      const mark = `<svg class="mini" viewBox="-12 -12 24 24"><circle r="10" fill="${AL.shade(f)}" class="m-shades"/><path d="${AL.shapePath(AL.shapeOf(f), 7)}" fill="${F.color}" class="m-shapes"/><circle r="11" fill="${F.color}" class="m-symbols"/>${typeof AL.SYMBOL[f] === "object" ? `<g class="m-symbols">${AL.symbolMarkup(AL.SYMBOL[f], 11, F.color)}</g>` : `<text class="symbol m-symbols" style="font-size:${(AL.SYMBOL[f] || "").length > 2 ? 9 : (AL.SYMBOL[f] || "").length > 1 ? 11 : 14}px">${AL.SYMBOL[f] || ""}</text>`}</svg>`;
+      return `<span class="gebiet-legende">${mark}${esc(a.name)} <span class="msc">${esc(a.msc || "")}</span></span>`;
+    }).join("")), { closed: true }) : "") +
     block("Meaning of the kinds", G.KINDS.map((k) => `<span><i style="background:${k.color}"></i><b>${k.name}:</b> ${k.text}</span>`), { closed: true }) +
     block("Points, bands and colours", [
       `<span class="hinweis">Each point is an area of these graphs or, at the level of MSC classes, one of its classes (the first MSC class of a concept or theorem); its size grows with the number of its concepts and theorems.</span>`,
@@ -645,7 +1020,15 @@
   // ------------------------------------------------------------ address
   function writeHash() {
     const parts = ["level=" + state.level];
+    if (AL && AL.GROUPING !== "msc") parts.push("fields=" + AL.GROUPING);
+    if (state.layout === "circle") parts.push("layout=circle");
+    if (svg.classList.contains("ohne-gruppennamen")) parts.push("groupnames=0");
+    if (svg.classList.contains("ohne-namen")) parts.push("names=0");
+    if (state.gap !== 20) parts.push("gap=" + state.gap);
+    if (!state.bysize) parts.push("size=same");
+    if (state.scale !== 1) parts.push("scale=" + state.scale);
     if (state.min[state.level] !== (state.level === "areas" ? 3 : 2)) parts.push("min=" + state.min[state.level]);
+    if (hooks.hashParts) parts.push(...hooks.hashParts());
     if (state.sel) parts.push("sel=" + encodeURIComponent(state.sel));
     else if (state.pair) parts.push("pair=" + encodeURIComponent(state.pair.from + ">" + state.pair.to));
     const h = "#" + parts.join("&");
@@ -653,8 +1036,17 @@
   }
   function fromHash() {
     const q = new Map(location.hash.slice(1).split("&").filter(Boolean).map((p) => { const i = p.indexOf("="); return [p.slice(0, i), decodeURIComponent(p.slice(i + 1))]; }));
-    const level = q.get("level") === "classes" ? "classes" : "areas";
+    // the level of MSC classes is no longer offered on this page (user, 5 November 2026); #level=classes is ignored
+    const level = "areas";
     state.level = level;
+    if (AL) {
+      state.layout = q.get("layout") === "circle" ? "circle" : "e2"; state.mix = state.layout === "e2" ? 1 : 0;
+      svg.classList.toggle("ohne-gruppennamen", q.get("groupnames") === "0");
+      svg.classList.toggle("ohne-namen", q.get("names") === "0");
+      state.gap = q.has("gap") ? Math.max(0, Math.min(40, Math.round(+q.get("gap")) || 0)) : 20;
+      const marks = "symbols", bysize = q.get("size") !== "same", scale = Math.max(0.4, Math.min(1.8, +q.get("scale") || 1));
+      if (marks !== state.marks || bysize !== state.bysize || scale !== state.scale) { Object.assign(state, { marks, bysize, scale }); growCircles(); posE = {}; }
+    }
     if (q.has("min")) state.min[level] = Math.max(1, Math.min(20, +q.get("min") || 1));
     state.sel = q.has("sel") && G.units[level].has(q.get("sel")) ? q.get("sel") : null;
     const p = q.has("pair") ? q.get("pair").split(">") : null;
@@ -662,7 +1054,16 @@
     draw();
     drawControls();
     update();
+    if (hooks.fromHash) hooks.fromHash(q);
   }
+  // Zoom into an area (todo B101 step 1, user, 5 November 2026): shared_scripts/area-zoom.js, loaded before this file,
+  // defines window.AREA_ZOOM; it gets the parts of this page it needs and returns its hooks (afterDraw, onView,
+  // afterControls, hashParts, fromHash)
+  if (window.AREA_ZOOM && AL && window.AREA_CELLS) Object.assign(hooks, window.AREA_ZOOM({
+    svg, state, G, allAreas, layoutE, tip, moveTip, select, clear, writeHash, draw, drawControls, update,
+    dragged, fit, scale, getView: () => view, setView: (v) => { view = v; applyView(); }, controls, panel,
+    isMap: () => state.level === "areas" && state.layout === "e2" && state.mix === 1 && !animating,
+  }));
   window.addEventListener("hashchange", fromHash);
   fromHash();
   if (document.fonts && document.fonts.ready) document.fonts.ready.then(() => draw());
@@ -676,6 +1077,16 @@
     edges: (level) => [...G.edges[level || state.level].values()].map((e) => ({ kind: e.kind, from: e.from.key, to: e.to.key, n: e.singles.length, alt: e.alt })),
     units: (level) => GROUPS[level || state.level].flat().map((u) => ({ key: u.key, label: u.label, n: u.items.length, gray: !!u.gray })),
     // square picture without names and sidebars (preview images)
-    preview() { svg.classList.add("ohne-namen", "vorschau"); const R = GEO[state.level].R + (state.level === "classes" ? 30 : 50); view = { x: -R, y: -R, w: 2 * R, h: 2 * R }; applyView(); },
+    preview() {
+      svg.classList.add("ohne-namen", "vorschau");
+      let R = GEO[state.level].R + (state.level === "classes" ? 30 : 50);
+      const EL = state.level === "areas" && state.mix > 0 && posE[state.frame];
+      if (EL) R = Math.max(...EL.res.cells.map((c) => Math.hypot(c.x, c.y))) * EL.scale + 30;
+      view = { x: -R, y: -R, w: 2 * R, h: 2 * R }; applyView();
+    },
+    // names of the groups on the map: kind (outer, inner, leader), place, centre and cells of the group
+    groupLabels: () => groupLabelInfo.map((g) => ({ key: g.key, name: g.name, kind: g.kind, x: g.x, y: g.y, cx: g.cx, cy: g.cy, from: g.from, cells: g.cells })),
+    // E2 for tests: positions (unscaled cell units) and the measures' inputs
+    e2: () => { const EL = layoutE(); return EL ? { positions: EL.res.positions, keys: allAreas.map((u) => u.key), stats: { groupsConnected: EL.res.stats.groupsConnected, unitsConnected: EL.res.stats.unitsConnected } } : null; },
   };
 })();

@@ -1,7 +1,7 @@
 // Data of the theorem graph (theorems.html): theorems, lemmas, corollaries and conjectures of dynamical systems and
 // ergodic theory, MSC 2020 37. In English. Built on 3 November 2026. No theorem with first class 37 stood in another
 // folder, so nothing was moved here (geo:hamiltonian-flow-symplectic and geo:noether-symplectic have 53D first,
-// rt:ratner-theorems has 22E first; they stay where they are).
+// lie:ratner-theorems has 22E first; they stay where they are).
 //
 // Model as in ../../algebraic-number-theory/data/theorem-graph.js (see its header comment): `premises` and `proof` are
 // the standard textbook proof, named in `proofName`; further proofs in `alternativeProofs`; `foundation: true` marks a
@@ -144,7 +144,7 @@ window.DS_THEOREMS = {
       concepts: ["lyapunov-function", "omega-limit-set", "invariant-set"],
       year: 1960, who: "LaSalle; Barbashin and Krasovskii (1952)" },
     { id: "linear-spectral-splitting", name: "Spectral splitting of a linear map", kind: "lemma", foundation: true, area: "37D", field: [37], msc: ["37D", "15A"], msc5: "37D05",
-      premises: ["ana:spectral-radius-formula"],
+      premises: ["fa:spectral-radius-formula"],
       proofName: "Generalized eigenspaces and an adapted norm",
       formula: String.raw`\mathbb R^{n} = E^{s} \oplus E^{c} \oplus E^{u},\quad \|L|_{E^{s}}\| < 1,\quad \|L^{-1}|_{E^{u}}\| < 1`,
       text: "An invertible linear map L of ℝ<sup>n</sup> splits ℝ<sup>n</sup> into invariant subspaces on which the eigenvalues have absolute value < 1, = 1 and > 1; there is a norm (adapted norm) in which L contracts E<sup>s</sup> and L<sup>−1</sup> contracts E<sup>u</sup>. If L is hyperbolic, E<sup>c</sup> = 0.",
@@ -396,15 +396,15 @@ window.DS_THEOREMS = {
       concepts: ["koopman-operator"],
       year: 1931, who: "Koopman" },
     { id: "von-neumann-mean-ergodic-theorem", name: "Von Neumann's mean ergodic theorem", kind: "theorem", area: "37A", field: [37], msc: ["37A"], msc5: "37A30",
-      premises: ["koopman-isometry", "ana:projection-theorem"],
+      premises: ["koopman-isometry", "fa:projection-theorem"],
       proofName: "Riesz's decomposition of the Hilbert space",
       formula: String.raw`\tfrac1N \sum_{n<N} U^{n} f \to P f \quad \text{in } L^{2}`,
       text: "For an isometry U of a Hilbert space, the averages (1/N) Σ<sub>n<N</sub> U<sup>n</sup>f converge in norm to the orthogonal projection Pf of f onto the space of U-invariant vectors. For the Koopman operator this is convergence in L<sup>2</sup> of ergodic averages; for an ergodic T the limit is the constant ∫ f dμ.",
       proof: "The Hilbert space is the orthogonal sum of the invariant vectors and the closure of the coboundaries g − Ug (projection theorem; the orthogonal complement of the coboundaries consists of the invariant vectors). On invariant vectors the averages are constant, on coboundaries they telescope to (g − U<sup>N</sup>g)/N → 0, and the bound ‖average‖ ≤ 1 passes to the closure.",
       alternativeProofs: [
-        { name: "Von Neumann's spectral proof", premises: ["koopman-isometry", "ana:spectral-theorem-self-adjoint"], idea: "Represent the unitary Koopman operator by its spectral measure on the circle; the averages are given by the bounded functions (1/N) Σ z<sup>n</sup>, which converge pointwise to the indicator of z = 1, and dominated convergence for the spectral measure gives the limit.", year: 1932, who: "von Neumann" },
+        { name: "Von Neumann's spectral proof", premises: ["koopman-isometry", "fa:spectral-theorem-self-adjoint"], idea: "Represent the unitary Koopman operator by its spectral measure on the circle; the averages are given by the bounded functions (1/N) Σ z<sup>n</sup>, which converge pointwise to the indicator of z = 1, and dominated convergence for the spectral measure gives the limit.", year: 1932, who: "von Neumann" },
       ],
-      concepts: ["ergodic-average", "koopman-operator", "ana:hilbert-space"],
+      concepts: ["ergodic-average", "koopman-operator", "fa:hilbert-space"],
       year: 1932, who: "von Neumann; proof by F. Riesz (1938)" },
     { id: "maximal-ergodic-theorem", name: "Maximal ergodic theorem", kind: "lemma", area: "37A", field: [37], msc: ["37A"], msc5: "37A30",
       premises: ["invariance-of-integrals"],
@@ -450,7 +450,7 @@ window.DS_THEOREMS = {
       concepts: ["bernoulli-shift", "strong-mixing"],
       year: 1935, who: "folklore (Kolmogorov's 0–1 law)" },
     { id: "krylov-bogolyubov", name: "Krylov–Bogolyubov theorem", kind: "theorem", area: "37A", field: [37], msc: ["37A", "37B"], msc5: "37A05",
-      premises: ["ana:riesz-markov-kakutani", "ana:banach-alaoglu"],
+      premises: ["ana:riesz-markov-kakutani", "fa:banach-alaoglu"],
       proofName: "Weak-* limits of orbit averages",
       formula: String.raw`\mu = \lim_{k} \tfrac{1}{N_k} \sum_{n<N_k} \delta_{T^{n}x}`,
       text: "Every continuous map of a compact metric space has an invariant Borel probability measure. The set M(T) of invariant probability measures is non-empty, convex and weak-* compact.",
@@ -558,7 +558,7 @@ window.DS_THEOREMS = {
       concepts: ["measure-preserving-transformation", "weak-mixing", "recurrent-point"],
       year: 1977, who: "Furstenberg" },
     { id: "furstenberg-correspondence-principle", name: "Furstenberg correspondence principle", kind: "theorem", area: "37A", field: [37], msc: ["37A", "11B"], msc5: "37A44",
-      premises: ["ana:riesz-markov-kakutani", "ana:banach-alaoglu"],
+      premises: ["ana:riesz-markov-kakutani", "fa:banach-alaoglu"],
       proofName: "Orbit closure of the indicator sequence",
       formula: String.raw`\bar d\big(E \cap (E - n_1) \cap \dots \cap (E - n_k)\big) \ge \mu\big(A \cap T^{-n_1}A \cap \dots \cap T^{-n_k}A\big)`,
       text: "For a set E of integers with positive upper Banach density there is a measure-preserving system (X, μ, T) and a set A with μ(A) = d*(E) such that the density of every intersection E ∩ (E − n<sub>1</sub>) ∩ … ∩ (E − n<sub>k</sub>) is at least the measure of A ∩ T<sup>−n<sub>1</sub></sup>A ∩ … ∩ T<sup>−n<sub>k</sub></sup>A. With multiple recurrence it gives Szemerédi's theorem on arithmetic progressions.",

@@ -60,7 +60,7 @@ window.CV_CONCEPTS = {
     { id: "lower-semicontinuous-functional", name: "Lower semicontinuous functional", kind: "eigenschaft", area: "49J", field: [49], msc: ["49J"], msc5: "49J45", uses: ["functional", "top:convergent-sequence", "ana:limit-superior"],
       formula: String.raw`u_n \to u \;\Rightarrow\; J(u) \le \liminf_{n \to \infty} J(u_n)`,
       text: "A functional J on a space with a notion of convergence (a topology, or weak convergence) is sequentially lower semicontinuous if its value at the limit of every convergent sequence is at most the lower limit of the values. Values may jump down in the limit, never up." },
-    { id: "coercive-functional", name: "Coercive functional", kind: "eigenschaft", area: "49J", field: [49], msc: ["49J"], msc5: "49J45", uses: ["functional", "ana:normed-space"],
+    { id: "coercive-functional", name: "Coercive functional", kind: "eigenschaft", area: "49J", field: [49], msc: ["49J"], msc5: "49J45", uses: ["functional", "fa:normed-space"],
       formula: String.raw`\|u\| \to \infty \;\Rightarrow\; J(u) \to \infty`,
       text: "A functional J on a normed space is coercive if J(u) tends to +∞ as the norm of u tends to ∞; equivalently, all sublevel sets {J ≤ t} are bounded. With a compactness theorem for bounded sets it makes minimizing sequences precompact." },
     { id: "convex-functional", name: "Convex functional", kind: "eigenschaft", area: "49J", field: [49], msc: ["49J"], msc5: "49J27", uses: ["functional", "ana:convex-function"],
@@ -81,7 +81,7 @@ window.CV_CONCEPTS = {
     { id: "integral-functional", name: "Integral functional", kind: "konstruktion", area: "49J", field: [49], msc: ["49J"], msc5: "49J10", uses: ["lagrangian", "ana:lebesgue-integral", "ana:partial-derivative"], isA: ["functional"],
       formula: String.raw`J[u] = \int_\Omega L(x, u(x), \nabla u(x))\, dx`,
       text: "The functional defined by integrating a Lagrangian L(x, u, ξ) along a function u on a domain Ω ⊆ ℝ<sup>n</sup> with values in ℝ<sup>m</sup>, evaluated at u and its first derivatives. For n = 1 it is the classical functional J[y] = ∫<sub>a</sub><sup>b</sup> L(x, y, y′) dx of a curve." },
-    { id: "dirichlet-energy", name: "Dirichlet energy", kind: "konstruktion", area: "49J", field: [49], msc: ["49J"], msc5: "49J10", uses: ["integral-functional", "ana:partial-derivative", "ana:sobolev-space"], isA: ["integral-functional"],
+    { id: "dirichlet-energy", name: "Dirichlet energy", kind: "konstruktion", area: "49J", field: [49], msc: ["49J"], msc5: "49J10", uses: ["integral-functional", "ana:partial-derivative", "fa:sobolev-space"], isA: ["integral-functional"],
       formula: String.raw`D(u) = \frac12 \int_\Omega |\nabla u|^2\, dx`,
       text: "The integral functional with Lagrangian ½|ξ|<sup>2</sup>, defined on the Sobolev space W<sup>1,2</sup>(Ω), also for maps with values in ℝ<sup>m</sup>. Its critical points are the (weakly) harmonic functions; minimizing it with prescribed boundary values is the Dirichlet principle." },
     { id: "optimal-control-problem", name: "Optimal control problem", kind: "konstruktion", area: "49J", field: [49], msc: ["49J"], msc5: "49J15", uses: ["de:initial-value-problem", "ana:measurable-function", "functional"],
@@ -156,10 +156,10 @@ window.CV_CONCEPTS = {
       text: "The partial differential equation of dynamic programming for an optimal control problem with dynamics f, running cost L and terminal cost g. It is a Hamilton–Jacobi equation whose Hamiltonian is a minimum over the controls." },
 
     // ------------------------------------------------------------ 49Q Minimal surfaces, geometric measure theory, optimal transport
-    { id: "plateau-problem", name: "Plateau problem", kind: "konstruktion", area: "49Q", field: [49], msc: ["49Q"], msc5: "49Q05", uses: ["geo:surface-area-element", "top:closed-disk", "top:continuous-map", "ana:sobolev-space"],
+    { id: "plateau-problem", name: "Plateau problem", kind: "konstruktion", area: "49Q", field: [49], msc: ["49Q"], msc5: "49Q05", uses: ["geo:surface-area-element", "top:closed-disk", "top:continuous-map", "fa:sobolev-space"],
       formula: String.raw`A(X) = \int_D |X_u \times X_v|\, du\, dv \to \min,\quad X(\partial D) = \Gamma`,
       text: "Given a Jordan curve Γ in ℝ<sup>3</sup>, find a surface of least area spanned by it. In Douglas's and Radó's formulation: minimize the area among maps X of the closed unit disc D that are continuous, lie in W<sup>1,2</sup> and map the boundary circle monotonically onto Γ." },
-    { id: "current", name: "Current", kind: "objekt", area: "49Q", field: [49], msc: ["49Q"], msc5: "49Q15", uses: ["top:differential-form", "ana:distribution"],
+    { id: "current", name: "Current", kind: "objekt", area: "49Q", field: [49], msc: ["49Q"], msc5: "49Q15", uses: ["top:differential-form", "fa:distribution"],
       formula: String.raw`T: \mathcal D^k(U) \to \mathbb R,\quad \partial T(\omega) = T(d\omega)`,
       text: "A k-dimensional current in an open set U ⊆ ℝ<sup>n</sup> is a continuous linear functional on the smooth differential k-forms with compact support, in the sense of distributions. An oriented surface defines one by integration; the boundary is defined by Stokes's formula." },
     { id: "mass-of-current", name: "Mass of a current", kind: "invariante", area: "49Q", field: [49], msc: ["49Q"], msc5: "49Q15", uses: ["current", "st:supremum"],
@@ -185,7 +185,7 @@ window.CV_CONCEPTS = {
       text: "For 1 ≤ p < ∞ and probability measures with finite p-th moments on a metric space: the p-th root of the optimal cost of the Kantorovich problem with cost d(x, y)<sup>p</sup>." },
 
     // ------------------------------------------------------------ 49R Variational methods for eigenvalues
-    { id: "rayleigh-quotient", name: "Rayleigh quotient of the Dirichlet Laplacian", kind: "konstruktion", area: "49R", field: [49], msc: ["49R"], msc5: "49R05", uses: ["la:rayleigh-quotient", "ana:sobolev-space-zero", "ana:lebesgue-integral"],
+    { id: "rayleigh-quotient", name: "Rayleigh quotient of the Dirichlet Laplacian", kind: "konstruktion", area: "49R", field: [49], msc: ["49R"], msc5: "49R05", uses: ["la:rayleigh-quotient", "fa:sobolev-space-zero", "ana:lebesgue-integral"],
       formula: String.raw`R(u) = \frac{\int_\Omega |\nabla u|^2\, dx}{\int_\Omega u^2\, dx},\quad u \in W^{1,2}_0(\Omega) \setminus \{0\}`,
       text: "For a bounded domain Ω and a non-zero function u with boundary values 0 in the Sobolev space W<sub>0</sub><sup>1,2</sup>(Ω): the quotient shown, the Rayleigh quotient ⟨−Δu, u⟩/⟨u, u⟩ of the Dirichlet Laplacian written in the energy form. Its minimum and min-max values are the Dirichlet eigenvalues." },
 

@@ -527,7 +527,7 @@ window.DIO_THEOREMS = {
       proof: "It suffices to take n = 3; Margulis shows that every orbit of SO(2, 1) on SL<sub>3</sub>(ℝ)/SL<sub>3</sub>(ℤ) that is relatively compact is closed, using Mahler's compactness criterion and topological dynamics of unipotent flows, outside these graphs.",
       proofName: "Orbits of SO(2, 1) (Margulis)",
       alternativeProofs: [
-        { name: "Consequence of Ratner's orbit closure theorem", premises: ["rt:ratner-theorems"], year: 1991, who: "Ratner",
+        { name: "Consequence of Ratner's orbit closure theorem", premises: ["lie:ratner-theorems"], year: 1991, who: "Ratner",
           idea: "By Ratner the closure of the SO(Q)-orbit of ℤ<sup>3</sup> is the orbit of a closed subgroup; for irrational Q it is all of SL<sub>3</sub>(ℝ)/SL<sub>3</sub>(ℤ), and density of the values follows." },
       ],
       concepts: ["indefinite-form", "space-of-lattices"],
@@ -934,7 +934,7 @@ window.DIO_THEOREMS = {
       premises: [],
       formula: String.raw`\operatorname{trdeg}_{\mathbb Q} \mathbb Q(z_1, \dots, z_n, e^{z_1}, \dots, e^{z_n}) \ge n`,
       text: "If complex numbers z<sub>1</sub>, …, z<sub>n</sub> are linearly independent over ℚ, then the field generated over ℚ by z<sub>1</sub>, …, z<sub>n</sub>, e<sup>z<sub>1</sub></sup>, …, e<sup>z<sub>n</sub></sup> has transcendence degree at least n. Open; it contains the Lindemann–Weierstrass theorem and would imply that e and π are algebraically independent.",
-      concepts: ["algebraic-independence", "ft:transcendence-degree", "ana:exponential-function"],
+      concepts: ["algebraic-independence", "gal:transcendence-degree", "ana:exponential-function"],
       year: 1966, who: "Schanuel (published by Lang)" },
     { id: "period-conjecture", name: "Kontsevich–Zagier period conjecture", kind: "conjecture", area: "11J", field: [11], msc: ["11J"], msc5: "11J81",
       premises: [],

@@ -264,7 +264,7 @@ window.STA_CONCEPTS = {
     { id: "linear-model", name: "Linear model", kind: "objekt", area: "62J", field: [62], msc: ["62J"], msc5: "62J05", uses: ["la:matrix", "pr:expectation", "pr:covariance"], isA: ["parametric-model"],
       formula: String.raw`Y = X\beta + \varepsilon,\quad E\varepsilon = 0,\quad \operatorname{Cov}\varepsilon = \sigma^2 I_n`,
       text: "A model for a random vector Y in ℝ<sup>n</sup> with a known n × p design matrix X of rank p, an unknown coefficient vector β in ℝ<sup>p</sup> and errors ε that are centred, uncorrelated and of equal variance σ<sup>2</sup>; in the normal linear model ε has the distribution N<sub>n</sub>(0, σ<sup>2</sup>I)." },
-    { id: "least-squares-estimator", name: "Least squares estimator", kind: "konstruktion", area: "62J", field: [62], msc: ["62J"], msc5: "62J05", uses: ["linear-model", "estimator", "ana:inner-product-space"],
+    { id: "least-squares-estimator", name: "Least squares estimator", kind: "konstruktion", area: "62J", field: [62], msc: ["62J"], msc5: "62J05", uses: ["linear-model", "estimator", "fa:inner-product-space"],
       formula: String.raw`\hat\beta = \operatorname{arg\,min}_\beta \lVert Y - X\beta \rVert^2 = (X^{\mathsf T}X)^{-1} X^{\mathsf T} Y`,
       text: "In a linear model, the coefficient vector that minimises the sum of squared residuals ‖Y − Xβ‖<sup>2</sup> (Legendre 1805, Gauss 1809)." },
     { id: "best-linear-unbiased-estimator", name: "Best linear unbiased estimator (BLUE)", kind: "eigenschaft", area: "62J", field: [62], msc: ["62J"], msc5: "62J05", uses: ["linear-model", "unbiased-estimator", "pr:covariance"],

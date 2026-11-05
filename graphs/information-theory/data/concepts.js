@@ -123,12 +123,12 @@ window.IT_CONCEPTS = {
     { id: "error-probability", name: "Probability of decoding error", kind: "invariante", area: "channel", field: [94], msc: ["94A"], msc5: "94A24", uses: ["channel-code", "pr:conditional-probability"],
       formula: String.raw`\lambda_{\max} = \max_{m} \Pr\big(g(Y^n) \ne m \mid X^n = f(m)\big)`,
       text: "For a channel code, the maximal (or averaged over uniformly distributed messages) probability that the decoder outputs a wrong message." },
-    { id: "zero-error-capacity", name: "Zero-error capacity (Shannon capacity of a graph)", kind: "invariante", area: "channel", field: [94, 5], msc: ["94A", "05C"], msc5: "94A24", uses: ["discrete-memoryless-channel", "co:graph", "co:clique"],
+    { id: "zero-error-capacity", name: "Zero-error capacity (Shannon capacity of a graph)", kind: "invariante", area: "channel", field: [94, 5], msc: ["94A", "05C"], msc5: "94A24", uses: ["discrete-memoryless-channel", "gr:graph", "gr:clique"],
       formula: String.raw`\Theta(G) = \sup_{n} \alpha(G^{\boxtimes n})^{1/n}`,
       text: "For the confusability graph G of a channel (two inputs adjacent if some output can come from both), the growth rate of the independence number α of its strong powers: the number of messages per use that can be sent with error probability zero." },
 
     // ------------------------------------------------------------ 94A12, 94A20 Signals and sampling
-    { id: "finite-energy-signal", name: "Finite-energy signal", kind: "objekt", area: "signal", field: [94], msc: ["94A"], msc5: "94A12", uses: ["ana:lp-space"],
+    { id: "finite-energy-signal", name: "Finite-energy signal", kind: "objekt", area: "signal", field: [94], msc: ["94A"], msc5: "94A12", uses: ["fa:lp-space"],
       formula: String.raw`\int_{-\infty}^{\infty} |x(t)|^2\, dt < \infty`,
       text: "A signal in continuous time is a function x(t) of a real variable t; it has finite energy if it is square integrable, that is an element of L<sup>2</sup>(ℝ)." },
     { id: "band-limited-function", name: "Band-limited signal", kind: "eigenschaft", area: "signal", field: [94], msc: ["94A"], msc5: "94A12", uses: ["finite-energy-signal", "ana:fourier-transform"],
@@ -216,7 +216,7 @@ window.IT_CONCEPTS = {
     { id: "reed-muller-code", name: "Reed–Muller code", kind: "konstruktion", area: "codes", field: [94], msc: ["94B"], msc5: "94B05", uses: ["linear-code", "ca:polynomial-ring", "ft:finite-field"], isA: ["linear-code"],
       formula: String.raw`\operatorname{RM}(r, m) = \{ (f(v))_{v \in \mathbb F_2^m} : \deg f \le r \}`,
       text: "The binary code of length 2<sup>m</sup> formed by the value tables of all polynomials of degree at most r in m variables over 𝔽<sub>2</sub>." },
-    { id: "ldpc-code", name: "Low-density parity-check code", kind: "konstruktion", area: "codes", field: [94], msc: ["94B"], msc5: "94B05", uses: ["parity-check-matrix", "co:bipartite-graph"], isA: ["linear-code"],
+    { id: "ldpc-code", name: "Low-density parity-check code", kind: "konstruktion", area: "codes", field: [94], msc: ["94B"], msc5: "94B05", uses: ["parity-check-matrix", "gr:bipartite-graph"], isA: ["linear-code"],
       formula: String.raw`H \in \mathbb F_2^{(n-k) \times n} \text{ sparse}`,
       text: "A linear code given by a parity-check matrix with few non-zero entries in each row and column (Gallager 1962); its Tanner graph is the bipartite graph between coordinates and checks, on which iterative message-passing decoders run." },
     { id: "polar-code", name: "Polar code", kind: "konstruktion", area: "codes", field: [94], msc: ["94B"], msc5: "94B05", uses: ["linear-code", "discrete-memoryless-channel", "la:matrix-ring"], isA: ["linear-code"],

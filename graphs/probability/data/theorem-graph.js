@@ -161,7 +161,7 @@ window.PR_THEOREMS = {
       text: "For every integrable random variable X and every sub-σ-algebra 𝓖 the conditional expectation E[X | 𝓖] exists and is unique up to a null set.",
       proof: "For X ≥ 0 the measure ν(G) = 𝔼[X 1<sub>G</sub>] on 𝓖 is absolutely continuous with respect to Pr restricted to 𝓖; its Radon–Nikodym derivative is the conditional expectation. Two versions agree on every G ∈ 𝓖, hence almost surely.",
       alternativeProofs: [
-        { name: "Orthogonal projection in L²", premises: ["ana:projection-theorem", "ana:monotone-convergence-theorem"], idea: "For square-integrable X, E[X | 𝓖] is the orthogonal projection onto the closed subspace L<sup>2</sup>(𝓖); for integrable X ≥ 0 take the monotone limit of the projections of min(X, n)." },
+        { name: "Orthogonal projection in L²", premises: ["fa:projection-theorem", "ana:monotone-convergence-theorem"], idea: "For square-integrable X, E[X | 𝓖] is the orthogonal projection onto the closed subspace L<sup>2</sup>(𝓖); for integrable X ≥ 0 take the monotone limit of the projections of min(X, n)." },
       ],
       concepts: ["conditional-expectation", "ana:absolutely-continuous-measure"],
       year: 1933, who: "Kolmogorov" },
@@ -345,7 +345,7 @@ window.PR_THEOREMS = {
 
     // ------------------------------------------------------------ 60B Convergence of measures
     { id: "prokhorov-theorem", name: "Prokhorov's theorem", kind: "theorem", area: "60B", field: [60], msc: ["60B"], msc5: "60B10",
-      premises: ["ana:riesz-markov-kakutani", "ana:banach-alaoglu"],
+      premises: ["ana:riesz-markov-kakutani", "fa:banach-alaoglu"],
       proofName: "Weak-* compactness on a compactification",
       formula: String.raw`\{\mu_i\} \text{ tight} \iff \{\mu_i\} \text{ relatively compact}`,
       text: "A family of probability measures on a complete separable metric space is relatively compact for weak convergence if and only if it is tight.",
@@ -917,7 +917,7 @@ window.PR_THEOREMS = {
       concepts: ["critical-probability", "bond-percolation"],
       year: 1980, who: "Kesten; Harris (1960, θ(1/2) = 0)" },
     { id: "smirnov-cardy-formula", name: "Cardy's formula and conformal invariance of site percolation (Smirnov)", kind: "theorem", area: "60K", field: [60, 82], msc: ["60K", "82B"], msc5: "60K35",
-      premises: ["russo-seymour-welsh", "ana:arzela-ascoli", "ana:riemann-mapping-theorem"],
+      premises: ["russo-seymour-welsh", "fa:arzela-ascoli", "ana:riemann-mapping-theorem"],
       proofName: "Discrete holomorphic observables",
       formula: String.raw`\Pr\big(\text{crossing of an equilateral triangle from side } AB \text{ to a segment } CX\big) \to \frac{|CX|}{|CA|}`,
       text: "For critical site percolation on the triangular lattice, crossing probabilities of conformal rectangles converge, as the mesh tends to 0, to a conformally invariant limit given by Cardy's formula, which is linear in the equilateral triangle shown.",
@@ -962,7 +962,7 @@ window.PR_THEOREMS = {
       premises: [],
       formula: String.raw`p_c(G) < p_u(G)`,
       text: "For every connected transitive graph G that is non-amenable, there is a non-trivial interval of edge probabilities in which percolation has infinitely many infinite clusters: the critical probability p<sub>c</sub> is less than the uniqueness threshold p<sub>u</sub>. Open; proved for many classes of graphs, including Cayley graphs with large spectral gap and hyperbolic groups.",
-      concepts: ["bond-percolation", "critical-probability", "co:cayley-graph"],
+      concepts: ["bond-percolation", "critical-probability", "gr:cayley-graph"],
       year: 1996, who: "Benjamini, Schramm" },
     { id: "rwre-zero-one-law-conjecture", name: "Directional zero-one law for random walk in random environment", kind: "conjecture", area: "60K", field: [60], msc: ["60K"], msc5: "60K37",
       premises: [],

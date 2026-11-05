@@ -230,3 +230,10 @@ a.klein-knopf { display: inline-block; color: inherit; text-decoration: none; ma
 /* reason why a proof has no premises (user, 3 November 2026) */
 .ohne-praemissen { font-style: italic; color: var(--leise); }
 .ent-graph .kante.aussen { display: none !important; }
+/* definitions and theorems in one picture (B94, user, 4 November 2026) */
+.ent-graph .knoten .satz-rand { fill: none; stroke: #4b443b; stroke-width: 1; }
+.ent-graph .kante.aussage:not(.hell) { stroke: #5c8a4a; stroke-dasharray: 1.5 3; }
+.fokus-ansicht .fokus-kante.aussage { stroke: #5c8a4a; stroke-dasharray: 2 3; }
+.fokus-ansicht .fokus-knoten.satz rect { stroke-width: 2; }
+.block .art-alle { font-weight: 600; }
+.block .art-liste { margin: 0 0 6px 14px; display: flex; flex-direction: column; }

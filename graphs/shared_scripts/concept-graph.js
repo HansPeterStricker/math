@@ -24,14 +24,28 @@
 //                 is marked or with the switch (user, 3 November 2026)
 //   conceptSources  "" (own folder) and prefix -> { data, page }: concept files for the field `concepts` (concepts in
 //                 the statement), shown in the panel as links into the concept graphs
+// Definitions and theorems in one picture (B94, user, 4 November 2026). Every page loads the settings of both graphs of
+// its folder, window.CONCEPT_PAGES.concepts (scripts/concept-page.js) and window.CONCEPT_PAGES.theorems
+// (scripts/theorem-page.js); window.CONCEPT_PAGE is the setting of the page itself (loaded last). Switches in "Display"
+// show or hide the definitions and the theorems, all of them or by kind. The state is in the query of the address:
+// ?concepts=all|none|<kind>,<kind>&theorems=… ; a missing key means the default of the page (concept page: only the
+// definitions, theorem page: only the theorems). A change of the switches loads the page again with the new address, so
+// that levels, sectors and the layout are computed for the nodes shown; nodes of a hidden kind are left out with their
+// edges. With both shown the graph is the heterogeneous graph of graphs/CLAUDE.md: a theorem uses, besides the premises
+// of its proof, the concepts of its statement (field `concepts`; edge class "aussage"), and its level is 1 + the highest
+// level among both, so that within a sector it lies further out than everything it uses. The nodes of the other kind
+// of graph get a prefix in their id ("t." for theorems on the concept page, "c." for concepts on the theorem page),
+// because some ids occur in both data files; the nodes of the page itself keep their ids (#<id>, #mark=<id>).
 (function () {
   "use strict";
   const CFG = window.CONCEPT_PAGE;
+  const PAGES = window.CONCEPT_PAGES || {};
   // Theorems: `premises` and `proof` are the standard proof (name in `proofName`), `alternativeProofs` further proofs
   // ({ name, premises, idea, year, who }), as on the maps (user, 3 November 2026). The graph uses the standard proof.
   const asGraph = (d) => (!d || d.concepts ? d : { ...d, concepts: d.theorems.map((t) => ({ ...t, uses: t.premises || [] })) });
   // Concepts likewise (user, 3 November 2026): `uses` is the standard definition (name in `definitionName`),
   // `alternativeDefinitions` further equivalent definitions ({ name, uses, formula, text }).
+  // In the combined picture the concepts of a theorem's statement (`stmt`) belong to every one of its proofs.
   const proofsOf = (c) => {
     if ((c.alternativeDefinitions || []).length || c.definitionName)
       return [{ name: c.definitionName || "Standard definition", premises: c.uses || [], idea: "" }]
@@ -40,19 +54,51 @@
       ? [{ name: c.proofName || "Standard proof", premises: c.premises || [], idea: c.proof || "", year: c.proofYear, who: c.proofWho }].concat(c.alternativeProofs || [])
       : [];
   };
-  const OWN = asGraph(window[CFG.data]);
+  const PRIMARY = window[CFG.data] && window[CFG.data].theorems ? "theorems" : "concepts";
+  const SECONDARY = PRIMARY === "concepts" ? "theorems" : "concepts";
+  const cfgOf = (type) => (type === PRIMARY ? CFG : PAGES[type]);
+  const TYPES = [PRIMARY].concat(PAGES[SECONDARY] && window[PAGES[SECONDARY].data] ? [SECONDARY] : []);
+  const rawOf = (type) => window[cfgOf(type).data];
+  const listOf = (raw) => raw.concepts || raw.theorems;
+  // the kinds that occur in the own data, in the order of `kinds`
+  const KINDS = {};
+  TYPES.forEach((type) => {
+    const raw = rawOf(type), present = new Set(listOf(raw).map((x) => x.kind));
+    KINDS[type] = Object.keys(raw.kinds || {}).filter((k) => present.has(k)).concat([...present].filter((k) => !(k in (raw.kinds || {}))));
+  });
+  const query = new URLSearchParams(location.search);
+  const SHOWN = {};
+  TYPES.forEach((type) => {
+    const v = query.get(type);
+    SHOWN[type] = v == null ? (type === PRIMARY ? KINDS[type].slice() : []) : v === "all" ? KINDS[type].slice() : v === "none" ? [] : KINDS[type].filter((k) => v.split(",").includes(k));
+  });
+  // nothing at all is not a picture: then the default
+  if (!TYPES.some((t) => SHOWN[t].length)) SHOWN[PRIMARY] = KINDS[PRIMARY].slice();
+  const CONCEPT_WORDS = {
+    one: "concept", many: "concepts", usingIt: "concepts using it",
+    usesHead: "Defined with", usedByHead: "Used in the definitions of", edges: "definitional dependencies",
+    arrow: "A → B: B is defined with A", proofsHead: "Definitions", proofWord: "Definition", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
+    levelHint: "Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.",
+  };
+  const PARTS = TYPES.filter((t) => SHOWN[t].length).map((type) => {
+    const cfg = cfgOf(type), g = asGraph(rawOf(type)), kinds = new Set(SHOWN[type]);
+    return { type, cfg, kinds, raw: g, own: { ...g, concepts: g.concepts.filter((c) => kinds.has(c.kind)) },
+      ns: type === PRIMARY ? "" : type === "theorems" ? "t." : "c.", words: Object.assign({}, CONCEPT_WORDS, cfg.words || {}) };
+  });
+  const COMBINED = PARTS.length > 1;
+  const TP = PARTS.find((p) => p.type === "theorems"), CP = PARTS.find((p) => p.type === "concepts");
+  const WORDS = COMBINED ? Object.assign({}, PARTS[0].words, {
+    one: "node", many: "concepts and theorems", edges: "dependencies",
+    levelHint: "Level 1: uses no other concept or theorem of the area; level k: 1 + highest level among what the definition, or the statement and the proof, uses. Nodes of other areas are not counted; their arrows come from outside.",
+  }) : PARTS[0].words;
+  // the concepts of a theorem's statement as ids of the concept data: own concepts without prefix, others "<prefix>:<id>"
+  const stmtRefs = (t) => (t.concepts || []).map((r) => (CFG.prefix && r.startsWith(CFG.prefix + ":") ? r.slice(CFG.prefix.length + 1) : r));
+  const { el } = window.GL;
   // names for SVG text: <sup>/<sub> as Unicode superscripts and subscripts where they exist, other tags removed
   const SUP = { 0: "⁰", 1: "¹", 2: "²", 3: "³", 4: "⁴", 5: "⁵", 6: "⁶", 7: "⁷", 8: "⁸", 9: "⁹", "+": "⁺", "-": "⁻", "−": "⁻", n: "ⁿ", i: "ⁱ", d: "ᵈ", k: "ᵏ", m: "ᵐ", p: "ᵖ", e: "ᵉ", r: "ʳ", x: "ˣ", "*": "*" };
   const SUB = { 0: "₀", 1: "₁", 2: "₂", 3: "₃", 4: "₄", 5: "₅", 6: "₆", 7: "₇", 8: "₈", 9: "₉", "+": "₊", "-": "₋", "−": "₋", n: "ₙ", k: "ₖ", p: "ₚ", i: "ᵢ", m: "ₘ", e: "ₑ", x: "ₓ" };
   const conv = (t, map, mark) => ([...t].every((ch) => map[ch]) ? [...t].map((ch) => map[ch]).join("") : mark + t);
   const plainName = (n) => n.replace(/<sup>(.*?)<\/sup>/g, (m, t) => conv(t, SUP, "^")).replace(/<sub>(.*?)<\/sub>/g, (m, t) => conv(t, SUB, "_")).replace(/<[^>]+>/g, "");
-  const WORDS = Object.assign({
-    one: "concept", many: "concepts", usingIt: "concepts using it",
-    usesHead: "Defined with", usedByHead: "Used in the definitions of", edges: "definitional dependencies",
-    arrow: "A → B: B is defined with A", proofsHead: "Definitions", proofWord: "Definition", buildsOn: "Definitions this concept builds on", homeVerb: "Defined",
-    levelHint: "Prerequisites: concepts from other areas. Level 1: defined without other concepts of the area; level k: 1 + highest level used in the definition.",
-  }, CFG.words || {});
-  const { el } = window.GL;
   // Formulas (user, 3 November 2026): no line break inside a formula; a formula with several parts separated by
   // ",\quad", "\quad", ",\;" or ",\ \ " at the outer level is split there, and every part is set on its own as one
   // unbreakable piece (one per line in the panel); the commas are dropped.
@@ -80,62 +126,87 @@
   const svg = document.getElementById("graph");
   const panel = document.getElementById("panel");
 
-  const COLORS = CFG.colors;
+  const COLORS = Object.assign({}, ...PARTS.slice().reverse().map((p) => p.cfg.colors || {}));
   const FOREIGN = CFG.foreignArea;
 
-  // own concepts plus the concepts of other folders that they refer to (one step only)
-  const D = { ...OWN, concepts: OWN.concepts.slice() };
-  const KIND_LABEL = D.kinds;
-  const refs = new Set();
-  OWN.concepts.forEach((c) => (c.uses || []).concat(c.isA || [], ...(c.alternativeProofs || []).map((b) => b.premises || []), ...(c.alternativeDefinitions || []).map((d) => d.uses || [])).forEach((t) => { if (t.includes(":")) refs.add(t); }));
-  // a concept of another folder by its prefixed id (null if that folder's data are not loaded)
-  const lookup = (ref) => {
-    const [prefix, id] = ref.split(":");
-    const source = (CFG.sources || {})[prefix], data = source && asGraph(window[source.data]);
-    const c = data && data.concepts.find((x) => x.id === id);
-    return c ? { c, prefix, source } : null;
-  };
-  const withPrefix = (prefix, t) => (t.includes(":") ? t : prefix + ":" + t);
-  // Shared nodes (user, 3 November 2026): a concept or theorem that is equally important in two areas keeps its one home
-  // folder (definition, proofs, dependencies), but a second folder lists it in `shared` ({ ref, area }) and shows it as
-  // one of its own nodes: in the sector of `area`, filled, with its level, its edges and its card. The nodes its
-  // definition or proof uses are referenced as well.
-  const SHARED = new Map((OWN.shared || []).map((s) => [s.ref, s]));
-  SHARED.forEach((s, ref) => {
-    refs.add(ref);
-    const hit = lookup(ref);
-    if (hit) (hit.c.uses || hit.c.premises || []).map((u) => withPrefix(hit.prefix, u)).filter((u) => !(CFG.prefix && u.startsWith(CFG.prefix + ":"))).forEach((u) => refs.add(u));
-  });
-  // Dependencies among the referenced concepts themselves are kept (ℕ → ℤ; user, 2 November 2026). Where the path in
-  // the home graph runs through concepts that are not shown here (ideal → maximal ideal → local ring), it is followed
-  // to the next referenced concept, so that the edge ideal → local ring appears.
-  const reachedRefs = (prefix, list) => {
-    const found = new Set(), seen = new Set(), stack = (list || []).map((t) => withPrefix(prefix, t));
-    while (stack.length) {
-      const t = stack.pop();
-      if (seen.has(t)) continue;
-      seen.add(t);
-      // a reference back into this folder (a shared node defined with concepts of this area) is an own concept
-      if (CFG.prefix && t.startsWith(CFG.prefix + ":") && OWN.concepts.some((x) => x.id === t.slice(CFG.prefix.length + 1))) { found.add(t.slice(CFG.prefix.length + 1)); continue; }
-      if (refs.has(t)) { found.add(t); continue; }
-      const hit = lookup(t);
-      if (hit) (hit.c.uses || []).forEach((u) => stack.push(withPrefix(hit.prefix, u)));
-    }
-    return [...found];
-  };
-  refs.forEach((ref) => {
-    const hit = lookup(ref);
-    if (!hit) { console.error("concept graph: unknown reference " + ref); return; }
-    const { c, prefix, source } = hit;
-    const isA = (c.isA || []).map((t) => withPrefix(prefix, t)).filter((t) => refs.has(t));
-    const shared = SHARED.get(ref);
-    // the alternative definitions and proofs refer to the nodes shown here as well
-    const alt = (list, key) => list && list.map((b) => ({ ...b, [key]: reachedRefs(prefix, b[key]).filter((t) => t !== ref) }));
-    D.concepts.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: shared ? shared.area : FOREIGN,
-      alternativeDefinitions: alt(c.alternativeDefinitions, "uses"), alternativeProofs: alt(c.alternativeProofs, "premises"),
-      shared: !!shared, foreign: { home: source.page + "#mark=" + c.id, title: source.title, prefix } });
-  });
 
+  // own nodes plus the nodes of other folders that they refer to (one step only), for each kind of graph shown
+  function loadPart(part) {
+    const P = part.cfg, OWN = part.own;
+    const nodes = OWN.concepts.slice();
+    const refs = new Set();
+    OWN.concepts.forEach((c) => (c.uses || []).concat(c.isA || [], ...(c.alternativeProofs || []).map((b) => b.premises || []), ...(c.alternativeDefinitions || []).map((d) => d.uses || [])).forEach((t) => { if (t.includes(":")) refs.add(t); }));
+    // concepts of other areas in the statements of the theorems shown
+    if (part === CP && TP) TP.own.concepts.forEach((t) => stmtRefs(t).forEach((r) => { if (r.includes(":")) refs.add(r); }));
+    // a node of another folder by its prefixed id (null if that folder's data are not loaded)
+    const lookup = (ref) => {
+      const [prefix, id] = ref.split(":");
+      const source = (P.sources || {})[prefix], data = source && asGraph(window[source.data]);
+      const c = data && data.concepts.find((x) => x.id === id);
+      return c ? { c, prefix, source } : null;
+    };
+    const withPrefix = (prefix, t) => (t.includes(":") ? t : prefix + ":" + t);
+    // Shared nodes (user, 3 November 2026): a concept or theorem that is equally important in two areas keeps its one home
+    // folder (definition, proofs, dependencies), but a second folder lists it in `shared` ({ ref, area }) and shows it as
+    // one of its own nodes: in the sector of `area`, filled, with its level, its edges and its card. The nodes its
+    // definition or proof uses are referenced as well.
+    const SHARED = new Map((OWN.shared || []).map((s) => [s.ref, s]));
+    SHARED.forEach((s, ref) => {
+      refs.add(ref);
+      const hit = lookup(ref);
+      if (hit) (hit.c.uses || hit.c.premises || []).map((u) => withPrefix(hit.prefix, u)).filter((u) => !(P.prefix && u.startsWith(P.prefix + ":"))).forEach((u) => refs.add(u));
+    });
+    // Dependencies among the referenced concepts themselves are kept (ℕ → ℤ; user, 2 November 2026). Where the path in
+    // the home graph runs through concepts that are not shown here (ideal → maximal ideal → local ring), it is followed
+    // to the next referenced concept, so that the edge ideal → local ring appears.
+    const reachedRefs = (prefix, list) => {
+      const found = new Set(), seen = new Set(), stack = (list || []).map((t) => withPrefix(prefix, t));
+      while (stack.length) {
+        const t = stack.pop();
+        if (seen.has(t)) continue;
+        seen.add(t);
+        // a reference back into this folder (a shared node defined with concepts of this area) is an own concept
+        if (P.prefix && t.startsWith(P.prefix + ":") && OWN.concepts.some((x) => x.id === t.slice(P.prefix.length + 1))) { found.add(t.slice(P.prefix.length + 1)); continue; }
+        if (refs.has(t)) { found.add(t); continue; }
+        const hit = lookup(t);
+        if (hit) (hit.c.uses || []).forEach((u) => stack.push(withPrefix(hit.prefix, u)));
+      }
+      return [...found];
+    };
+    refs.forEach((ref) => {
+      const hit = lookup(ref);
+      if (!hit) { console.error("concept graph: unknown reference " + ref); return; }
+      const { c, prefix, source } = hit;
+      const isA = (c.isA || []).map((t) => withPrefix(prefix, t)).filter((t) => refs.has(t));
+      const shared = SHARED.get(ref);
+      // the alternative definitions and proofs refer to the nodes shown here as well
+      const alt = (list, key) => list && list.map((b) => ({ ...b, [key]: reachedRefs(prefix, b[key]).filter((t) => t !== ref) }));
+      nodes.push({ ...c, id: ref, uses: reachedRefs(prefix, c.uses).filter((t) => t !== ref), isA, area: shared ? shared.area : FOREIGN,
+        alternativeDefinitions: alt(c.alternativeDefinitions, "uses"), alternativeProofs: alt(c.alternativeProofs, "premises"),
+        shared: !!shared, foreign: { home: source.page + "#mark=" + c.id, title: source.title, prefix } });
+    });
+    // nodes of a hidden kind are left out everywhere, also those of other areas; the prefix of the part keeps the ids of
+    // concepts and theorems apart
+    const ns = (list) => list && list.map((t) => part.ns + t);
+    // (a kind that occurs only in other folders has no switch here and stays)
+    return nodes.filter((c) => part.kinds.has(c.kind) || !KINDS[part.type].includes(c.kind)).map((c) => ({
+      ...c, id: part.ns + c.id, uses: ns(c.uses), isA: ns(c.isA), premises: ns(c.premises), part,
+      alternativeProofs: c.alternativeProofs && c.alternativeProofs.map((b) => ({ ...b, premises: ns(b.premises || []) })),
+      alternativeDefinitions: c.alternativeDefinitions && c.alternativeDefinitions.map((d) => ({ ...d, uses: ns(d.uses || []) })),
+      // concepts of the statement of an own theorem, when the concepts are shown as well
+      stmt: part === TP && CP && !c.foreign ? stmtRefs(c).map((r) => CP.ns + r) : undefined,
+    }));
+  }
+  // names of kinds that the data may use before their `kinds` list names them: a single, particular object (the Monster
+  // group, the Leech lattice, π) as opposed to a class of objects (user, 4 November 2026); drawn as a five-pointed star
+  const KIND_NAMES = { einzelobjekt: "Individual object" };
+  const merge = (key) => Object.assign({}, ...PARTS.slice().reverse().map((p) => p.raw[key] || {}));
+  const D = { title: PARTS[0].raw.title, areas: merge("areas"), kinds: Object.assign({}, ...PARTS.map((p) => Object.fromEntries([...p.kinds].map((k) => [k, (p.raw.kinds || {})[k] || KIND_NAMES[k] || k])))),
+    concepts: PARTS.flatMap(loadPart) };
+  const KIND_LABEL = D.kinds;
+  const SHAPES = Object.assign({}, ...PARTS.map((p) => p.cfg.shapes || {}));
+  const wordsOf = (c) => c.part.words;
+  const isTheorem = (c) => c.part.type === "theorems";
   const concepts = D.concepts;
 
   // Prerequisites are coloured by their origin (user, 2 November 2026): the home folder of a referenced concept, or
@@ -144,7 +215,7 @@
   // colour of each area from the register (shared_scripts/areas.js, field `color`), "local" for placeholders of this folder
   const ORIGIN_COLORS = Object.assign({ local: "#d9d4ca" }, ...(window.GRAPH_AREAS || []).map((a) => ({ [a.prefix]: a.color })));
   const originOf = (c) => (c.foreign ? c.foreign.prefix : "local");
-  const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + ((CFG.sources[o] || {}).title || o).replace(/^the (concept|theorem) graph of /, ""));
+  const originName = (o) => (o === "local" ? CFG.foreignLabel + ", no home folder yet" : "from " + (((CFG.sources || {})[o] || PARTS.map((p) => (p.cfg.sources || {})[o]).find(Boolean) || {}).title || o).replace(/^the (concept|theorem) graph of /, ""));
   const colorOf = (c) => (c.area === FOREIGN ? ORIGIN_COLORS[originOf(c)] || "#d9d4ca" : COLORS[c.area] || "#ccc");
   const byId = new Map(concepts.map((c) => [c.id, c]));
   const usesEdges = [];
@@ -153,13 +224,13 @@
   // alternative proofs are marked `alt` (drawn lighter). For concepts there is only one "proof", the definition.
   const premiseSets = (c) => {
     const P = proofsOf(c);
-    return (P.length ? P.map((b) => b.premises || []) : [c.uses || []]).map((S) => S.filter((t) => byId.has(t)));
+    return (P.length ? P.map((b) => b.premises || []) : [c.uses || []]).map((S) => S.concat(c.stmt || []).filter((t) => byId.has(t)));
   };
   const allUses = new Map();
   concepts.forEach((c) => {
     const all = [...new Set(premiseSets(c).flat())];
     allUses.set(c.id, all);
-    all.forEach((t) => usesEdges.push({ from: t, to: c.id, kind: "uses", alt: !(c.uses || []).includes(t),
+    all.forEach((t) => usesEdges.push({ from: t, to: c.id, kind: "uses", alt: !(c.uses || []).includes(t) && !(c.stmt || []).includes(t), stmt: (c.stmt || []).includes(t),
       // essential: every proof of the target uses it
       essential: premiseSets(c).every((S) => S.includes(t)) }));
     (c.isA || []).forEach((t) => byId.has(t) && isaEdges.push({ from: c.id, to: t, kind: "isa" }));
@@ -204,7 +275,7 @@
   // pre: edges from prerequisites (concepts from outside the area). hub: edges from the concepts in `hubs` (group in
   // group theory), which are used by almost everything. All three are shown for a selected concept or by switches.
   const HUBS = {};
-  (CFG.hubs || []).forEach((h) => { HUBS[h] = true; });
+  PARTS.forEach((p) => (p.cfg.hubs || []).forEach((h) => { HUBS[p.ns + h] = true; }));
   usesEdges.forEach((e) => {
     const uses = allUses.get(e.to);
     e.transitive = uses.some((u) => u !== e.from && ancestors(u).has(e.from) && !ancestors(e.from).has(u));
@@ -245,7 +316,8 @@
     return Math.atan2(y, x);
   };
 
-  const CENTRE_ID = (CFG.centre || []).find((id) => byId.has(id) && level.get(id) === 1);
+  // the centre of the page itself, else (definitions and theorems together) that of the other kind of graph
+  const CENTRE_ID = PARTS.flatMap((p) => (p.cfg.centre || []).map((h) => p.ns + h)).find((id) => byId.has(id) && level.get(id) === 1);
   // the white inner circle only holds the centre node (an axiom or a theorem from the definitions alone in the theorem
   // graphs): small with one node, smaller still without (user, 3 November 2026)
   if (CFG.foreignOutside) RING.inner = CENTRE_ID ? 130 : 95;
@@ -454,8 +526,13 @@
   });
   // within a block: by depth along the edges among the prerequisites (ℕ 0, ℤ 1, ℚ 2, …), ties in the order of the walk
   const preDepth = new Map();
+  // edges of alternative proofs can form a cycle among the prerequisites (fundamental theorem of Galois theory ↔
+  // primitive element theorem); a node on the current path counts with depth 0, so the recursion ends
   const depthOfPre = (id) => {
-    if (!preDepth.has(id)) preDepth.set(id, 1 + Math.max(-1, ...preEdges.filter((e) => e.to === id).map((e) => depthOfPre(e.from))));
+    if (!preDepth.has(id)) {
+      preDepth.set(id, 0);
+      preDepth.set(id, 1 + Math.max(-1, ...preEdges.filter((e) => e.to === id).map((e) => depthOfPre(e.from))));
+    }
     return preDepth.get(id);
   };
   blocks.forEach((b) => { const order = new Map(b.map((id, i) => [id, i])); b.sort((x, y) => depthOfPre(x) - depthOfPre(y) || order.get(x) - order.get(y)); });
@@ -598,17 +675,17 @@
   const gEdges = el("g", {}, svg), gNodes = el("g", {}, svg), gStubs = el("g", {}, svg);
 
   edges.forEach((e) => {
-    e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : "") + (e.alt ? " alternativ" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
+    e.line = el("line", { class: "kante " + e.kind + (e.transitive ? " transitiv" : "") + (e.pre ? " basis" : "") + (e.hub ? " hub" : "") + (e.alt ? " alternativ" : "") + (e.stmt ? " aussage" : ""), "marker-end": e.kind === "uses" ? "url(#pfeil)" : "" }, gEdges);
   });
   // Arrows to other areas (user, 3 November 2026): for an own concept, the concepts of other folders (loaded through
   // `sources`) whose `uses` name it with this folder's prefix (setting `prefix`). Drawn from the concept to a small
   // point outside the circle in the colour of that area; a click opens it in its own graph.
   const outsOf = new Map();
-  if (CFG.prefix) for (const [q, src] of Object.entries(CFG.sources || {})) {
+  if (CFG.prefix) PARTS.forEach((part) => Object.entries(part.cfg.sources || {}).forEach(([q, src]) => {
     const d = asGraph(window[src.data]);
-    if (!d) continue;
+    if (!d) return;
     d.concepts.forEach((t) => (t.uses || []).forEach((u) => {
-      const [p, id] = u.split(":");
+      const [p, id0] = u.split(":"), id = part.ns + id0;
       if (p !== CFG.prefix || !byId.has(id) || isPre(id)) return;
       if (!outsOf.has(id)) outsOf.set(id, []);
       const o = { from: id, q, t, page: src.page + "#mark=" + t.id, title: src.title };
@@ -622,10 +699,14 @@
       o.g.addEventListener("click", (ev) => { ev.stopPropagation(); location.href = o.page; });
       outsOf.get(id).push(o);
     }));
-  }
+  }));
 
   const shape = (g, kind0, r, fill) => {
-    const s = { class: "form", fill }, kind = (CFG.shapes || {})[kind0] || kind0;
+    const s = { class: "form", fill }, kind = SHAPES[kind0] || kind0;
+    if (kind === "einzelobjekt") {
+      const pts = [...Array(10)].map((_, i) => { const a = -Math.PI / 2 + (Math.PI / 5) * i, q = (i % 2 ? 0.5 : 1.25) * r; return `${(q * Math.cos(a)).toFixed(2)},${(q * Math.sin(a)).toFixed(2)}`; });
+      return el("polygon", { ...s, points: pts.join(" ") }, g);
+    }
     if (kind === "konstruktion") return el("rect", { ...s, x: -r * 0.88, y: -r * 0.88, width: r * 1.76, height: r * 1.76, rx: 2 }, g);
     if (kind === "invariante") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.2},0L0,${r * 1.2}L${-r * 1.2},0Z` }, g);
     if (kind === "eigenschaft") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.1},${r * 0.8}L${-r * 1.1},${r * 0.8}Z` }, g);
@@ -648,7 +729,10 @@
   let nodeDrag = null; // { p, moved }
   concepts.forEach((c) => {
     const p = pos.get(c.id);
-    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" : ""), "data-id": c.id }, gNodes);
+    const g = el("g", { class: "knoten" + (c.area === FOREIGN ? " fremd" : "") + (COMBINED && isTheorem(c) ? " satz" : ""), "data-id": c.id }, gNodes);
+    // definitions and theorems together: a theorem has a second, outer outline, since the shapes of the kinds of
+    // theorems repeat those of the kinds of concepts (theorem and object both circles)
+    if (COMBINED && isTheorem(c)) shape(g, c.kind, p.r + 3.5, "none").setAttribute("class", "satz-rand");
     // prerequisites: light fill with a thick border in the colour of their origin, unlike the filled own concepts
     shape(g, c.kind, p.r, c.area === FOREIGN ? "#fbfaf6" : colorOf(c));
     if (c.area === FOREIGN) g.style.setProperty("--herkunft", colorOf(c));
@@ -776,8 +860,10 @@
   const proofChoice = new Map();
   const usesOf = (x) => {
     const c = byId.get(x), k = proofChoice.get(x) || 0;
-    return (k ? proofsOf(c)[k].premises || [] : c.uses || []).filter((t) => byId.has(t));
+    return (k ? proofsOf(c)[k].premises || [] : c.uses || []).concat(c.stmt || []).filter((t) => byId.has(t));
   };
+  // the premises of the chosen proof alone, without the concepts of the statement
+  const premisesOf = (x) => usesOf(x).filter((t) => !(byId.get(x).stmt || []).includes(t));
   const backOf = (x) => usesOf(x).concat((byId.get(x).isA || []).filter((t) => byId.has(t)));
   // In the proof card and the side view, foundations (`foundation: true`, e.g. Bézout's identity) are shown but not
   // expanded further (user, 3 November 2026)
@@ -888,10 +974,16 @@
     const generalisations = c.isA || [];
     const special = isaEdges.filter((e) => e.to === c.id).map((e) => e.from);
     const stepNote = ""; // no step line (user, 3 November 2026)
+    const W = wordsOf(c);
+    // users split by kind of graph: theorems use a concept in their statement (definitions and theorems together)
+    const users = usedBy.get(c.id), byConcepts = users.filter((u) => !isTheorem(byId.get(u))), byTheorems = users.filter((u) => isTheorem(byId.get(u)));
+    const usedHtml = !COMBINED ? `<h3>${W.usedByHead}</h3><p>${users.length ? users.map(chip).join("") : "—"}</p>`
+      : isTheorem(c) ? `<h3>${W.usedByHead}</h3><p>${byTheorems.length ? byTheorems.map(chip).join("") : "—"}</p>`
+      : `<h3>${W.usedByHead}</h3><p>${byConcepts.length ? byConcepts.map(chip).join("") : "—"}</p><h3>Used in the statements of</h3><p>${byTheorems.length ? byTheorems.map(chip).join("") : "—"}</p>`;
     panel.innerHTML = `<h2>${c.name}</h2>${stepNote}
-      <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + CFG.foreignLabel + ")" : D.areas[c.area]}</div>
-      ${c.shared ? `<p class="meta">Equally important here and in <a href="${c.foreign.home}">${c.foreign.title}</a>, where it is ${WORDS.homeVerb.toLowerCase()}.</p>`
-        : c.foreign ? `<p class="meta">${WORDS.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
+      <div class="meta">${KIND_LABEL[c.kind] || c.kind} · ${c.area === FOREIGN ? "MSC " + c.msc.join(", ") + " (" + c.part.cfg.foreignLabel + ")" : D.areas[c.area]}</div>
+      ${c.shared ? `<p class="meta">Equally important here and in <a href="${c.foreign.home}">${c.foreign.title}</a>, where it is ${W.homeVerb.toLowerCase()}.</p>`
+        : c.foreign ? `<p class="meta">${W.homeVerb} in <a href="${c.foreign.home}">${c.foreign.title}</a>; its own dependencies are shown there.</p>` : ""}
       ${c.formula && window.katex ? `<div class="formel">${tex(c.formula)}</div>` : ""}
       <p>${c.text || ""}</p>
       ${c.who || c.year ? `<p class="meta">${[c.who, c.year < 0 ? -c.year + " BC" : c.year].filter(Boolean).join(", ")}</p>` : ""}
@@ -899,31 +991,39 @@
       ${statementConcepts(c)}
       ${focusView(c.id)}
       ${proofList(c)}
-      <h3>${WORDS.usedByHead}</h3><p>${usedBy.get(c.id).length ? usedBy.get(c.id).map(chip).join("") : "—"}</p>
+      ${usedHtml}
       ${(outsOf.get(c.id) || []).length ? `<h3>Used in other areas</h3><p>${outsOf.get(c.id).map((o) => `<a class="chip" href="${o.page}" title="${o.title}">${o.t.name}</a>`).join("")}</p>` : ""}
       ${generalisations.length ? `<h3>Is a special case of</h3><p>${generalisations.map(chip).join("")}</p>` : ""}
       ${special.length ? `<h3>Special cases</h3><p>${special.map(chip).join("")}</p>` : ""}
-      <p class="meta">Depends on ${ancestors(c.id).size} ${WORDS.many}; ${descendants(c.id).size} ${WORDS.many} depend on it.</p>`;
+      <p class="meta">Depends on ${countText(ancestors(c.id), W)}; ${countText(descendants(c.id), W)} depend on it.</p>`;
+  }
+  // "5 concepts", or with definitions and theorems together "3 concepts and 2 theorems"
+  function countText(set, W) {
+    if (!COMBINED) return set.size + " " + (W || WORDS).many;
+    const ids = [...set], t = ids.filter((x) => isTheorem(byId.get(x))).length, k = ids.length - t;
+    return `${k} ${k === 1 ? "concept" : "concepts"} and ${t} ${t === 1 ? "theorem" : "theorems"}`;
   }
   // Why the standard proof has no premises (user, 3 November 2026): `fromDefinitions` (it works with the definitions
   // only) or `foundation` (it rests on methods outside these graphs, named in the proof idea)
   const noPremiseReason = (c) => c.fromDefinitions
-    ? `No premises: the ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one}; it works directly with the definitions of the concepts in the statement.`
-    : c.foundation ? `No premises here: a foundation of this graph, whose ${WORDS.proofWord.toLowerCase()} rests on methods outside these graphs (see the idea).` : "";
+    ? `No premises: the ${wordsOf(c).proofWord.toLowerCase()} uses no other ${wordsOf(c).one}; it works directly with the definitions of the concepts in the statement.`
+    : c.foundation ? `No premises here: a foundation of this graph, whose ${wordsOf(c).proofWord.toLowerCase()} rests on methods outside these graphs (see the idea).` : "";
   const noPremises = (c) => `<p class="ohne-praemissen">${noPremiseReason(c) || "—"}</p>`;
   function proofList(c) {
     const P = proofsOf(c);
-    if (P.length <= 1) return `<h3>${WORDS.usesHead}</h3>${(c.uses || []).length ? `<p>${c.uses.map(chip).join("")}</p>` : noPremises(c)}`;
+    if (P.length <= 1) return `<h3>${wordsOf(c).usesHead}</h3>${(c.uses || []).filter((t) => byId.has(t)).length ? `<p>${c.uses.map(chip).join("")}</p>` : noPremises(c)}`;
     const k = proofChoice.get(c.id) || 0;
-    return `<h3>${WORDS.proofsHead} (${P.length})</h3>` + P.map((b, i) => `<div class="beweis${i === k ? " gezeigt" : ""}" data-proof="${i}">
+    return `<h3>${wordsOf(c).proofsHead} (${P.length})</h3>` + P.map((b, i) => `<div class="beweis${i === k ? " gezeigt" : ""}" data-proof="${i}">
       <div class="beweis-name">${b.name}${b.who || b.year ? ` <span class="meta">${[b.who, b.year].filter(Boolean).join(", ")}</span>` : ""}${i === k ? ' <span class="meta">(shown)</span>' : ""}</div>
       ${b.formula && window.katex ? `<div class="formel">${tex(b.formula)}</div>` : ""}${b.idea ? `<p>${b.idea}</p>` : ""}${(b.premises || []).filter((t) => byId.has(t)).length ? `<p>${b.premises.filter((t) => byId.has(t)).map(chip).join("")}</p>` : i === 0 ? noPremises(c) : "<p>—</p>"}</div>`).join("");
   }
   // concepts occurring in the statement of a theorem, as links into the concept graphs (field `concepts`)
   function statementConcepts(c) {
-    const S = CFG.conceptSources;
+    const S = isTheorem(c) && c.part.cfg.conceptSources;
     if (!S || !(c.concepts || []).length) return "";
-    const links = c.concepts.map((ref) => {
+    const links = c.concepts.map((ref, i) => {
+      // definitions and theorems together: a concept shown in this picture is a chip of the graph
+      if (c.stmt && byId.has(c.stmt[i])) return chip(c.stmt[i]);
       const [p, id] = ref.includes(":") ? ref.split(":") : ["", ref];
       const src = S[p], data = src && window[src.data], hit = data && data.concepts.find((x) => x.id === id);
       return hit ? `<a class="chip" href="${src.page}#${id}">${hit.name}</a>` : "";
@@ -1298,11 +1398,11 @@
         d += `V${level.get(pts[i - 1][1].c + "|" + k)}H${pts[i][0]}V${yAt(i)}`;
       }
       const E = edge.orig || edge;
-      el("path", { d, class: "fokus-kante" + (E.dashed ? " gestrichelt" : ""), [back ? "marker-start" : "marker-end"]: `url(#${mk})`, "data-from": E.from, "data-to": E.to, "data-via": (E.via || []).join(" ") }, s);
+      el("path", { d, class: "fokus-kante" + (E.dashed ? " gestrichelt" : "") + ((byId.get(E.to).stmt || []).includes(E.from) ? " aussage" : ""), [back ? "marker-start" : "marker-end"]: `url(#${mk})`, "data-from": E.from, "data-to": E.to, "data-via": (E.via || []).join(" ") }, s);
     });
     ids.forEach((x) => {
       const it = lay.item[x], c = byId.get(x);
-      const g = el("g", { class: "fokus-knoten" + (x === id ? " ziel" : back ? " oben" : " unten") + (back && x !== id && c.foundation ? " grundlage" : ""), "data-id": x, transform: `translate(${it.cx - BW / 2},${yOf(it)})` }, s);
+      const g = el("g", { class: "fokus-knoten" + (x === id ? " ziel" : back ? " oben" : " unten") + (COMBINED && isTheorem(c) ? " satz" : "") + (back && x !== id && c.foundation ? " grundlage" : ""), "data-id": x, transform: `translate(${it.cx - BW / 2},${yOf(it)})` }, s);
       el("rect", c.area === FOREIGN ? { width: BW, height: BH, rx: 4, style: `fill:#fbfaf6;fill-opacity:1;stroke:${colorOf(c)};stroke-width:2.6` } : { width: BW, height: BH, rx: 4, fill: colorOf(c) }, g);
       const lines = GL.textLines(plainName(c.name), chars, 2);
       lines.forEach((t, i) => {
@@ -1323,7 +1423,7 @@
         const b = el("g", { class: "beweis-wahl", "data-proof-of": x, transform: `translate(${BW - 30},${BH - 11})` }, g);
         el("rect", { width: 28, height: 13, rx: 3 }, b);
         el("text", { x: 14, y: 10, "text-anchor": "middle" }, b).textContent = `${k + 1}/${P.length} ›`;
-        el("title", {}, b).textContent = `${WORDS.proofWord} ${k + 1} of ${P.length}: ${P[k].name}. Click for the next one.`;
+        el("title", {}, b).textContent = `${wordsOf(c).proofWord} ${k + 1} of ${P.length}: ${P[k].name}. Click for the next one.`;
       }
       el("title", {}, g).textContent = plainName(c.name) + (c.area === FOREIGN ? " — " + originName(originOf(c)) : "");
     });
@@ -1334,7 +1434,7 @@
     const ids = localIds(id, "back", Infinity);
     if (ids.length < 2) return "";
     // the same drawing as the fully expanded proof card (user, 3 November 2026), scaled to the panel
-    return `<h3>Builds on (${ids.length - 1} ${WORDS.many})</h3>` + layered(ids, id, { ...CARD_BOX, switches: false, mode: "back", fit: true, cls: "seite", label: WORDS.buildsOn }).outerHTML;
+    return `<h3>Builds on (${countText(new Set(ids.filter((x) => x !== id)), wordsOf(byId.get(id)))})</h3>` + layered(ids, id, { ...CARD_BOX, switches: false, mode: "back", fit: true, cls: "seite", label: wordsOf(byId.get(id)).buildsOn }).outerHTML;
   }
   const stepText = (id) => {
     const m = maxDepth(id, cardMode);
@@ -1367,7 +1467,7 @@
       // the formula of the shown definition, so that two definitions with the same premises can be told apart
       // (user, 3 November 2026: the two definitions of a partial order)
       const shownFormula = pk === 0 ? c.formula : P[pk].formula;
-      const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${WORDS.proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button>` +
+      const switcher = cardMode === "back" && P.length > 1 ? `<div class="karte-beweise">${wordsOf(c).proofWord} ${pk + 1} of ${P.length}: <b>${P[pk].name}</b> <button class="klein-knopf" data-step="-1">‹</button><button class="klein-knopf" data-step="1">›</button>` +
         `${shownFormula && window.katex ? `<div class="karte-formel">${tex(shownFormula)}</div>` : ""}</div>` : "";
       const backBtn = jumpStack.length ? `<button class="klein-knopf karte-zurueck" title="Back to ${plainName(byId.get(jumpStack[jumpStack.length - 1].id).name)}">‹ Back</button> ` : "";
       card.innerHTML = `<div class="karte-kopf">${backBtn}<b>${c.name}</b> <button class="karte-zu" aria-label="Close">×</button>${switcher}</div>`;
@@ -1375,10 +1475,10 @@
       const body = document.createElement("div");
       body.className = "karte-inhalt";
       // a proof (or definition) that uses nothing of this graph: say so instead of an empty card
-      if (cardMode === "back" && P.length && !usesOf(id).length) {
+      if (cardMode === "back" && P.length && !premisesOf(id).length) {
         const note = document.createElement("div");
         note.className = "karte-hinweis";
-        note.innerHTML = ((pk === 0 && noPremiseReason(c)) || `This ${WORDS.proofWord.toLowerCase()} uses no other ${WORDS.one} of this graph.`) + (P[pk].idea ? ` <span>${P[pk].idea}</span>` : "");
+        note.innerHTML = ((pk === 0 && noPremiseReason(c)) || `This ${wordsOf(c).proofWord.toLowerCase()} uses no other ${wordsOf(c).one} of this graph.`) + (P[pk].idea ? ` <span>${P[pk].idea}</span>` : "");
         card.appendChild(note);
       }
       cardIds = new Set(localIds(id, cardMode, Infinity));
@@ -1505,7 +1605,7 @@
   function overview() {
     const top = concepts.map((c) => [c, descendants(c.id).size]).sort((a, b) => b[1] - a[1]).slice(0, 8);
     return `<h2>${D.title}</h2>
-      <p class="meta">${concepts.length} ${WORDS.many}, ${usesEdges.length} ${WORDS.edges}${isaEdges.length ? `, ${isaEdges.length} “is a” relations` : ""}.</p>
+      <p class="meta">${countText(new Set(concepts.map((c) => c.id)))}, ${usesEdges.length} ${WORDS.edges}${isaEdges.length ? `, ${isaEdges.length} “is a” relations` : ""}.</p>
       <h3>Most used ${WORDS.many}</h3><p>${top.map(([c, n]) => chip(c.id) + `<span class="meta">${n}</span> `).join("")}</p>
       <p class="meta">The contents were compiled with the help of a language model and have not been checked by a specialist.</p>`;
   }
@@ -1525,27 +1625,52 @@
   document.getElementById("legend").innerHTML =
     block("Colour: MSC class", areaKeys.filter((k) => k !== FOREIGN).map((k) => `<span><i style="background:${COLORS[k]}"></i>${D.areas[k]}</span>`), { closed: true }) +
     block("Prerequisites: origin", [...new Set(concepts.filter((c) => c.area === FOREIGN).map(originOf))].map((o) => `<span><i style="background:#fbfaf6;border:3px solid ${ORIGIN_COLORS[o] || "#d9d4ca"}"></i>${originName(o)}</span>`), { closed: true }) +
-    block("Shape: kind", Object.keys(D.kinds).map((k) => `<span>${kindSvg(k)}${D.kinds[k]}</span>`), { cls: "zweispaltig", closed: true }) +
+    block("Shape: kind", Object.keys(D.kinds).map((k) => `<span>${kindSvg(k)}${D.kinds[k]}</span>`)
+      .concat(COMBINED ? [`<span class="hinweis">Theorems have a second outline.</span>`] : []), { cls: "zweispaltig", closed: true }) +
     block("Lines and sizes", [
       `<span>${lineSvg('stroke="#a99e8c" stroke-width="1.3" marker-end="url(#pfeil)"')}${WORDS.arrow}</span>`,
+      COMBINED ? `<span>${lineSvg('stroke="#5c8a4a" stroke-width="1.3" stroke-dasharray="1.5 3" marker-end="url(#pfeil)"')}the statement of theorem B uses concept A</span>` : "",
       isaEdges.length ? `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>` : "",
-      `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${CFG.foreignLabel}</span>`,
+      `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${PARTS.map((p) => p.cfg.foreignLabel).join("; ")}</span>`,
       `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
       `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges only of other ${WORDS.proofWord.toLowerCase()}s (dashed), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
+  // Switches for the definitions and the theorems, all of them and by kind (B94, user, 4 November 2026); only kinds
+  // that occur in the data, with their numbers. A change loads the page with the new address after a short pause, so
+  // that several switches can be changed at once.
+  const typeName = { concepts: "definitions", theorems: "theorems" };
+  const kindName = (type, k) => { const n = (rawOf(type).kinds || {})[k] || KIND_NAMES[k] || k; return n[0].toLowerCase() + n.slice(1); };
+  const typeSwitches = TYPES.map((type) => {
+    const list = listOf(rawOf(type)), n = (k) => list.filter((x) => x.kind === k).length;
+    return `<label class="toggle art-alle"><input type="checkbox" data-type="${type}"${SHOWN[type].length ? " checked" : ""}><span class="regler"></span>${typeName[type]} <span class="meta">(${list.length})</span></label>`
+      + `<div class="art-liste">` + KINDS[type].map((k) => `<label class="toggle"><input type="checkbox" data-type="${type}" data-kind="${k}"${SHOWN[type].includes(k) ? " checked" : ""}><span class="regler"></span>${kindName(type, k)} <span class="meta">(${n(k)})</span></label>`).join("") + "</div>";
+  });
+  // the address of a choice of kinds: only what differs from the default of the page
+  const displayHref = (want) => {
+    const q = new URLSearchParams(location.search);
+    TYPES.forEach((t) => q.delete(t));
+    const parts = [q.toString()].filter(Boolean);
+    TYPES.forEach((t) => {
+      const def = t === PRIMARY ? KINDS[t] : [], w = want[t];
+      if (w.length === def.length && w.every((k) => def.includes(k))) return;
+      parts.push(t + "=" + (w.length === KINDS[t].length ? "all" : w.length ? w.join(",") : "none"));
+    });
+    return location.pathname + (parts.length ? "?" + parts.join("&") : "") + location.hash;
+  };
   // the mode of the click always visible, outside the collapsed blocks (user, 3 November 2026)
   document.getElementById("controls").innerHTML =
     `<label class="toggle immer" title="On: a click opens the card of the ${WORDS.proofWord.toLowerCase()}, a right click the card of the consequences. Off: a click marks in the graph itself the ${WORDS.many} it builds on, a right click those building on it; each further click on it one step more."><input type="checkbox" id="c-mark"${clickMode === "card" ? " checked" : ""}><span class="regler"></span>click opens a card</label>` +
-    block("Display", [
+    block("Display", typeSwitches.concat([
       `<label class="toggle"${isaEdges.length ? "" : ' style="display:none"'}><input type="checkbox" id="c-isa"><span class="regler"></span>all “is a” relations</label>`,
       `<label class="toggle"><input type="checkbox" id="c-trans"><span class="regler"></span>indirect dependencies</label>`,
-      ...(usesEdges.some((e) => e.alt) ? [`<label class="toggle"><input type="checkbox" id="c-alt"><span class="regler"></span>edges of other ${WORDS.proofWord.toLowerCase()}s</label>`] : []),
+      ...(usesEdges.some((e) => e.alt) ? [`<label class="toggle"><input type="checkbox" id="c-alt"><span class="regler"></span>${COMBINED ? "other proofs/definitions" : "edges of other " + WORDS.proofWord.toLowerCase() + "s"}</label>`] : []),
       `<label class="toggle"><input type="checkbox" id="c-basis"><span class="regler"></span>arrows from other areas</label>`,
       ...(outsOf.size ? [`<label class="toggle"><input type="checkbox" id="c-aus"><span class="regler"></span>arrows to other areas</label>`] : []),
       ...Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => `<label class="toggle"><input type="checkbox" class="c-hub"><span class="regler"></span>edges from ${byId.get(h).name}</label>`),
       `<label class="toggle"><input type="checkbox" id="c-names" checked><span class="regler"></span>names</label>`,
       `<button id="c-home">Reset view</button>`,
-    ], { closed: true }) +
+    // open while definitions and theorems differ from the default of the page
+    ]), { closed: !TYPES.some((t) => query.has(t)) }) +
     // levels in two columns, filled column by column (1 … 5 left, 6 … 10 right)
     block("Levels", [
       `<div class="spalten" style="grid-template-rows:repeat(${Math.ceil(levels.length / 2)},auto)">` + levels.filter((l) => !(OUTSIDE && l === 0)).map((l) =>
@@ -1590,9 +1715,28 @@
     select(null);
     if (id) step(id, cardMode);
   });
-  // "Reset view" also sets every switch of "Display" back to its default (user, 3 November 2026)
+  const typeBoxes = [...document.querySelectorAll("#controls input[data-type]")];
+  let typeTimer = null;
+  typeBoxes.forEach((box) => box.addEventListener("change", () => {
+    const type = box.dataset.type, ofType = typeBoxes.filter((b) => b.dataset.type === type);
+    if (!box.dataset.kind) ofType.forEach((b) => { b.checked = box.checked; });
+    else ofType.find((b) => !b.dataset.kind).checked = ofType.some((b) => b.dataset.kind && b.checked);
+    const want = {};
+    TYPES.forEach((t) => { want[t] = typeBoxes.filter((b) => b.dataset.type === t && b.dataset.kind && b.checked).map((b) => b.dataset.kind); });
+    // nothing at all is not allowed: the switch springs back
+    if (!TYPES.some((t) => want[t].length)) {
+      ofType.forEach((b) => { b.checked = !box.dataset.kind || !b.dataset.kind || b === box; });
+      return;
+    }
+    clearTimeout(typeTimer);
+    const href = displayHref(want);
+    typeTimer = setTimeout(() => { if (href !== location.pathname + location.search + location.hash) location.href = href; }, 600);
+  }));
+  // "Reset view" also sets every switch of "Display" back to its default (user, 3 November 2026), the definitions and
+  // theorems shown as well (the page is then loaded again)
   document.getElementById("c-home").addEventListener("click", () => {
-    document.querySelectorAll("#controls details.block input[type=checkbox]:not([data-level])").forEach((box) => {
+    if (TYPES.some((t) => query.has(t))) { location.href = displayHref({ [PRIMARY]: KINDS[PRIMARY], [SECONDARY]: [] }); return; }
+    document.querySelectorAll("#controls details.block input[type=checkbox]:not([data-level]):not([data-type])").forEach((box) => {
       const def = box.id === "c-names";
       if (box.checked !== def) { box.checked = def; box.dispatchEvent(new Event("change")); }
     });

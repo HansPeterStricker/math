@@ -8,24 +8,12 @@ window.BIPARTITE_PAGE = {
   "theorems": "CS_THEOREMS",
   "colors": {
     "basic": "#d9d4ca",
-    "68Q04": "#b08968",
-    "68Q06": "#8ab17d",
-    "68Q11": "#7f8c3a",
-    "68Q12": "#9b5de5",
-    "68Q15": "#e76f51",
-    "68Q17": "#c0392b",
-    "68Q25": "#a3b18a",
-    "68Q30": "#6d597a",
-    "68Q42": "#6c8ebf",
-    "68Q45": "#4f86c6",
-    "68Q70": "#5fa8a0",
     "68P10": "#d4a017",
     "68P25": "#2a9d8f",
     "68R10": "#8d99ae",
     "68W20": "#c77dba",
     "68W25": "#e9c46a",
-    "68W40": "#3d5a80",
-    "68Q10": "#c9a227"
+    "68W40": "#3d5a80"
   },
   "shapes": {
     "axiom": "konstruktion",
@@ -41,6 +29,16 @@ window.BIPARTITE_PAGE = {
       "data": "LO_CONCEPTS",
       "page": "../logic/concepts.html",
       "name": "mathematical logic"
+    },
+    "mt": {
+      "data": "MT_CONCEPTS",
+      "page": "../model-theory/concepts.html",
+      "name": "model theory"
+    },
+    "cc": {
+      "data": "CC_CONCEPTS",
+      "page": "../computability/concepts.html",
+      "name": "computability and complexity"
     },
     "st": {
       "data": "ST_CONCEPTS",
@@ -80,12 +78,17 @@ window.BIPARTITE_PAGE = {
     "fnt": {
       "data": "FNT_CONCEPTS",
       "page": "../further-number-theory/concepts.html",
-      "name": "further number theory"
+      "name": "number theory: other topics"
     },
     "ft": {
       "data": "FT_CONCEPTS",
       "page": "../field-theory/concepts.html",
       "name": "field theory"
+    },
+    "gal": {
+      "data": "GAL_CONCEPTS",
+      "page": "../galois-theory/concepts.html",
+      "name": "Galois theory"
     },
     "ca": {
       "data": "CA_CONCEPTS",
@@ -105,7 +108,12 @@ window.BIPARTITE_PAGE = {
     "lie": {
       "data": "LIE_CONCEPTS",
       "page": "../lie-theory/concepts.html",
-      "name": "Lie theory and nonassociative algebras"
+      "name": "Lie theory: Lie groups, Lie algebras and nonassociative algebras"
+    },
+    "ha": {
+      "data": "HA_CONCEPTS",
+      "page": "../homological-algebra/concepts.html",
+      "name": "homological algebra"
     },
     "kt": {
       "data": "KT_CONCEPTS",
@@ -145,7 +153,12 @@ window.BIPARTITE_PAGE = {
     "ana": {
       "data": "ANA_CONCEPTS",
       "page": "../analysis/concepts.html",
-      "name": "analysis"
+      "name": "real and complex analysis"
+    },
+    "fa": {
+      "data": "FA_CONCEPTS",
+      "page": "../functional-analysis/concepts.html",
+      "name": "functional analysis"
     },
     "scv": {
       "data": "SCV_CONCEPTS",
@@ -177,6 +190,11 @@ window.BIPARTITE_PAGE = {
       "page": "../combinatorics/concepts.html",
       "name": "combinatorics"
     },
+    "gr": {
+      "data": "GR_CONCEPTS",
+      "page": "../graph-theory/concepts.html",
+      "name": "graph theory"
+    },
     "num": {
       "data": "NUM_CONCEPTS",
       "page": "../numerical-analysis/concepts.html",
@@ -185,7 +203,12 @@ window.BIPARTITE_PAGE = {
     "opt": {
       "data": "OPT_CONCEPTS",
       "page": "../optimization/concepts.html",
-      "name": "optimization, games and control"
+      "name": "optimization and control"
+    },
+    "gm": {
+      "data": "GM_CONCEPTS",
+      "page": "../game-theory/concepts.html",
+      "name": "game theory"
     },
     "it": {
       "data": "IT_CONCEPTS",

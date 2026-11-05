@@ -162,7 +162,7 @@ window.STA_THEOREMS = {
       concepts: ["bayes-rule", "posterior-distribution", "loss-function"],
       year: 1950, who: "Wald" },
     { id: "wald-complete-class", name: "Wald's complete class theorem", kind: "theorem", area: "62C", field: [62], msc: ["62C"], msc5: "62C07",
-      premises: ["ana:hahn-banach-theorem"],
+      premises: ["fa:hahn-banach-theorem"],
       proofName: "Separating hyperplane in the risk set",
       formula: String.raw`\delta \text{ admissible} \;\Rightarrow\; \delta = \delta_\pi`,
       text: "For a finite parameter space and a bounded loss, every admissible rule is a Bayes rule with respect to some prior (randomised rules allowed); in general settings admissible rules are limits of Bayes rules.",
@@ -590,7 +590,7 @@ window.STA_THEOREMS = {
       concepts: ["permutation-test", "size-of-test"],
       year: 1935, who: "Fisher; Pitman (1937)" },
     { id: "hajek-projection", name: "Hájek projection lemma", kind: "lemma", area: "62G", field: [62], msc: ["62G"], msc5: "62G20",
-      premises: ["ana:projection-theorem"],
+      premises: ["fa:projection-theorem"],
       proofName: "Orthogonal projection onto sums of functions of one variable",
       formula: String.raw`\hat S = \sum_{i=1}^n E[S \mid X_i] - (n - 1) E S`,
       text: "For independent X<sub>1</sub>, …, X<sub>n</sub> and a square-integrable statistic S, the orthogonal projection of S − E S in L<sup>2</sup> onto the space of sums Σ g<sub>i</sub>(X<sub>i</sub>) is Σ (E[S | X<sub>i</sub>] − E S).",
@@ -650,7 +650,7 @@ window.STA_THEOREMS = {
 
     // ------------------------------------------------------------ 62J Linear models
     { id: "least-squares-normal-equations", name: "Least squares as orthogonal projection", kind: "theorem", area: "62J", field: [62], msc: ["62J"], msc5: "62J05",
-      premises: ["ana:projection-theorem"],
+      premises: ["fa:projection-theorem"],
       proofName: "Projection onto the column space",
       formula: String.raw`X^{\mathsf T} X \hat\beta = X^{\mathsf T} Y,\quad X\hat\beta = PY,\quad P = X(X^{\mathsf T}X)^{-1}X^{\mathsf T}`,
       text: "In a linear model with a design matrix of full column rank, the least squares estimator is the unique solution of the normal equations X<sup>T</sup>Xβ = X<sup>T</sup>Y; the fitted values Xβ̂ are the orthogonal projection of Y onto the column space of X.",

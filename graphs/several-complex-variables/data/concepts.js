@@ -67,7 +67,7 @@ window.SCV_CONCEPTS = {
     { id: "meromorphic-function-several", name: "Meromorphic function of several variables", kind: "objekt", area: "32A", field: [32], msc: ["32A"], msc5: "32A20", uses: ["holomorphic-function-several", "ca:fraction-field"],
       formula: String.raw`f = g_U / h_U,\quad g_U h_V = g_V h_U \text{ on } U \cap V`,
       text: "A function given locally on an open cover by quotients g/h of holomorphic functions, with h not identically zero on any component, such that the quotients agree on overlaps as elements of the fraction field of the ring of germs. Unlike in one variable, the zero and pole sets can meet (points of indeterminacy, as for z<sub>1</sub>/z<sub>2</sub> at 0)." },
-    { id: "bergman-kernel", name: "Bergman kernel", kind: "konstruktion", area: "32A", field: [32], msc: ["32A"], msc5: "32A25", uses: ["holomorphic-function-several", "ana:lp-space", "ana:hilbert-space"],
+    { id: "bergman-kernel", name: "Bergman kernel", kind: "konstruktion", area: "32A", field: [32], msc: ["32A"], msc5: "32A25", uses: ["holomorphic-function-several", "fa:lp-space", "fa:hilbert-space"],
       formula: String.raw`f(z) = \int_\Omega K(z, w)\, f(w)\, dV(w)`,
       text: "For a domain Ω ⊆ ℂ<sup>n</sup>, the Bergman space of square-integrable holomorphic functions is a closed subspace of L<sup>2</sup>(Ω), hence a Hilbert space. Its reproducing kernel K(z, w) is the Bergman kernel; it is holomorphic in z and antiholomorphic in w and defines a biholomorphically invariant metric." },
 
@@ -149,7 +149,7 @@ window.SCV_CONCEPTS = {
     { id: "positive-line-bundle", name: "Positive line bundle", kind: "eigenschaft", area: "32L", field: [32], msc: ["32L"], msc5: "32L05", uses: ["holomorphic-line-bundle", "pq-form", "dbar-operator"],
       formula: String.raw`\tfrac{i}{2\pi}\Theta_h = -\tfrac{i}{2\pi}\,\partial\bar\partial \log |s|_h^2 > 0`,
       text: "A holomorphic line bundle L on a complex manifold that carries a Hermitian metric h (a smoothly varying inner product on the fibres) whose curvature form, the real (1,1)-form computed from any local non-vanishing holomorphic section s as displayed, is positive definite at every point. Its cohomology class is the first Chern class of L." },
-    { id: "dolbeault-cohomology", name: "Dolbeault cohomology", kind: "invariante", area: "32L", field: [32], msc: ["32L"], msc5: "32L10", uses: ["dbar-operator", "pq-form", "ct:homology"],
+    { id: "dolbeault-cohomology", name: "Dolbeault cohomology", kind: "invariante", area: "32L", field: [32], msc: ["32L"], msc5: "32L10", uses: ["dbar-operator", "pq-form", "ha:homology"],
       formula: String.raw`H^{p,q}_{\bar\partial}(X) = \ker \bar\partial \,/\, \operatorname{im} \bar\partial`,
       text: "The cohomology of the complex of smooth (p, q)-forms on a complex manifold X with the operator ∂̄: in degree q, the ∂̄-closed (p, q)-forms modulo the ∂̄-exact ones. With values in a holomorphic vector bundle E it is defined in the same way." },
 

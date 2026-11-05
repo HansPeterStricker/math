@@ -237,7 +237,7 @@ window.DIO_CONCEPTS = {
     { id: "linear-form-in-logarithms", name: "Linear form in logarithms", kind: "konstruktion", area: "11J", field: [11], msc: ["11J"], msc5: "11J86", uses: ["ant:algebraic-number", "ana:logarithm"],
       formula: String.raw`\Lambda = \beta_0 + \beta_1 \log \alpha_1 + \dots + \beta_n \log \alpha_n`,
       text: "An expression β<sub>0</sub> + β<sub>1</sub> log α<sub>1</sub> + … + β<sub>n</sub> log α<sub>n</sub> with non-zero algebraic numbers α<sub>i</sub>, fixed determinations of their logarithms and algebraic coefficients β<sub>i</sub>; in applications the β<sub>i</sub> are integers b<sub>i</sub>, and Λ is the logarithm of α<sub>1</sub><sup>b<sub>1</sub></sup>⋯α<sub>n</sub><sup>b<sub>n</sub></sup>." },
-    { id: "naive-height", name: "Height of an algebraic number", kind: "invariante", area: "11J", field: [11], msc: ["11J"], msc5: "11J68", uses: ["ant:algebraic-number", "ft:minimal-polynomial", "ent:gcd"],
+    { id: "naive-height", name: "Height of an algebraic number", kind: "invariante", area: "11J", field: [11], msc: ["11J"], msc5: "11J68", uses: ["ant:algebraic-number", "gal:minimal-polynomial", "ent:gcd"],
       formula: String.raw`H(\alpha) = \max_i |a_i|`,
       text: "The maximum of the absolute values of the coefficients a<sub>i</sub> of the minimal polynomial of an algebraic number α over ℤ, the irreducible polynomial with integer coefficients of greatest common divisor 1 and positive leading coefficient that has α as a root; for p/q in lowest terms it is max(|p|, |q|)." },
     { id: "period", name: "Period (Kontsevich–Zagier)", kind: "eigenschaft", area: "11J", field: [11], msc: ["11J"], msc5: "11J81", uses: ["ana:lebesgue-integral", "ca:polynomial-ring", "st:rational-number", "st:complex-number"],

@@ -1,3 +1,4 @@
+// 4 November 2026: all nodes with first class 18G moved to ../../homological-algebra/ ("ha:"); the folder now covers 18 without 18G.
 // Data model: concepts (definitions) of category theory (MSC 2020 18) and their definitional dependencies: general
 // theory (18A), special categories and topoi (18B), monads (18C), categories with structure (18D), additive and
 // abelian categories (18E), sheaves and Grothendieck topologies (18F), homological algebra (18G), monoidal categories
@@ -30,7 +31,6 @@ window.CT_CONCEPTS = {
     "18D": "18D Categories with structure",
     "18E": "18E Additive and abelian categories",
     "18F": "18F Sheaves, Grothendieck topologies",
-    "18G": "18G Homological algebra",
     "18M": "18M Monoidal categories",
     "18N": "18N Higher categories, homotopical algebra",
   },
@@ -312,52 +312,6 @@ window.CT_CONCEPTS = {
       alternativeDefinitions: [
         { name: "Giraud's axioms", uses: ["limit", "coproduct", "pullback", "epimorphism", "coequalizer"],
           text: "A locally small category with finite limits in which all small coproducts exist, are disjoint and are stable under pullback, every epimorphism is a coequalizer, every equivalence relation is the kernel pair of its coequalizer and coequalizers are stable under pullback, and which has a set of generators. Equivalent to the standard definition by Giraud's theorem." },
-      ], },
-
-    // ------------------------------------------------------------ 18G Homological algebra
-    { id: "chain-complex", name: "Chain complex", kind: "objekt", area: "18G", field: [18], msc: ["18G"], msc5: "18G35", uses: ["abelian-category"],
-      formula: String.raw`\cdots \to C_{n+1} \xrightarrow{d} C_n \xrightarrow{d} C_{n-1} \to \cdots,\quad d \circ d = 0`,
-      text: "A sequence of objects of an abelian category with morphisms whose composite is zero." },
-    { id: "chain-map", name: "Chain map", kind: "morphismus", area: "18G", field: [18], msc: ["18G"], msc5: "18G35", uses: ["chain-complex"],
-      formula: String.raw`f_{n-1} \circ d = d \circ f_n`,
-      text: "A morphism of chain complexes: morphisms f<sub>n</sub>: C<sub>n</sub> → D<sub>n</sub> that commute with the differentials. Chain maps induce morphisms on homology." },
-    { id: "homology", name: "Homology", kind: "invariante", area: "18G", field: [18, 55], msc: ["18G", "55N"], msc5: "18G35", uses: ["chain-complex", "kernel", "image", "cokernel"],
-      formula: String.raw`H_n(C) = \ker d_n / \operatorname{im} d_{n+1}`,
-      text: "The kernels of the differentials modulo the images, i.e. the cokernel of the morphism from im d<sub>n+1</sub> to ker d<sub>n</sub>; it measures how far a chain complex is from being exact." },
-    { id: "chain-homotopy", name: "Chain homotopy", kind: "morphismus", area: "18G", field: [18], msc: ["18G"], msc5: "18G35", uses: ["chain-complex", "chain-map"],
-      formula: String.raw`f - g = d h + h d`,
-      text: "Morphisms h: C<sub>n</sub> → D<sub>n+1</sub> relating two chain maps f and g; homotopic chain maps induce the same map on homology." },
-    { id: "quasi-isomorphism", name: "Quasi-isomorphism", kind: "eigenschaft", area: "18G", field: [18], msc: ["18G"], msc5: "18G80", uses: ["chain-map", "homology", "isomorphism"],
-      formula: String.raw`H_n(f) : H_n(C) \xrightarrow{\ \sim\ } H_n(D)`,
-      text: "A chain map that induces isomorphisms on all homology objects." },
-    { id: "projective-object", name: "Projective object", kind: "eigenschaft", area: "18G", field: [18], msc: ["18G"], msc5: "18G05", uses: ["epimorphism", "hom-functor"],
-      formula: String.raw`\operatorname{Hom}(P, -) \ \text{preserves epimorphisms}`,
-      text: "An object P such that every morphism from P lifts along every epimorphism, i.e. the hom functor Hom(P, −) preserves epimorphisms; free modules are projective." },
-    { id: "injective-object", name: "Injective object", kind: "eigenschaft", area: "18G", field: [18], msc: ["18G"], msc5: "18G05", uses: ["monomorphism", "epimorphism", "hom-functor"],
-      formula: String.raw`\operatorname{Hom}(-, I) \ \text{turns monomorphisms into epimorphisms}`,
-      text: "The dual of a projective object: every morphism into I extends along every monomorphism, i.e. the hom functor Hom(−, I) turns monomorphisms into epimorphisms. ℚ/ℤ is an injective abelian group." },
-    { id: "resolution", name: "Resolution", kind: "konstruktion", area: "18G", field: [18], msc: ["18G"], msc5: "18G10", uses: ["exact-sequence", "chain-complex", "injective-object", "projective-object"],
-      formula: String.raw`0 \to A \to I^0 \to I^1 \to \cdots \ \text{exact}`,
-      text: "An exact sequence replacing an object by a complex of injective (or projective) objects. Unique up to chain homotopy." },
-    { id: "derived-functor", name: "Derived functor", kind: "konstruktion", area: "18G", field: [18], msc: ["18G"], msc5: "18G10", uses: ["exact-functor", "resolution", "injective-object", "homology"],
-      formula: String.raw`R^i F(A) = H^i\big(F(I^\bullet)\big)`,
-      text: "For a left exact functor F the homology of F applied to an injective resolution. The long exact sequence of derived functors measures the failure of exactness; sheaf cohomology is the derived functor of global sections." },
-    { id: "ext", name: "Ext", kind: "invariante", area: "18G", field: [18], msc: ["18G"], msc5: "18G15", uses: ["derived-functor", "hom-functor"],
-      formula: String.raw`\operatorname{Ext}^i(A, B) = R^i \operatorname{Hom}(A, -)(B)`,
-      text: "The derived functors of Hom. Ext<sup>1</sup>(C, A) classifies the extensions 0 → A → B → C → 0." },
-    { id: "tor", name: "Tor", kind: "invariante", area: "18G", field: [18], msc: ["18G", "13D"], msc5: "18G15", uses: ["derived-functor", "resolution", "projective-object", "ca:tensor-product"],
-      formula: String.raw`\operatorname{Tor}_i(A, B) = L_i(A \otimes -)(B)`,
-      text: "The left derived functors of the tensor product, computed with projective resolutions. Tor<sub>1</sub>(ℤ/n, B) is the n-torsion of B." },
-    { id: "triangulated-category", name: "Triangulated category", kind: "objekt", area: "18G", field: [18], msc: ["18G"], msc5: "18G80", uses: ["additive-category", "functor"], isA: ["additive-category"],
-      formula: String.raw`X \to Y \to Z \to X[1]`,
-      text: "An additive category with a shift functor and a class of distinguished triangles satisfying Verdier's axioms; it replaces short exact sequences." },
-    { id: "derived-category", name: "Derived category", kind: "konstruktion", area: "18G", field: [18, 14], msc: ["18G", "14F"], msc5: "18G80", uses: ["category", "chain-complex", "chain-map", "quasi-isomorphism"],
-      formula: String.raw`D(\mathcal A) = \operatorname{Ch}(\mathcal A)[\text{qis}^{-1}]`,
-      text: "The category of chain complexes and chain maps in which the quasi-isomorphisms are made invertible (Grothendieck and Verdier). Derived functors become functors between derived categories; it is a triangulated category.",
-      definitionName: "Localisation at quasi-isomorphisms",
-      alternativeDefinitions: [
-        { name: "Verdier quotient of the homotopy category", uses: ["chain-complex", "chain-homotopy", "triangulated-category", "quasi-isomorphism"], formula: String.raw`D(\mathcal A) = K(\mathcal A) / K_{\mathrm{acyc}}(\mathcal A)`,
-          text: "The Verdier quotient of the homotopy category K(A) (chain complexes, chain maps up to chain homotopy), a triangulated category, by the thick subcategory of acyclic complexes, those quasi-isomorphic to zero." },
       ], },
 
     // ------------------------------------------------------------ 18M Monoidal categories
