@@ -468,9 +468,7 @@
       // the names of the marks and the title are obstacles as well (their screen boxes in graph units)
       const inv = svg.getScreenCTM().inverse(), toG = (x, y) => { const q = svg.createSVGPoint(); q.x = x; q.y = y; return q.matrixTransform(inv); };
       const boxOf = (e) => { const b = e.getBoundingClientRect(), a = toG(b.left, b.top), c = toG(b.right, b.bottom); return { x0: a.x, y0: a.y, x1: c.x, y1: c.y }; };
-      const fixed = [...gZoom.querySelectorAll(".zmarke-name")].map(boxOf);
-      const title = gZoom.querySelector(".zoom-titel");
-      if (title) { title.style.fontSize = (15 * s).toFixed(4) + "px"; title.setAttribute("y", (C.cy - C.B + 20 * s).toFixed(3)); fixed.push(boxOf(title)); }
+      const fixed = [...gZoom.querySelectorAll(".zmarke-name, .zkreis")].map(boxOf);
       const meets = (r, t) => r.x0 < t.x1 && t.x0 < r.x1 && r.y0 < t.y1 && t.y0 < r.y1;
       const free = (r, i) => !taken.some((t) => meets(r, t)) && !fixed.some((t) => meets(r, t)) && !pts.some((t) => t.i !== i && meets(r, t));
       order.forEach((i) => {
@@ -504,6 +502,16 @@
         t.setAttribute("x", pick.x.toFixed(3)); t.setAttribute("y", pick.y.toFixed(3)); t.setAttribute("text-anchor", pick.anchor);
         taken.push(pick.r);
       });
+      // the name of the area small and pale inside the upper edge of the ellipse, only where no node and no name lies
+      // (its full name is in the toolbar: "Graph of the areas › <area>")
+      const title = gZoom.querySelector(".zoom-titel");
+      if (title) {
+        title.style.fontSize = (12 * s).toFixed(4) + "px";
+        title.setAttribute("y", (C.cy - C.B + 18 * s).toFixed(3));
+        title.style.visibility = "";
+        const b = boxOf(title), r = { x0: b.x0 - 4 * s, x1: b.x1 + 4 * s, y0: b.y0 - 2 * s, y1: b.y1 + 2 * s };
+        title.style.visibility = taken.some((t) => meets(r, t)) || pts.some((t) => meets(r, t)) ? "hidden" : "";
+      }
     }
 
     // ------------------------------------------------------------ edges to other areas: to their point or to a mark
@@ -514,17 +522,20 @@
     }
     function placeOutside() {
       if (!C) return;
-      const V = visible(), s = V.s, zp = pointScale();
+      const V = visible(), s = V.s;
       C.gOut.innerHTML = ""; C.gMarks.innerHTML = "";
       C.outLines = []; C.marks = [];
-      const inView = (u) => { const q = wpos(u); return q.x > V.x + 12 * s && q.x < V.x + V.w - 12 * s && q.y > V.y + 12 * s && q.y < V.y + V.h - 12 * s; };
-      const toPoint = [], toMark = [];
-      C.E.outside.forEach((list, ou) => (inView(ou) ? toPoint : toMark).push({ ou, list }));
-      // Marks (user, 5 November 2026): arcs on an ellipse concentric with the outline and a little larger (parallel to
-      // it), in the direction of their area seen from the centre; with many marks on a second ring further out. The name
-      // runs along the arc on its outer side, readable from left to right (on the lower half the path runs the other way
-      // and lies further out, so that the letters hang down to the arc).
-      const FS = 11, BAR = 5 * s, GAP0 = 14 * s + AMP * 1.2 * C.A, RING = (FS + 18) * s;
+      // every neighbour with edges to the area is a mark on the ring, also one whose region is in the picture (user,
+      // 5 November 2026); the neighbouring regions are drawn pale, without points and names, and only show the lay of the
+      // land
+      const toMark = [];
+      C.E.outside.forEach((list, ou) => toMark.push({ ou, list }));
+      // Marks (user, 5 November 2026): small circles with the symbol of the area, all of the same size, in the colour of
+      // its group, on an ellipse concentric with the outline and a little larger (parallel to it), in the direction of the
+      // area seen from the centre; with many marks on further rings. Name and number of edges run along the ring on the
+      // outer side of the circle, readable from left to right (on the lower half the path runs the other way and lies
+      // further out, so that the letters hang down to the circle).
+      const KR = 8, FS = 11, BAR = 2 * KR * s, GAP0 = 14 * s + AMP * 1.2 * C.A, RING = (2 * KR + FS + 12) * s;
       const ringAxes = (ring) => [C.A + GAP0 + ring * RING, C.B + GAP0 + ring * RING];
       const onRing = (t, ring, extra = 0) => {
         const [a, b] = ringAxes(ring), A2 = a + extra, B2 = b + extra, r = (A2 * B2) / Math.hypot(B2 * Math.cos(t), A2 * Math.sin(t));
@@ -532,7 +543,7 @@
       };
       const marks = toMark.map(({ ou, list }) => {
         const q = wpos(ou), phi = Math.atan2(q.y - C.cy, q.x - C.cx);
-        return { ou, list, phi, a: phi, ring: 0, full: ou.label, n: list.length, arc: Math.min(60, 16 + 6 * Math.sqrt(list.length)) };
+        return { ou, list, phi, a: phi, ring: 0, full: ou.label, n: list.length, arc: 2 * KR + 4 };
       }).sort((p, q) => p.phi - q.phi);
       // half the room of a mark along its ring, as an angle: the arc or the name, whichever is longer, and a gap
       const halfOf = (m) => ((Math.max(m.arc, m.label.length * FS * 0.54) / 2 + 7) * s) / onRing(m.a, m.ring).d;
@@ -593,8 +604,9 @@
       marks.forEach((m, mi) => {
         const P = onRing(m.a, m.ring), g = el("g", { class: "zmarke", "data-folder": m.ou.folder.folder }, C.gMarks);
         m.x = P.x; m.y = P.y; m.h = halfOf(m);
-        const da = (m.arc * s) / 2 / P.d;
-        el("path", { d: arcPath(m.a - da, m.a + da, m.ring, 0), class: "zbogen", stroke: m.ou.F.color, "stroke-width": BAR.toFixed(3) }, g);
+        const kreis = el("g", { class: "zkreis", transform: `translate(${P.x.toFixed(2)},${P.y.toFixed(2)})` }, g), AL0 = window.AREA_LAYOUT;
+        el("circle", { r: (KR * s).toFixed(3), fill: m.ou.F.color, class: "zkreis-form" }, kreis);
+        if (AL0) el("g", { class: "symbol-mark" }, kreis).innerHTML = AL0.symbolMarkup(AL0.SYMBOL[m.ou.folder.folder], KR * s, m.ou.F.color);
         // the path of the name: on the upper half clockwise (left to right), on the lower half anticlockwise and further
         // out by the height of the letters
         const low = Math.sin(m.a) > 0, extra = BAR / 2 + 3 * s + (low ? FS * 0.8 * s : 0), dl = m.h * 1.3;
@@ -622,9 +634,8 @@
         const l = el("line", { x1: (p.x + (dx / d) * p.r).toFixed(2), y1: (p.y + (dy / d) * p.r).toFixed(2), x2: (x - (dx / d) * stop).toFixed(2), y2: (y - (dy / d) * stop).toFixed(2), class: "zoom-aussen-kante", stroke: ou.F.color }, C.gOut);
         C.outLines.push({ el: l, ou, node });
       };
-      toPoint.forEach(({ ou, list }) => { const q = wpos(ou); list.forEach((e) => line(C.P[e.node], q.x, q.y, ou, ou.r * zp + 1.5 * s, e.node)); });
-      marks.forEach((m) => m.list.forEach((e) => line(C.P[e.node], m.x, m.y, m.ou, 3 * s, e.node)));
-      C.toPoint = toPoint.map((x) => x.ou.folder.folder);
+      marks.forEach((m) => m.list.forEach((e) => line(C.P[e.node], m.x, m.y, m.ou, (KR + 1.5) * s, e.node)));
+      C.toPoint = [];
     }
 
     // ------------------------------------------------------------ size of the points of the other areas while zoomed
@@ -644,7 +655,8 @@
       const btn = (attr, val, on, label, title) => `<button ${attr}="${val}" class="${on ? "an" : ""}" title="${esc(title)}">${label}</button>`;
       const div = document.createElement("div");
       div.className = "leiste-gruppe zoom-leiste";
-      div.innerHTML = `<button data-zoom-out title="back to the map of all areas (Escape)">‹ All areas</button>` +
+      // the path "Graph of the areas › <area>"; its first part leads back (user, 5 November 2026)
+      div.innerHTML = `<span class="zoom-pfad"><button data-zoom-out title="back to the map of all areas (Escape)">Graph of the areas</button> › <b>${esc(unitOf(Z.folder).label)}</b></span>` +
         `<div class="stufen">${btn("data-zoom-inner", "concepts", Z.inner === "concepts", "concepts", "the concepts of the area; concepts and theorems keep their places and sectors when switching")}${btn("data-zoom-inner", "theorems", Z.inner === "theorems", "theorems", "the theorems of the area")}${btn("data-zoom-inner", "both", Z.inner === "both", "both", "concepts and theorems together")}</div>` +
         `<button data-zoom-open title="the ${Z.inner === "concepts" ? "concept graph" : Z.inner === "theorems" ? "theorem graph" : "concept graph with the theorems"} of this area on its own page">open detailed graph</button>`;
       api.controls.insertBefore(div, api.controls.firstChild);
