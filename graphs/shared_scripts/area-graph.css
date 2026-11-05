@@ -159,10 +159,7 @@ header.leiste .toggle i.farbe { width: 12px; height: 6px; border-radius: 3px; }
 .area-graph .zmarke-name { fill: #3d372f; stroke: none; }
 .area-graph .zmarke-halo { fill: none; stroke: #fbfaf6; stroke-linejoin: round; }
 .area-graph .zmarke:hover .zmarke-name { font-weight: 600; }
-header.leiste .zoom-leiste button[data-zoom-out], header.leiste .zoom-leiste button[data-zoom-open] { font: inherit; font-size: 13px; padding: 2px 8px; border: 1px solid var(--linie); border-radius: 4px; background: #fff; cursor: pointer; white-space: nowrap; }
-header.leiste .zoom-pfad { white-space: nowrap; font-size: 14px; }
-header.leiste .zoom-pfad b { font-variant: small-caps; letter-spacing: .03em; }
-header.leiste .zoom-pfad .zoom-gruppe { font-weight: 600; }
+header.leiste .zoom-leiste button[data-zoom-open] { font: inherit; font-size: 13px; padding: 2px 8px; border: 1px solid var(--linie); border-radius: 4px; background: #fff; cursor: pointer; white-space: nowrap; }
 #panel .zoom-liste { list-style: none; padding: 0; margin: 4px 0; font-size: 14px; }
 #panel .zoom-liste i.farbe { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
 
@@ -183,3 +180,11 @@ header.leiste .zoom-pfad .zoom-gruppe { font-weight: 600; }
    on the ring around the area */
 .area-graph.gezoomt .knoten { display: none; }
 .area-graph.gezoomt g.sektoren, .area-graph.gezoomt g.zoom-regionen { opacity: .45; }
+/* the path in the heading while zoomed (user, 5 November 2026): same font as the title; the title a link back */
+header.leiste h1 .zoom-titel-link { color: inherit; text-decoration: none; cursor: default; }
+header.leiste h1 .zoom-titel-link.aktiv { cursor: pointer; }
+header.leiste h1 .zoom-titel-link.aktiv:hover { text-decoration: underline; }
+header.leiste h1 .zoom-titel-pfad .zoom-gebiet { font-weight: inherit; }
+/* announcement of the zoom into an area by the wheel (from 2 times the whole view) */
+.area-graph .zoom-region.ankuendigung .zoom-umriss { opacity: 1; stroke-width: 4px; }
+.area-graph .zoom-region.ankuendigung .zoom-flaeche { fill-opacity: .1; }

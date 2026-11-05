@@ -27,7 +27,9 @@
     const INTER = window.AREA_INTERIORS || {};
     const TAU = 2 * Math.PI;
     const angDist = (x, y) => { const d = Math.abs(x - y) % TAU; return d > Math.PI ? TAU - d : d; };
-    const FILL = 0.7, DURATION = 600;
+    // duration of the change region ⇄ ellipse (zoom in and out, the neighbours giving way), in ms (user, 5 November 2026:
+    // clearly slower than the first 0.6 s); a way through another area (out, then in) takes CHAIN for each half
+    const FILL = 0.7, DURATION = 1600, CHAIN = 1200;
     const hsl = (h, sat, l) => `hsl(${h},${sat}%,${l.toFixed(1)}%)`;
     const hexHsl = (c) => {
       if (!/^#[0-9a-f]{6}$/i.test(c)) { const m = /hsl\((\d+),\s*(\d+)%/.exec(c); return m ? { h: +m[1], s: +m[2] } : { h: 30, s: 30 }; }
@@ -214,13 +216,13 @@
 
     // ------------------------------------------------------------ zoom in and out
     const ease = (x) => (x < 0.5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2);
-    function animate(target, frame, done) {
+    function animate(target, frame, done, dur = DURATION) {
       if (Z.anim) cancelAnimationFrame(Z.anim);
       const from = api.getView(), t0 = performance.now();
       const fc = { x: from.x + from.w / 2, y: from.y + from.h / 2 }, tc = { x: target.x + target.w / 2, y: target.y + target.h / 2 };
       svg.classList.add("unterwegs", "zoom-unterwegs");
       const step = (now) => {
-        const x = Math.min(1, (now - t0) / DURATION), e = ease(x);
+        const x = Math.min(1, (now - t0) / dur), e = ease(x);
         // geometric change of the size, the centre in proportion to the size, so that the move looks even
         const w = from.w * Math.pow(target.w / from.w, e), h = from.h * Math.pow(target.h / from.h, e);
         const s = Math.abs(target.w - from.w) > 1e-6 ? (w - from.w) / (target.w - from.w) : e;
@@ -238,32 +240,54 @@
     // user: a new entry in the history of the browser, so that its back button returns to the previous state
     function remember() { try { history.pushState(null, "", location.href); } catch (e) { /* file:// in some browsers */ } }
     function removeInterior() { if (gZoom) gZoom.remove(); gZoom = null; C = null; }
-    function zoomTo(folder, user, instant) {
+    function zoomTo(folder, user, instant, dur = DURATION) {
       if (!api.isMap() || !INTER[folder] || !unitOf(folder) || Z.folder === folder) return;
       if (Z.anim) { cancelAnimationFrame(Z.anim); Z.anim = null; svg.classList.remove("unterwegs", "zoom-unterwegs"); }
       if (user) remember();
       // from one area into another: out of the first, then into the second
-      if (Z.geo) { zoomOut(false, instant, () => zoomTo(folder, false, instant)); return; }
+      if (Z.geo) { zoomOut(false, instant, () => zoomTo(folder, false, instant, CHAIN), CHAIN); return; }
       api.clear();
-      Z.folder = folder; Z.marked = null; Z.geo = geoFor(folder); Z.e = 0;
+      Z.folder = folder; Z.marked = null; Z.geo = geoFor(folder); Z.e = 0; Z.shifted = false;
       svg.classList.add("gezoomt");
       removeInterior();
       markOwnPoint();
       api.drawControls(); api.update();
       const finish = () => { Z.e = 1; applyWarp(); buildInterior(); api.update(); };
       if (instant) { api.setView(Z.geo.tv); finish(); }
-      else animate(Z.geo.tv, (e) => { Z.e = e; applyWarp(); }, finish);
+      else animate(Z.geo.tv, (e) => { Z.e = e; applyWarp(); }, finish, dur);
     }
-    function zoomOut(user, instant, then) {
+    // The view after zooming out (user, 5 November 2026): the area just left stays as near the middle of the picture as
+    // possible, the map is moved instead of jumping back to the whole view; at most a quarter of the width and of the
+    // height of the map may stand outside the picture. A click on an empty place or on the title brings the whole map
+    // back (recentre).
+    function outView(g) {
+      const f = api.fit(), cw = svg.clientWidth || 1, ch = svg.clientHeight || 1, s = Math.max(f.w / cw, f.h / ch), W = cw * s, H = ch * s;
+      const EL = api.layoutE(), xs = EL.res.cells.map((c) => c.x * EL.scale), ys = EL.res.cells.map((c) => c.y * EL.scale);
+      const mx0 = Math.min(...xs), mx1 = Math.max(...xs), my0 = Math.min(...ys), my1 = Math.max(...ys), MW = mx1 - mx0, MH = my1 - my0;
+      const mcx = (mx0 + mx1) / 2, mcy = (my0 + my1) / 2, fcx = f.x + f.w / 2, fcy = f.y + f.h / 2;
+      const lx = Math.max(0, (W - MW) / 2 + MW / 4), ly = Math.max(0, (H - MH) / 2 + MH / 4);
+      const clamp = (v, l) => Math.max(-l, Math.min(l, v));
+      // centre of the picture: the area, moved back towards the middle of the map as far as the limit asks
+      const cx = mcx + clamp(g.c.x - mcx, lx), cy = mcy + clamp(g.c.y - mcy, ly);
+      return { x: f.x + (cx - fcx), y: f.y + (cy - fcy), w: f.w, h: f.h };
+    }
+    function recentre() {
+      if (Z.folder || Z.anim || !Z.shifted) return;
+      Z.shifted = false;
+      updateTitle();
+      animate(api.fit(), () => {}, () => { svg.classList.remove("unterwegs", "zoom-unterwegs"); });
+    }
+    function zoomOut(user, instant, then, dur = DURATION) {
       if (!Z.geo) { if (then) then(); return; }
       if (Z.anim) { cancelAnimationFrame(Z.anim); Z.anim = null; svg.classList.remove("unterwegs", "zoom-unterwegs"); }
       if (user) remember();
       Z.folder = null; Z.marked = null;
       removeInterior();
       api.drawControls(); api.update();
-      const finish = () => { Z.geo = null; Z.e = 0; applyWarp(); markOwnPoint(); svg.classList.remove("gezoomt"); api.update(); if (then) then(); };
+      const target = !instant && api.isMap() && !then ? outView(Z.geo) : api.fit();
+      const finish = () => { Z.geo = null; Z.e = 0; applyWarp(); markOwnPoint(); svg.classList.remove("gezoomt"); Z.shifted = target !== api.fit() && !then && !instant; updateTitle(); api.update(); if (then) then(); };
       if (instant || !api.isMap()) { api.setView(api.fit()); finish(); }
-      else { const e0 = Z.e; animate(api.fit(), (e) => { Z.e = e0 * (1 - e); applyWarp(); }, finish); }
+      else { const e0 = Z.e; animate(target, (e) => { Z.e = e0 * (1 - e); applyWarp(); }, finish, dur); }
     }
     function setInner(inner, user) {
       if (inner === Z.inner) return;
@@ -669,21 +693,45 @@
     }
 
     // ------------------------------------------------------------ toolbar and panel while zoomed
+    // The path in the heading (user, 5 November 2026): "Graph of the areas › <group> › <area>" in the font of the title;
+    // "Graph of the areas" stays the title and leads back to the map as a link while zoomed (or brings the moved map back
+    // into view); the group without its MSC classes, in its colour; the ⓘ stays behind the title
+    let titleLink = null, titlePath = null;
+    function setupTitle() {
+      const h1 = document.querySelector("header.leiste h1");
+      if (!h1) return;
+      const tn = [...h1.childNodes].find((n) => n.nodeType === 3 && n.textContent.trim());
+      if (!tn) return;
+      titleLink = document.createElement("a");
+      titleLink.className = "zoom-titel-link";
+      titleLink.textContent = tn.textContent.trim();
+      titleLink.title = "back to the whole map (Escape)";
+      h1.replaceChild(titleLink, tn);
+      h1.insertBefore(document.createTextNode(" "), titleLink.nextSibling);
+      titlePath = document.createElement("span");
+      titlePath.className = "zoom-titel-pfad";
+      h1.appendChild(titlePath);
+      titleLink.addEventListener("click", (ev) => { ev.preventDefault(); if (Z.folder) zoomOut(true); else recentre(); });
+    }
+    function updateTitle() {
+      if (!titleLink) return;
+      titleLink.classList.toggle("aktiv", !!Z.folder || !!Z.shifted);
+      if (!Z.folder) { titlePath.innerHTML = ""; return; }
+      const zu = unitOf(Z.folder), group = zu.F.name.replace(/\s*\([^)]*\)\s*$/, "");
+      titlePath.innerHTML = ` › <span class="zoom-gruppe" style="color:${zu.F.color}">${esc(group)}</span> › <span class="zoom-gebiet">${esc(zu.label)}</span>`;
+    }
+    setupTitle();
     function afterControls() {
+      updateTitle();
       if (!Z.folder) return;
       const btn = (attr, val, on, label, title) => `<button ${attr}="${val}" class="${on ? "an" : ""}" title="${esc(title)}">${label}</button>`;
       const div = document.createElement("div");
       div.className = "leiste-gruppe zoom-leiste";
-      // the path "Graph of the areas › <group> › <area>"; its first part leads back, the group (of the grouping chosen) is
-      // plain text in its colour; the name of the area stands only here (user, 5 November 2026)
-      const zu = unitOf(Z.folder);
-      div.innerHTML = `<span class="zoom-pfad"><button data-zoom-out title="back to the map of all areas (Escape)">Graph of the areas</button> › <span class="zoom-gruppe" style="color:${zu.F.color}">${esc(zu.F.name)}</span> › <b>${esc(zu.label)}</b></span>` +
-        `<div class="stufen">${btn("data-zoom-inner", "concepts", Z.inner === "concepts", "concepts", "the concepts of the area; concepts and theorems keep their places and sectors when switching")}${btn("data-zoom-inner", "theorems", Z.inner === "theorems", "theorems", "the theorems of the area")}${btn("data-zoom-inner", "both", Z.inner === "both", "both", "concepts and theorems together")}</div>` +
+      div.innerHTML = `<div class="stufen">${btn("data-zoom-inner", "concepts", Z.inner === "concepts", "concepts", "the concepts of the area; concepts and theorems keep their places and sectors when switching")}${btn("data-zoom-inner", "theorems", Z.inner === "theorems", "theorems", "the theorems of the area")}${btn("data-zoom-inner", "both", Z.inner === "both", "both", "concepts and theorems together")}</div>` +
         `<button data-zoom-open title="the ${Z.inner === "concepts" ? "concept graph" : Z.inner === "theorems" ? "theorem graph" : "concept graph with the theorems"} of this area on its own page">open detailed graph</button>`;
       api.controls.insertBefore(div, api.controls.firstChild);
     }
     api.controls.addEventListener("click", (ev) => {
-      if (ev.target.closest("[data-zoom-out]")) { zoomOut(true); return; }
       const b = ev.target.closest("[data-zoom-inner]");
       if (b) { setInner(b.dataset.zoomInner, true); return; }
       if (ev.target.closest("[data-zoom-open]")) location.href = detailHref();
@@ -744,13 +792,38 @@
       };
       springAnim = requestAnimationFrame(step);
     }
+    // factor of one wheel event, weighted by its size: one notch of a mouse wheel (deltaY 100) is 1.15, the many small
+    // events of a touchpad count by their size (for zooming in and out alike)
+    const stepFactor = (ev) => {
+      const d = ev.deltaY * (ev.deltaMode === 1 ? 33 : ev.deltaMode === 2 ? 400 : 1);
+      return Math.exp((Math.max(-300, Math.min(300, d)) * Math.log(1.15)) / 100);
+    };
+    // Into an area by the wheel on the map (user, 5 November 2026): up to 2.5 times the whole view the wheel only enlarges
+    // the map; from 2.0 times the outline of the area under the mouse is lit as an announcement, and beyond 2.5 times the
+    // same change as a click on its region starts. Only over the region of an area: over gaps, bands, points or outside
+    // the map the map is enlarged further without leaving. Not in "Circle".
+    const IN_ANNOUNCE = 2.0, IN_LIMIT = 2.5;
+    let announced = null;
+    const announce = (g) => { if (announced && announced !== g) announced.classList.remove("ankuendigung"); announced = g; if (g) g.classList.add("ankuendigung"); };
+    svg.addEventListener("wheel", (ev) => {
+      if (Z.folder || Z.anim || !api.isMap()) return;
+      ev.preventDefault();
+      ev.stopImmediatePropagation();
+      const v = api.getView(), f = stepFactor(ev), rect = svg.getBoundingClientRect(), s = api.scale(), fit = api.fit();
+      const after = fit.w / (v.w * f), hit = document.elementFromPoint(ev.clientX, ev.clientY), region = hit && hit.closest(".zoom-region");
+      if (f < 1 && region && after > IN_LIMIT) { announce(null); zoomTo(region.dataset.folder, true); return; }
+      announce(f < 1 && region && after >= IN_ANNOUNCE ? region : after >= IN_ANNOUNCE && region === announced ? region : null);
+      // the map itself, around the mouse (as the page's own wheel)
+      const cx = v.x + v.w / 2 + (ev.clientX - rect.left - rect.width / 2) * s, cy = v.y + v.h / 2 + (ev.clientY - rect.top - rect.height / 2) * s;
+      api.setView({ x: cx - (cx - v.x) * f, y: cy - (cy - v.y) * f, w: v.w * f, h: v.h * f });
+    }, { capture: true, passive: false });
     svg.addEventListener("wheel", (ev) => {
       if (!Z.folder || Z.anim || !C) return;
       ev.preventDefault();
       ev.stopImmediatePropagation();
       clearTimeout(springTimer);
       if (springAnim) { cancelAnimationFrame(springAnim); springAnim = null; }
-      const v = api.getView(), rect = svg.getBoundingClientRect(), s = api.scale(), f = ev.deltaY > 0 ? 1.15 : 1 / 1.15;
+      const v = api.getView(), rect = svg.getBoundingClientRect(), s = api.scale(), f = stepFactor(ev);
       // the factor the view would have after this step: below the limit the area is left
       if (Z.geo.tv.w / (v.w * f) < OUT_LIMIT - 1e-9) { zoomOut(true); return; }
       const cx = v.x + v.w / 2 + (ev.clientX - rect.left - rect.width / 2) * s, cy = v.y + v.h / 2 + (ev.clientY - rect.top - rect.height / 2) * s;
@@ -761,9 +834,10 @@
     // ------------------------------------------------------------ leaving the zoom; address; history
     document.addEventListener("keydown", (ev) => { if (ev.key === "Escape" && Z.folder && !(ev.target && ev.target.id === "search")) zoomOut(true); });
     svg.addEventListener("click", (ev) => {
-      if (!Z.folder || api.dragged() || Z.anim) return;
+      if (api.dragged() || Z.anim) return;
       if (ev.target.closest(".zoom-region, .zoom-ebene, .knoten, .band")) return;
-      zoomOut(true);
+      if (Z.folder) zoomOut(true);
+      else if (Z.shifted) recentre();
     });
     function fromAddress(q) {
       const want = q.get("zoom"), inner = ["theorems", "both"].includes(q.get("inner")) ? q.get("inner") : "concepts";
@@ -782,12 +856,24 @@
     // for tests
     window.AREA_ZOOM_STATE = {
       get folder() { return Z.folder; }, get inner() { return Z.inner; }, get animating() { return !!Z.anim; },
+      mapFactor: () => api.fit().w / api.getView().w,
+      announced: () => (announced ? announced.dataset.folder : null),
       zoomTo: (f) => zoomTo(f, true), zoomOut: () => zoomOut(true), setInner: (i) => setInner(i, true),
       // the view of the area enlarged by a factor (1 … 6) around a point (default: the centre of the area)
       setZoom: (f, x, y) => { if (!Z.geo) return; const tv = Z.geo.tv; api.setView(tv); zoomView(1 / f, x == null ? Z.geo.c.x : x, y == null ? Z.geo.c.y : y); },
       zoomFactor: () => (Z.geo ? Z.geo.tv.w / api.getView().w : 1),
       // nodes with their drawn position and the position mapped back into the unstretched disk without the waves
       // (inverse of diskPt), for the comparison with the reference page
+      // the map after zooming out: moved or not, distance of the area from the middle of the picture (now and in the
+      // whole view), and the parts of the width and height of the map that stand outside the picture
+      mapInfo: (folder) => {
+        const f = api.fit(), v = api.getView(), cw = svg.clientWidth || 1, ch = svg.clientHeight || 1;
+        const vis = (q) => { const s = Math.max(q.w / cw, q.h / ch), W = cw * s, H = ch * s; return { x0: q.x + q.w / 2 - W / 2, x1: q.x + q.w / 2 + W / 2, y0: q.y + q.h / 2 - H / 2, y1: q.y + q.h / 2 + H / 2 }; };
+        const EL = api.layoutE(), xs = EL.res.cells.map((c) => c.x * EL.scale), ys = EL.res.cells.map((c) => c.y * EL.scale);
+        const m = { x0: Math.min(...xs), x1: Math.max(...xs), y0: Math.min(...ys), y1: Math.max(...ys) }, u = unitOf(folder);
+        const V = vis(v), F = vis(f), dist = (R) => Math.hypot(u.x - (R.x0 + R.x1) / 2, u.y - (R.y0 + R.y1) / 2);
+        return { shifted: !!Z.shifted, dist: dist(V), fitDist: dist(F), outX: (Math.max(0, V.x0 - m.x0) + Math.max(0, m.x1 - V.x1)) / (m.x1 - m.x0), outY: (Math.max(0, V.y0 - m.y0) + Math.max(0, m.y1 - V.y1)) / (m.y1 - m.y0), isFit: Math.abs(v.x - f.x) + Math.abs(v.y - f.y) < 1e-3 * f.w };
+      },
       contents: () => (C ? { cx: C.cx, cy: C.cy, A: C.A, B: C.B, R: C.I.R, theta: C.theta, sectors: C.secs.map((x) => [x.name, +x.a0.toFixed(4), +x.a1.toFixed(4)]), nodes: C.P.map((p) => {
         const X = (p.x - C.cx) / C.A, Y = (p.y - C.cy) / C.B, b = Math.atan2(Y, X), rho = Math.hypot(X, Y) / wob(Z.geo, b);
         return { id: p.n[0], x: p.x, y: p.y, r: p.r, rx: p.n[1], ry: p.n[2], dx: rho * Math.cos(b), dy: rho * Math.sin(b) };
