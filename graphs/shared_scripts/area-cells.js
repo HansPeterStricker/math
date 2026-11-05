@@ -170,6 +170,9 @@
       // only cells at the border of the side component (with a neighbour of another label in the domain)
       const edge = S.filter((d) => nb[d].some((e) => e >= 0 && domain[e] && lab[e] !== X));
       const c = edge.sort((a, b) => Math.hypot(cellsXY[a].x - mx, cellsXY[a].y - my) - Math.hypot(cellsXY[b].x - mx, cellsXY[b].y - my) || a - b)[0];
+      // no cell of the side component touches another label in the domain (the domain itself is split, possible with
+      // grids of other shapes, opt.grid): nothing can be handed on; stop (never happens with the disk of the map)
+      if (c === undefined) break;
       // graph of neighbouring labels (without X)
       const adj = new Map();
       for (const d of domainCells) for (const e of nb[d]) if (e >= 0 && domain[e] && lab[e] !== lab[d] && lab[d] !== X && lab[e] !== X) {
@@ -355,7 +358,9 @@
     const U = units.length;
     const per = Math.max(minCells, Math.round(N0 / U));
     const aspect = opt.aspect || 1;
-    const grid = hexDisk(per * U, aspect), cells = grid.cells, nb = grid.nb, M = cells.length;
+    // opt.grid (B101, 5 November 2026; optional, default: the disk or ellipse of hexDisk): a function N -> { cells, nb, R }
+    // that gives a grid of N cells of any shape, e.g. a hexagonal grid cut to a polygon (skizzen/zoom-layouts-core.js)
+    const grid = opt.grid ? opt.grid(per * U) : hexDisk(per * U, aspect), cells = grid.cells, nb = grid.nb, M = cells.length;
     const quota = units.map(() => per);
     // groups as indices
     const groupKeys = [...new Set(units.map((u) => u.group))];
@@ -366,7 +371,8 @@
     const rms = Math.sqrt(units.reduce((a, u, i) => a + quota[i] * ((u.x - cx0) ** 2 + (u.y - cy0) ** 2), 0) / W0) || 1;
     const sc = ((opt.spread || 0.75) * grid.R) / Math.SQRT2 / rms;
     // in the ellipse (E4) the start positions are stretched in the same way as the frame
-    const P = units.map((u) => ({ x: (u.x - cx0) * sc * Math.sqrt(aspect), y: (u.y - cy0) * sc / Math.sqrt(aspect) }));
+    // opt.startInGrid (optional): the start positions are given in the units of the grid and are taken as they are
+    const P = opt.startInGrid ? units.map((u) => ({ x: u.x, y: u.y })) : units.map((u) => ({ x: (u.x - cx0) * sc * Math.sqrt(aspect), y: (u.y - cy0) * sc / Math.sqrt(aspect) }));
     const all = cells.map((c, i) => i), full = new Uint8Array(M).fill(1);
     const d2 = (c, p) => (c.x - p.x) ** 2 + (c.y - p.y) ** 2;
     // stage 1: cells -> units (exact, cost = squared distance to the start position); the group of a cell is the group of

@@ -12,8 +12,8 @@
 .bip-graph .knoten { cursor: pointer; }
 .bip-graph .knoten .form { stroke: #4b443b; stroke-width: 1; }
 .bip-graph .knoten text { font-size: 13px; fill: var(--tinte); paint-order: stroke; stroke: #fbfaf6; stroke-width: 3px; stroke-linejoin: round; }
-/* concepts of other areas: light, dashed border in the colour of their home area (set as --herkunft on the node) */
-.bip-graph .knoten.fremd .form { fill: #fbfaf6; stroke: var(--herkunft, #8a7f6e); stroke-width: 2.4; stroke-dasharray: 3 2; }
+/* concepts of other areas: white inside, solid border in the colour of their home area (set as --herkunft on the node) */
+.bip-graph .knoten.fremd .form { fill: #fff; stroke: var(--herkunft, #8a7f6e); stroke-width: 2.4; }
 .bip-graph.ohne-namen .knoten:not(.hell) text { display: none; }
 
 /* blocks of the MSC classes: pale bands with the name of the class above them */

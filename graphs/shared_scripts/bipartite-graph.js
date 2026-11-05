@@ -205,7 +205,7 @@
   const radius = (n) => Math.min(8.5, 3.5 + Math.sqrt(n.partners.length));
   const shape = (g, n, r) => {
     const kind = n.side === "R" ? (CFG.shapes || {})[n.d.kind] || "objekt" : n.d.kind;
-    const s = { class: "form", fill: n.area ? colorOf(n) : "#fbfaf6" };
+    const s = { class: "form", fill: n.area ? colorOf(n) : "#fff" };
     if (kind === "konstruktion") return el("rect", { ...s, x: -r * 0.88, y: -r * 0.88, width: r * 1.76, height: r * 1.76, rx: 2 }, g);
     if (kind === "invariante") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.2},0L0,${r * 1.2}L${-r * 1.2},0Z` }, g);
     if (kind === "eigenschaft") return el("path", { ...s, d: `M0,${-r * 1.2}L${r * 1.1},${r * 0.8}L${-r * 1.1},${r * 0.8}Z` }, g);
@@ -362,7 +362,7 @@
     edges.forEach((e) => { if (e.c === n || e.t === n) gEdges.appendChild(e.path); });
   }
   const hashOf = (key) => (key ? key.replace(":", "=") : "");
-  const chip = (p) => `<span class="chip" data-key="${p.key}"><i style="background:${p.area ? colorOf(p) : "#fbfaf6"};border-color:${colorOf(p)}"></i>${p.d.name}</span>`;
+  const chip = (p) => `<span class="chip" data-key="${p.key}"><i style="background:${p.area ? colorOf(p) : "#fff"};border-color:${colorOf(p)}"></i>${p.d.name}</span>`;
   const inColumn = (list) => list.slice().sort((a, b) => a.pos - b.pos);
   function select(key) {
     selected = key && nodes.has(key) ? key : null;
@@ -420,7 +420,7 @@
   const theoremKinds = [...new Set(rightNodes.map((n) => n.d.kind))];
   document.getElementById("legend").innerHTML =
     block("Colour: MSC class", usedClasses.map((k) => `<span><i style="background:${CFG.colors[k] || "#ccc"}"></i>${areaName(k)}</span>`), { closed: true }) +
-    (usedOrigins.length ? block("Concepts of other areas", usedOrigins.map((o) => `<span><i style="background:#fbfaf6;border:2px dashed ${originColor(o)}"></i>${originName(o)}</span>`), { closed: true }) : "") +
+    (usedOrigins.length ? block("Concepts of other areas", usedOrigins.map((o) => `<span><i style="background:#fff;border:2px solid ${originColor(o)}"></i>${originName(o)}</span>`), { closed: true }) : "") +
     block("Shape: kind", Object.keys(C.kinds).map((k) => `<span>${kindSvg(k)}${C.kinds[k]}</span>`)
       .concat(theoremKinds.map((k) => `<span>${kindSvg((CFG.shapes || {})[k] || "objekt")}${T.kinds[k] || k}</span>`)), { cls: "zweispaltig", closed: true }) +
     block("Lines and sizes", [

@@ -25,6 +25,10 @@
     const el = (n, a, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e; };
     const esc = (s) => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
     const INTER = window.AREA_INTERIORS || {};
+    // Variant "the area keeps its shape" (graphs/areas-shape.html, user, 5 November 2026): window.AREA_ZOOM_SHAPE = "keep".
+    // The map is only enlarged and moved; the outline of the area stays its smoothed shape, the neighbours stay in their
+    // places; the contents are mapped radially into the shape; the rings of the neighbours follow the shape.
+    const KEEP = window.AREA_ZOOM_SHAPE === "keep";
     const TAU = 2 * Math.PI;
     const angDist = (x, y) => { const d = Math.abs(x - y) % TAU; return d > Math.PI ? TAU - d : d; };
     // duration of the change region ⇄ ellipse (zoom in and out, the neighbours giving way), in ms (user, 5 November 2026:
@@ -115,19 +119,98 @@
       let h = 2166136261;
       for (const ch of folder) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
       const ph = [0, 1, 2].map((i) => (((h >>> (i * 9)) & 511) / 512) * TAU);
-      return { folder, u, c, A, B, rreg, tv, tv0: tv, ph };
+      const g = { folder, u, c, A, B, rreg, tv, tv0: tv, ph };
+      if (KEEP) keepShape(g);
+      return g;
     }
+    // The shape of the area for the variant "keep": its largest smoothed outline loop; in each of NK directions from the
+    // centre the first crossing of the ray with the outline (rin; the contents are mapped up to 94 % of it) and the
+    // farthest crossing (rout); the rings follow curves parallel to the convex hull of the shape (offsetR). A direction with
+    // several crossings makes the area not star-shaped seen from its centre.
+    const NK = 360;
+    function keepShape(g) {
+      smoothUnits(api.layoutE());
+      const loops = softCache.pts[allAreas.indexOf(g.u)] || [];
+      const areaOf = (P) => Math.abs(P.reduce((t, p, i) => { const q = P[(i + 1) % P.length]; return t + p.x * q.y - q.x * p.y; }, 0)) / 2;
+      const P = loops.slice().sort((a, b) => areaOf(b) - areaOf(a))[0] || [];
+      const rin = new Float64Array(NK), rout = new Float64Array(NK);
+      let multi = 0;
+      for (let k = 0; k < NK; k++) {
+        const t = (k * TAU) / NK, dx = Math.cos(t), dy = Math.sin(t), hits = [];
+        P.forEach((p, i) => {
+          const q = P[(i + 1) % P.length], ex = q.x - p.x, ey = q.y - p.y, den = dx * ey - dy * ex;
+          if (Math.abs(den) < 1e-12) return;
+          const qx = p.x - g.c.x, qy = p.y - g.c.y, tt = (qx * ey - qy * ex) / den, v = (qx * dy - qy * dx) / den;
+          if (tt > 1e-9 && v >= 0 && v < 1) hits.push(tt);
+        });
+        hits.sort((a, b) => a - b);
+        rin[k] = hits.length ? hits[0] : 1;
+        rout[k] = hits.length ? hits[hits.length - 1] : 1;
+        if (hits.length > 1) multi++;
+      }
+      const inside = (x, y) => { let r = false; for (let i = 0, j = P.length - 1; i < P.length; j = i++) { const a = P[i], b = P[j]; if ((a.y > y) !== (b.y > y) && x < ((b.x - a.x) * (y - a.y)) / (b.y - a.y) + a.x) r = !r; } return r; };
+      const xs = P.map((p) => p.x), ys = P.map((p) => p.y);
+      // the rings follow the convex hull of the shape, moved outward by a distance D in every direction (Minkowski sum
+      // with a disk: a curve parallel to the hull, smooth); its distance from the centre in each of NK directions
+      const hullOf = (Q) => {
+        const S = Q.slice().sort((a, b) => a.x - b.x || a.y - b.y), cr = (o, a, b) => (a.x - o.x) * (b.y - o.y) - (a.y - o.y) * (b.x - o.x), lo = [], hi = [];
+        S.forEach((q) => { while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], q) <= 0) lo.pop(); lo.push(q); });
+        S.slice().reverse().forEach((q) => { while (hi.length >= 2 && cr(hi[hi.length - 2], hi[hi.length - 1], q) <= 0) hi.pop(); hi.push(q); });
+        return lo.slice(0, -1).concat(hi.slice(0, -1));
+      };
+      const hull = hullOf(P), cache = new Map();
+      const offsetR = (D) => {
+        const key = D.toFixed(2);
+        if (cache.has(key)) return cache.get(key);
+        const Q = hullOf(D > 0 ? hull.flatMap((p) => [...Array(16)].map((_, i) => ({ x: p.x + D * Math.cos((i * TAU) / 16), y: p.y + D * Math.sin((i * TAU) / 16) }))) : hull);
+        const r = new Float64Array(NK);
+        for (let k = 0; k < NK; k++) {
+          const t = (k * TAU) / NK, dx = Math.cos(t), dy = Math.sin(t);
+          let best = 0;
+          Q.forEach((p, i) => {
+            const q = Q[(i + 1) % Q.length], ex = q.x - p.x, ey = q.y - p.y, den = dx * ey - dy * ex;
+            if (Math.abs(den) < 1e-12) return;
+            const qx = p.x - g.c.x, qy = p.y - g.c.y, tt = (qx * ey - qy * ex) / den, v = (qx * dy - qy * dx) / den;
+            if (tt > best && v >= 0 && v <= 1) best = tt;
+          });
+          r[k] = best;
+        }
+        if (cache.size > 60) cache.clear();
+        cache.set(key, r);
+        return r;
+      };
+      Object.assign(g, { offsetR, poly: P, rin, rout, ringR: offsetR(0), nonStar: multi, centreInside: inside(g.c.x, g.c.y), inside, moved: 0,
+        outlineD: "M" + P.map((p) => p.x.toFixed(1) + "," + p.y.toFixed(1)).join("L") + "Z",
+        A: (Math.max(...xs) - Math.min(...xs)) / 2, B: (Math.max(...ys) - Math.min(...ys)) / 2 });
+    }
+    const atK = (arr, t) => { const f = ((((t % TAU) + TAU) % TAU) / TAU) * NK, k = Math.floor(f) % NK, w = f - Math.floor(f); return arr[k] * (1 - w) + arr[(k + 1) % NK] * w; };
+    const KEEP_MARGIN = 0.94;
     // Organic outline (user, 5 November 2026): the ellipse with soft, slightly irregular waves, in the style of the
     // organic borders of the map; fixed per area. A point of the ellipse is given by its angle b in the unstretched disk
     // (x = A cos b, y = B sin b) and the radius fraction rho; the waves scale it radially by wob(b) (± about 2.5 %).
     const AMP = 0.025;
     const wob = (g, b) => 1 + AMP * (0.55 * Math.sin(3 * b + g.ph[0]) + 0.3 * Math.sin(5 * b + g.ph[1]) + 0.15 * Math.sin(8 * b + g.ph[2]));
-    const diskPt = (g, rho, b) => { const f = rho * wob(g, b); return { x: g.c.x + f * g.A * Math.cos(b), y: g.c.y + f * g.B * Math.sin(b) }; };
+    const diskPt = (g, rho, b) => {
+      if (KEEP) {
+        // radially into the shape: radius fraction rho of the first crossing in the direction b (with a margin inside); a
+        // point that would still lie outside the region (centre outside the region) goes inward along its ray to the
+        // nearest point inside
+        const r = rho * KEEP_MARGIN * atK(g.rin, b);
+        let x = g.c.x + r * Math.cos(b), y = g.c.y + r * Math.sin(b);
+        if (!g.inside(x, y)) {
+          for (let f = 0.95; f > 0.04; f -= 0.05) { const xx = g.c.x + f * r * Math.cos(b), yy = g.c.y + f * r * Math.sin(b); if (g.inside(xx, yy)) { x = xx; y = yy; break; } }
+          g.moved++;
+        }
+        return { x, y };
+      }
+      const f = rho * wob(g, b); return { x: g.c.x + f * g.A * Math.cos(b), y: g.c.y + f * g.B * Math.sin(b) };
+    };
     // radius of the organic outline in the direction t (angle on the screen)
     const rEll = (g, t) => { const b = Math.atan2(g.A * Math.sin(t), g.B * Math.cos(t)); return wob(g, b) * Math.hypot(g.A * Math.cos(b), g.B * Math.sin(b)); };
     const rReg = (g, t) => { const f = ((((t % TAU) + TAU) % TAU) / TAU) * N, k = Math.floor(f) % N, w = f - Math.floor(f); return g.rreg[k] * (1 - w) + g.rreg[(k + 1) % N] * w; };
     const rAt = (g, t, e) => rReg(g, t) * (1 - e) + rEll(g, t) * e;
     function warp(g, e, x, y) {
+      if (KEEP) return { x, y };
       const dx = x - g.c.x, dy = y - g.c.y, d = Math.hypot(dx, dy);
       if (d < 1e-9 || e <= 0) return { x, y };
       const t = Math.atan2(dy, dx), R0 = rReg(g, t), R1 = rAt(g, t, e), d2 = d <= R0 ? (d * R1) / R0 : d + R1 - R0;
@@ -146,6 +229,17 @@
     function applyWarp() {
       if (!mapEls) return;
       const g = Z.geo, e = g ? Z.e : 0, NUM = /(-?\d+(?:\.\d+)?),(-?\d+(?:\.\d+)?)/g;
+      if (KEEP) {
+        // the map stays as it is; the outline of the area (its smoothed shape) is filled lightly as the background
+        if (gMorph) { gMorph.remove(); gMorph = null; }
+        if (g && e > 0) {
+          gMorph = el("g", { class: "zoom-morph" });
+          svg.insertBefore(gMorph, svg.querySelector("g.kanten"));
+          el("path", { d: g.outlineD, class: "zoom-umriss-ellipse", stroke: g.u.F.color, "fill-opacity": (0.95 * e).toFixed(3) }, gMorph);
+          gMorph.addEventListener("click", (ev) => ev.stopPropagation());
+        }
+        return;
+      }
       mapEls.paths.forEach(([p, d]) => p.setAttribute("d", e > 0 ? d.replace(NUM, (m, x, y) => { const q = warp(g, e, +x, +y); return q.x.toFixed(1) + "," + q.y.toFixed(1); }) : d));
       mapEls.texts.forEach(([t, x, y]) => { const q = e > 0 ? warp(g, e, x, y) : { x, y }; t.setAttribute("x", q.x.toFixed(1)); t.setAttribute("y", q.y.toFixed(1)); });
       allAreas.forEach((u) => { if (!u.g) return; const q = wpos(u); u.g.setAttribute("transform", `translate(${q.x.toFixed(1)},${q.y.toFixed(1)})`); });
@@ -205,9 +299,9 @@
       const chaikin = (P) => { const Q = []; P.forEach((p, i) => { const q = P[(i + 1) % P.length]; Q.push({ x: 0.75 * p.x + 0.25 * q.x, y: 0.75 * p.y + 0.25 * q.y }, { x: 0.25 * p.x + 0.75 * q.x, y: 0.25 * p.y + 0.75 * q.y }); }); return Q; };
       // groupLoops with the areas as labels gives the outline loops of every area (labelLoops of area-cells.js)
       const loops = C0.groupLoops({ cells: res.cells, nb: res.nb, group: res.lab, groupKeys: { length: allAreas.length } });
-      const list = loops.map((ls) => ls.map((l) => chaikin(mids(l.map((p) => ({ x: p.x * scale, y: p.y * scale })))))
-        .map((P) => "M" + P.map((p) => p.x.toFixed(1) + "," + p.y.toFixed(1)).join("L") + "Z").join(""));
-      softCache = { EL, list };
+      const pts = loops.map((ls) => ls.map((l) => chaikin(mids(l.map((p) => ({ x: p.x * scale, y: p.y * scale }))))));
+      const list = pts.map((ls) => ls.map((P) => "M" + P.map((p) => p.x.toFixed(1) + "," + p.y.toFixed(1)).join("L") + "Z").join(""));
+      softCache = { EL, list, pts };
       return list;
     }
     function markOwnPoint() {
@@ -402,6 +496,7 @@
         });
         return bestS;
       };
+      g0.moved = 0;
       const P = I.nodes.map((n) => { const q = place(n[1], n[2], theta), sec = sectorOf(n[1], n[2]); return { x: q.x, y: q.y, r: Math.max(0.6, n[3] * sy), n, fill: sec ? sec.node : u.F.color }; });
       // degree of each node: its edges inside the area and to other areas (both directions), for the order of the names
       const deg = P.map(() => 0);
@@ -551,7 +646,16 @@
         const { KR, FS, GAPPX, RINGPX } = RINGS, margin = 14;
         const E = GAPPX + (rings - 1) * RINGPX + 2 * KR + 3 + FS * 1.3 + margin;
         const W = svg.clientWidth || 1, H = svg.clientHeight || 1, f = 1 + AMP * 1.2;
-        const need = Math.max((C.A * f) / Math.max(10, W / 2 - E), (C.B * f) / Math.max(10, H / 2 - E));
+        let need = Math.max((C.A * f) / Math.max(10, W / 2 - E), (C.B * f) / Math.max(10, H / 2 - E));
+        // variant "keep": the ring curve follows the shape; in every direction its point plus the room of the names must
+        // fit into the half width and half height of the picture (centred on the centre of the area)
+        if (KEEP) {
+          need = 0;
+          for (let k = 0; k < NK; k += 4) {
+            const t = (k * TAU) / NK, R = Z.geo.ringR[k], cs = Math.abs(Math.cos(t)), sn = Math.abs(Math.sin(t));
+            need = Math.max(need, (cs * R) / Math.max(10, W / 2 - cs * E), (sn * R) / Math.max(10, H / 2 - sn * E));
+          }
+        }
         const s0 = api.scale();
         if (need <= s0 * 1.002) return;
         const v = api.getView(), k = need / s0, cx = v.x + v.w / 2, cy = v.y + v.h / 2;
@@ -576,9 +680,11 @@
       // area seen from the centre; with many marks on further rings. Name and number of edges run along the ring on the
       // outer side of the circle, readable from left to right (on the lower half the path runs the other way and lies
       // further out, so that the letters hang down to the circle).
-      const { KR, FS, GAPPX, RINGPX } = RINGS, BAR = 2 * KR * s, GAP0 = GAPPX * s + AMP * 1.2 * C.A, RING = RINGPX * s;
+      const { KR, FS, GAPPX, RINGPX } = RINGS, BAR = 2 * KR * s, GAP0 = GAPPX * s + (KEEP ? 0 : AMP * 1.2 * C.A), RING = RINGPX * s;
       const ringAxes = (ring) => [C.A + GAP0 + ring * RING, C.B + GAP0 + ring * RING];
       const onRing = (t, ring, extra = 0) => {
+        // variant "keep": the smooth curve around the shape, moved outward by the gap and the rings
+        if (KEEP) { const r = atK(Z.geo.offsetR(GAP0 + ring * RING + extra), t); return { x: C.cx + r * Math.cos(t), y: C.cy + r * Math.sin(t), d: r }; }
         const [a, b] = ringAxes(ring), A2 = a + extra, B2 = b + extra, r = (A2 * B2) / Math.hypot(B2 * Math.cos(t), A2 * Math.sin(t));
         return { x: C.cx + r * Math.cos(t), y: C.cy + r * Math.sin(t), d: r };
       };
@@ -587,7 +693,10 @@
         return { ou, list, phi, a: phi, ring: 0, full: ou.label, n: list.length, arc: 2 * KR + 4 };
       }).sort((p, q) => p.phi - q.phi);
       // half the room of a mark along its ring, as an angle: the arc or the name, whichever is longer, and a gap
-      const halfOf = (m) => ((Math.max(m.arc, m.label.length * FS * 0.54) / 2 + 7) * s) / onRing(m.a, m.ring).d;
+      // (the length along the ring per angle is measured on the ring itself, which matters where the curve of the variant
+      // "keep" runs steeply)
+      const speed = (a, ring) => { const p = onRing(a - 0.01, ring), q = onRing(a + 0.01, ring); return Math.max(onRing(a, ring).d, Math.hypot(q.x - p.x, q.y - p.y) / 0.02); };
+      const halfOf = (m) => ((Math.max(m.arc, m.label.length * FS * 0.54) / 2 + 7) * s) / speed(m.a, m.ring);
       const signed = (x, y) => ((((y - x) % TAU) + 3 * Math.PI) % TAU) - Math.PI;
       const clash = (p, q) => p.ring === q.ring && Math.abs(signed(p.a, q.a)) < halfOf(p) + halfOf(q);
       // the rings first: all marks on the inner ring if they fit there (with some room to spare), else alternately on two
@@ -612,7 +721,7 @@
           const seq = list.slice(cut).concat(list.slice(0, cut));
           const want = []; let prev = null;
           seq.forEach((m) => { let w = m.phi; if (prev != null) while (w < prev) w += TAU; want.push(w); prev = w; });
-          for (let round = 0; round < 3; round++) {
+          for (let round = 0; round < 8; round++) {
             const width = seq.map((m) => 2.1 * halfOf(m)), blocks = [];
             seq.forEach((m, i) => {
               let blk = { items: [i], width: width[i] };
@@ -629,6 +738,8 @@
           }
           const sumW = seq.reduce((t, m) => t + 2 * halfOf(m), 0), first = seq[0], last = seq[seq.length - 1];
           if (sumW > TAU || last.a + halfOf(last) > first.a - halfOf(first) + TAU + 1e-9) ok = false;
+          // the rooms at the final places (they depend on the place along the ring) must not overlap
+          for (let i = 0; i + 1 < seq.length; i++) if (seq[i + 1].a - seq[i].a < halfOf(seq[i]) + halfOf(seq[i + 1]) - 1e-9) ok = false;
         });
         return ok;
       };
@@ -712,6 +823,13 @@
       titlePath.className = "zoom-titel-pfad";
       h1.appendChild(titlePath);
       titleLink.addEventListener("click", (ev) => { ev.preventDefault(); if (Z.folder) zoomOut(true); else recentre(); });
+      // the two variants of the zoom side by side (user, 5 November 2026): a small link to the other page, with the
+      // address (area, kind of nodes) carried over
+      const v = document.createElement("span");
+      v.className = "zoom-variante";
+      v.innerHTML = KEEP ? `variant: area keeps its shape · <a href="areas.html">other version</a>` : `<a href="areas-shape.html">variant: shape kept</a>`;
+      v.querySelector("a").addEventListener("click", (ev) => { ev.preventDefault(); location.href = (KEEP ? "areas.html" : "areas-shape.html") + location.hash; });
+      h1.appendChild(v);
     }
     function updateTitle() {
       if (!titleLink) return;
@@ -857,6 +975,11 @@
     window.AREA_ZOOM_STATE = {
       get folder() { return Z.folder; }, get inner() { return Z.inner; }, get animating() { return !!Z.anim; },
       mapFactor: () => api.fit().w / api.getView().w,
+      variant: () => (KEEP ? "keep" : "ellipse"),
+      // variant "keep": the outline drawn, the outline of the area, and whether the area is star-shaped seen from its centre
+      shapeInfo: () => (Z.geo && KEEP ? { drawn: gMorph ? gMorph.querySelector("path").getAttribute("d") : null, outline: Z.geo.outlineD, soft: smoothUnits(api.layoutE())[allAreas.indexOf(Z.geo.u)], nonStar: Z.geo.nonStar, centreInside: Z.geo.centreInside, moved: Z.geo.moved } : null),
+      // the shape of every area (variant "keep"): directions with several crossings, centre inside
+      allShapes: () => (KEEP ? allAreas.filter((u) => INTER[u.folder.folder]).map((u) => { const g = { folder: u.folder.folder, u, c: { x: u.x, y: u.y } }; keepShape(g); return { folder: g.folder, nonStar: g.nonStar, centreInside: g.centreInside, aspect: g.A / g.B }; }) : []),
       announced: () => (announced ? announced.dataset.folder : null),
       zoomTo: (f) => zoomTo(f, true), zoomOut: () => zoomOut(true), setInner: (i) => setInner(i, true),
       // the view of the area enlarged by a factor (1 … 6) around a point (default: the centre of the area)
@@ -875,6 +998,7 @@
         return { shifted: !!Z.shifted, dist: dist(V), fitDist: dist(F), outX: (Math.max(0, V.x0 - m.x0) + Math.max(0, m.x1 - V.x1)) / (m.x1 - m.x0), outY: (Math.max(0, V.y0 - m.y0) + Math.max(0, m.y1 - V.y1)) / (m.y1 - m.y0), isFit: Math.abs(v.x - f.x) + Math.abs(v.y - f.y) < 1e-3 * f.w };
       },
       contents: () => (C ? { cx: C.cx, cy: C.cy, A: C.A, B: C.B, R: C.I.R, theta: C.theta, sectors: C.secs.map((x) => [x.name, +x.a0.toFixed(4), +x.a1.toFixed(4)]), nodes: C.P.map((p) => {
+        if (KEEP) { const b = Math.atan2(p.y - C.cy, p.x - C.cx), rho = Math.hypot(p.x - C.cx, p.y - C.cy) / (KEEP_MARGIN * atK(Z.geo.rin, b)); return { id: p.n[0], x: p.x, y: p.y, r: p.r, rx: p.n[1], ry: p.n[2], dx: rho * Math.cos(b), dy: rho * Math.sin(b) }; }
         const X = (p.x - C.cx) / C.A, Y = (p.y - C.cy) / C.B, b = Math.atan2(Y, X), rho = Math.hypot(X, Y) / wob(Z.geo, b);
         return { id: p.n[0], x: p.x, y: p.y, r: p.r, rx: p.n[1], ry: p.n[2], dx: rho * Math.cos(b), dy: rho * Math.sin(b) };
       }),

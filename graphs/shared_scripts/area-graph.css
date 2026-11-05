@@ -188,3 +188,6 @@ header.leiste h1 .zoom-titel-pfad .zoom-gebiet { font-weight: inherit; }
 /* announcement of the zoom into an area by the wheel (from 2 times the whole view) */
 .area-graph .zoom-region.ankuendigung .zoom-umriss { opacity: 1; stroke-width: 4px; }
 .area-graph .zoom-region.ankuendigung .zoom-flaeche { fill-opacity: .1; }
+/* link to the other variant of the zoom (areas.html / areas-shape.html) */
+header.leiste h1 .zoom-variante { font-size: 12px; font-weight: 400; color: #8a8076; margin-left: 12px; }
+header.leiste h1 .zoom-variante a { color: #6b8f5e; }

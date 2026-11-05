@@ -5,7 +5,7 @@
 // Configuration in window.CONCEPT_PAGE (scripts/concept-page.js of the folder):
 //   data          name of the global object with the concepts (e.g. "ENT_CONCEPTS"; model in its header comment)
 //   colors        colour per key of `areas`
-//   foreignArea   area key of concepts defined in other areas (drawn with a dashed border), e.g. "basic"
+//   foreignArea   area key of concepts defined in other areas (drawn with a white inside and a solid border in the colour of their origin), e.g. "basic"
 //   foreignLabel  legend text for it, e.g. "defined outside 11A"
 //   hubs          own concepts used by almost everything whose outgoing edges are hidden by default (group)
 //   centre        candidates for the middle of the picture (first one with level 1)
@@ -734,7 +734,7 @@
     // theorems repeat those of the kinds of concepts (theorem and object both circles)
     if (COMBINED && isTheorem(c)) shape(g, c.kind, p.r + 3.5, "none").setAttribute("class", "satz-rand");
     // prerequisites: light fill with a thick border in the colour of their origin, unlike the filled own concepts
-    shape(g, c.kind, p.r, c.area === FOREIGN ? "#fbfaf6" : colorOf(c));
+    shape(g, c.kind, p.r, c.area === FOREIGN ? "#fff" : colorOf(c));
     if (c.area === FOREIGN) g.style.setProperty("--herkunft", colorOf(c));
     const t = el("text", { x: 0, y: p.r + 13, "text-anchor": "middle" }, g);
     t.textContent = plainName(c.name);
@@ -1403,7 +1403,7 @@
     ids.forEach((x) => {
       const it = lay.item[x], c = byId.get(x);
       const g = el("g", { class: "fokus-knoten" + (x === id ? " ziel" : back ? " oben" : " unten") + (COMBINED && isTheorem(c) ? " satz" : "") + (back && x !== id && c.foundation ? " grundlage" : ""), "data-id": x, transform: `translate(${it.cx - BW / 2},${yOf(it)})` }, s);
-      el("rect", c.area === FOREIGN ? { width: BW, height: BH, rx: 4, style: `fill:#fbfaf6;fill-opacity:1;stroke:${colorOf(c)};stroke-width:2.6` } : { width: BW, height: BH, rx: 4, fill: colorOf(c) }, g);
+      el("rect", c.area === FOREIGN ? { width: BW, height: BH, rx: 4, style: `fill:#fff;fill-opacity:1;stroke:${colorOf(c)};stroke-width:2.6` } : { width: BW, height: BH, rx: 4, fill: colorOf(c) }, g);
       const lines = GL.textLines(plainName(c.name), chars, 2);
       lines.forEach((t, i) => {
         el("text", { x: BW / 2, y: BH / 2 + (i - (lines.length - 1) / 2) * (font + 2) + font / 3, "text-anchor": "middle", style: `font-size:${font}px` }, g).textContent = t;
@@ -1624,14 +1624,14 @@
     `<div class="eintraege${o.cls ? " " + o.cls : ""}">${items.join("")}</div></details>`;
   document.getElementById("legend").innerHTML =
     block("Colour: MSC class", areaKeys.filter((k) => k !== FOREIGN).map((k) => `<span><i style="background:${COLORS[k]}"></i>${D.areas[k]}</span>`), { closed: true }) +
-    block("Prerequisites: origin", [...new Set(concepts.filter((c) => c.area === FOREIGN).map(originOf))].map((o) => `<span><i style="background:#fbfaf6;border:3px solid ${ORIGIN_COLORS[o] || "#d9d4ca"}"></i>${originName(o)}</span>`), { closed: true }) +
+    block("Prerequisites: origin", [...new Set(concepts.filter((c) => c.area === FOREIGN).map(originOf))].map((o) => `<span><i style="background:#fff;border:3px solid ${ORIGIN_COLORS[o] || "#d9d4ca"}"></i>${originName(o)}</span>`), { closed: true }) +
     block("Shape: kind", Object.keys(D.kinds).map((k) => `<span>${kindSvg(k)}${D.kinds[k]}</span>`)
       .concat(COMBINED ? [`<span class="hinweis">Theorems have a second outline.</span>`] : []), { cls: "zweispaltig", closed: true }) +
     block("Lines and sizes", [
       `<span>${lineSvg('stroke="#a99e8c" stroke-width="1.3" marker-end="url(#pfeil)"')}${WORDS.arrow}</span>`,
       COMBINED ? `<span>${lineSvg('stroke="#5c8a4a" stroke-width="1.3" stroke-dasharray="1.5 3" marker-end="url(#pfeil)"')}the statement of theorem B uses concept A</span>` : "",
       isaEdges.length ? `<span>${lineSvg('stroke="#7a5aa0" stroke-width="1.3" stroke-dasharray="5 4"')}B is a special case of A</span>` : "",
-      `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fbfaf6" stroke="#8a7f6e" stroke-width="2.6"/></svg>${PARTS.map((p) => p.cfg.foreignLabel).join("; ")}</span>`,
+      `<span><svg width="26" height="14" class="form"><circle cx="13" cy="7" r="5" fill="#fff" stroke="#8a7f6e" stroke-width="2.6"/></svg>${PARTS.map((p) => p.cfg.foreignLabel).join("; ")}</span>`,
       `<span><svg width="26" height="14" class="form"><circle cx="6" cy="7" r="2.5" fill="#ccc" stroke="#4b443b"/><circle cx="18" cy="7" r="5.5" fill="#ccc" stroke="#4b443b"/></svg>size: ${WORDS.many} depending on it</span>`,
       `<span class="hinweis">Hidden unless selected or switched on: “is a”, indirect dependencies (A → C when C uses B and B depends on A), edges only of other ${WORDS.proofWord.toLowerCase()}s (dashed), arrows from other areas${Object.keys(HUBS).filter((h) => byId.has(h)).map((h) => " and from " + byId.get(h).name).join("")}.</span>`,
     ], { closed: true });
