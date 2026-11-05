@@ -777,7 +777,7 @@
   const kindHead = (k) => `<h3 class="art"><i style="background:${k.color}"></i>${k.name}</h3>`;
   function unitPanel(u) {
     let html = `<h2>${esc(u.name)}${noteOf(u)}</h2><div class="meta">${u.other ? "MSC " + [...u.codes].sort().join(", ") + "; classes named only in the MSC lists of other nodes. " : u.gray ? "MSC " + u.main + "; no folder of these graphs yet. " : u.level === "classes" ? "MSC " + u.cls + " in " + esc(u.folder.name) + ". " : "MSC " + esc(u.folder.msc) + ". "}${itemCount(u)}.</div>`;
-    if (!u.gray && u.level === "areas") html += `<p class="meta"><a href="${u.folder.folder}/concepts.html">Concepts</a> · <a href="${u.folder.folder}/theorems.html">Theorems</a> · <a href="${u.folder.folder}/bipartite.html">In theorems</a></p>`;
+    if (!u.gray && u.level === "areas") html += `<p class="meta"><a href="${u.folder.folder}/concepts.html">Concepts</a> · <a href="${u.folder.folder}/theorems.html">Theorems</a> · <a href="${u.folder.folder}/bipartite.html">Concepts in theorems</a></p>`;
     if (u.gray || u.items.some((it) => it.moved)) {
       const list = u.items.filter((it) => u.gray || it.moved);
       html += `<details class="liste"><summary>${u.gray ? "Nodes of this class, provisionally in other folders" : "Nodes counted here from other folders (area “basic”)"} (${list.length})</summary><ul class="einzel">${list.map((it) => `<li>${link(it)} <span class="meta">MSC ${(it.d.msc || []).join(", ")}</span></li>`).join("")}</ul></details>`;

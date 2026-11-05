@@ -115,10 +115,10 @@ body.ohne-widerlegt .gkante.widerlegt, body.ohne-deutung .gkante.deutung { displ
 .note { font-size: 0.78em; font-weight: normal; font-style: normal; color: #8a8378; }
 
 /* explanatory text behind a small (i) next to the title (user, 5 November 2026): shown on hover or keyboard focus,
-   links inside stay usable because the box touches the symbol; position fixed without offsets keeps the box at its place in the line but outside the clipping of the scrolling sidebar */
+   links inside stay usable because the box touches the symbol; shared_scripts/info-tooltip.js sets left and top (position fixed, so scrolling containers do not clip the box) */
 .info { position: relative; display: inline-block; font-size: 14px; font-weight: 400; color: #8a8076; cursor: help; margin-left: 3px; }
 .info .info-text { display: none; position: fixed; z-index: 60; box-sizing: border-box; width: 330px; max-width: 80vw; padding: 8px 10px; background: #fbfaf6; border: 1px solid var(--linie); border-radius: 4px; box-shadow: 0 3px 10px rgba(0,0,0,.18); font-size: 12.5px; line-height: 1.4; font-style: normal; text-transform: none; letter-spacing: 0; color: var(--tinte); text-align: left; cursor: auto; }
 .info .info-text p { margin: 0 0 6px; font-size: inherit; }
 .info .info-text p:last-child { margin-bottom: 0; }
 .info .info-text p:empty { display: none; }
-.info:hover .info-text, .info:focus-within .info-text { display: block; }
+.info.open .info-text { display: block; }

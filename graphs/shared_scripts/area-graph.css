@@ -146,7 +146,6 @@ header.leiste .toggle i.farbe { width: 12px; height: 6px; border-radius: 3px; }
 .area-graph .zknoten { cursor: pointer; }
 .area-graph .zknoten .form { stroke: #4b443b; stroke-width: .8px; vector-effect: non-scaling-stroke; }
 .area-graph .zname { fill: var(--tinte); paint-order: stroke; stroke: #fffdf8; stroke-width: 3px; stroke-linejoin: round; pointer-events: none; }
-.area-graph .zoom-titel { fill: #4b443b; font-weight: 600; paint-order: stroke; stroke: #fbfaf6; stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
 .area-graph .zoom-ebene.fokus .zknoten:not(.zhell) { opacity: .18; }
 .area-graph .zoom-ebene.fokus .zoom-kante:not(.zhell) { opacity: .12; }
 .area-graph .zoom-ebene.fokus .zoom-aussen-kante:not(.zhell) { opacity: .1; }
@@ -163,6 +162,7 @@ header.leiste .toggle i.farbe { width: 12px; height: 6px; border-radius: 3px; }
 header.leiste .zoom-leiste button[data-zoom-out], header.leiste .zoom-leiste button[data-zoom-open] { font: inherit; font-size: 13px; padding: 2px 8px; border: 1px solid var(--linie); border-radius: 4px; background: #fff; cursor: pointer; white-space: nowrap; }
 header.leiste .zoom-pfad { white-space: nowrap; font-size: 14px; }
 header.leiste .zoom-pfad b { font-variant: small-caps; letter-spacing: .03em; }
+header.leiste .zoom-pfad .zoom-gruppe { font-weight: 600; }
 #panel .zoom-liste { list-style: none; padding: 0; margin: 4px 0; font-size: 14px; }
 #panel .zoom-liste i.farbe { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 5px; }
 
@@ -175,13 +175,11 @@ header.leiste .zoom-pfad b { font-variant: small-caps; letter-spacing: .03em; }
 .area-graph.gezoomt text.gruppe-name, .area-graph.gezoomt .gruppe-linie { display: none; }
 /* halos of all names with rounded joins and ends and a slightly thinner stroke (user, 5 November 2026: jagged halo) */
 .area-graph text.gruppe-name { stroke-width: 3px; stroke-linejoin: round; stroke-linecap: round; }
-.area-graph .knoten text, .area-graph .zname, .area-graph .zmarke-halo, .area-graph .zoom-titel { stroke-linejoin: round; stroke-linecap: round; }
+.area-graph .knoten text, .area-graph .zname, .area-graph .zmarke-halo { stroke-linejoin: round; stroke-linecap: round; }
 .area-graph .knoten text { stroke-width: 3px; }
-.area-graph .zoom-titel { stroke-width: 3px; }
 .area-graph text.gruppe-name.aussen { font-size: calc(17px * var(--zf, 1)); }
 .area-graph text.gruppe-name.innen { font-size: calc(19px * var(--zf, 1)); fill-opacity: .6; }
 /* zoomed (user, 5 November 2026): the neighbouring regions pale, without points and names; every neighbour is a circle
    on the ring around the area */
 .area-graph.gezoomt .knoten { display: none; }
 .area-graph.gezoomt g.sektoren, .area-graph.gezoomt g.zoom-regionen { opacity: .45; }
-.area-graph .zoom-titel { fill: #6d655a; font-weight: 600; font-variant: small-caps; letter-spacing: .04em; opacity: .75; }

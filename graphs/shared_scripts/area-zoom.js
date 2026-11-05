@@ -113,7 +113,7 @@
       let h = 2166136261;
       for (const ch of folder) h = Math.imul(h ^ ch.charCodeAt(0), 16777619) >>> 0;
       const ph = [0, 1, 2].map((i) => (((h >>> (i * 9)) & 511) / 512) * TAU);
-      return { folder, u, c, A, B, rreg, tv, ph };
+      return { folder, u, c, A, B, rreg, tv, tv0: tv, ph };
     }
     // Organic outline (user, 5 November 2026): the ellipse with soft, slightly irregular waves, in the style of the
     // organic borders of the map; fixed per area. A point of the ellipse is given by its angle b in the unstretched disk
@@ -425,10 +425,12 @@
         g.addEventListener("click", (ev) => { ev.stopPropagation(); if (api.dragged()) return; Z.marked = Z.marked === i ? null : i; markInside(); api.drawControls(); api.update(); });
         return g;
       });
-      el("text", { class: "zoom-titel", x: cx.toFixed(2), y: (cy - C.B).toFixed(2), "text-anchor": "middle" }, gZoom).textContent = u.label;
       C.gMarks = el("g", { class: "zoom-marken" }, gZoom);
       gZoom.addEventListener("click", (ev) => { ev.stopPropagation(); if (api.dragged() || ev.target.closest(".zmarke")) return; if (Z.marked != null) { Z.marked = null; markInside(); api.drawControls(); api.update(); } });
+      // at the view of the area: start again from its first view, then widen it as far as the rings need
+      if (Math.abs(api.getView().w - g0.tv.w) < 1e-6 * g0.tv.w) { g0.tv = g0.tv0; api.setView(g0.tv0); }
       placeOutside();
+      fitRings();
       markInside();
     }
     function markInside() {
@@ -465,7 +467,7 @@
       }
       const rr = (p) => p.r * kz;
       const pts = C.P.map((p, i) => ({ i, x0: p.x - rr(p), x1: p.x + rr(p), y0: p.y - rr(p), y1: p.y + rr(p) }));
-      // the names of the marks and the title are obstacles as well (their screen boxes in graph units)
+      // the names and circles of the marks are obstacles as well (their screen boxes in graph units)
       const inv = svg.getScreenCTM().inverse(), toG = (x, y) => { const q = svg.createSVGPoint(); q.x = x; q.y = y; return q.matrixTransform(inv); };
       const boxOf = (e) => { const b = e.getBoundingClientRect(), a = toG(b.left, b.top), c = toG(b.right, b.bottom); return { x0: a.x, y0: a.y, x1: c.x, y1: c.y }; };
       const fixed = [...gZoom.querySelectorAll(".zmarke-name, .zkreis")].map(boxOf);
@@ -502,16 +504,6 @@
         t.setAttribute("x", pick.x.toFixed(3)); t.setAttribute("y", pick.y.toFixed(3)); t.setAttribute("text-anchor", pick.anchor);
         taken.push(pick.r);
       });
-      // the name of the area small and pale inside the upper edge of the ellipse, only where no node and no name lies
-      // (its full name is in the toolbar: "Graph of the areas › <area>")
-      const title = gZoom.querySelector(".zoom-titel");
-      if (title) {
-        title.style.fontSize = (12 * s).toFixed(4) + "px";
-        title.setAttribute("y", (C.cy - C.B + 18 * s).toFixed(3));
-        title.style.visibility = "";
-        const b = boxOf(title), r = { x0: b.x0 - 4 * s, x1: b.x1 + 4 * s, y0: b.y0 - 2 * s, y1: b.y1 + 2 * s };
-        title.style.visibility = taken.some((t) => meets(r, t)) || pts.some((t) => meets(r, t)) ? "hidden" : "";
-      }
     }
 
     // ------------------------------------------------------------ edges to other areas: to their point or to a mark
@@ -519,6 +511,31 @@
     function visible() {
       const v = api.getView(), s = api.scale(), w = (svg.clientWidth || 1) * s, h = (svg.clientHeight || 1) * s;
       return { x: v.x + v.w / 2 - w / 2, y: v.y + v.h / 2 - h / 2, w, h, s };
+    }
+    // sizes of the marks on the rings in screen pixels: radius of a circle, size of the names, gap between the outline and
+    // the first ring, distance of the rings
+    const RINGS = { KR: 10, FS: 11, GAPPX: 14, RINGPX: 2 * 10 + 11 + 18 };
+    // The rings with their circles and names lie wholly in the picture (user, 5 November 2026): with more rings the
+    // ellipse appears smaller, i.e. the view of the area is widened until the outermost ring with its names and a margin
+    // fits into the visible part below the toolbar. Only at the view of the area itself (zoom factor 1); a few rounds,
+    // since the number of rings depends on the room on the screen.
+    function fitRings() {
+      if (!C || !Z.geo) return;
+      for (let round = 0; round < 4; round++) {
+        const rings = 1 + Math.max(0, ...C.marks.map((m) => m.ring));
+        if (!C.marks.length) return;
+        const { KR, FS, GAPPX, RINGPX } = RINGS, margin = 14;
+        const E = GAPPX + (rings - 1) * RINGPX + 2 * KR + 3 + FS * 1.3 + margin;
+        const W = svg.clientWidth || 1, H = svg.clientHeight || 1, f = 1 + AMP * 1.2;
+        const need = Math.max((C.A * f) / Math.max(10, W / 2 - E), (C.B * f) / Math.max(10, H / 2 - E));
+        const s0 = api.scale();
+        if (need <= s0 * 1.002) return;
+        const v = api.getView(), k = need / s0, cx = v.x + v.w / 2, cy = v.y + v.h / 2;
+        const nv = { x: cx - (v.w * k) / 2, y: cy - (v.h * k) / 2, w: v.w * k, h: v.h * k };
+        Z.geo.tv = nv;
+        api.setView(nv);
+        placeOutside();
+      }
     }
     function placeOutside() {
       if (!C) return;
@@ -535,7 +552,7 @@
       // area seen from the centre; with many marks on further rings. Name and number of edges run along the ring on the
       // outer side of the circle, readable from left to right (on the lower half the path runs the other way and lies
       // further out, so that the letters hang down to the circle).
-      const KR = 8, FS = 11, BAR = 2 * KR * s, GAP0 = 14 * s + AMP * 1.2 * C.A, RING = (2 * KR + FS + 12) * s;
+      const { KR, FS, GAPPX, RINGPX } = RINGS, BAR = 2 * KR * s, GAP0 = GAPPX * s + AMP * 1.2 * C.A, RING = RINGPX * s;
       const ringAxes = (ring) => [C.A + GAP0 + ring * RING, C.B + GAP0 + ring * RING];
       const onRing = (t, ring, extra = 0) => {
         const [a, b] = ringAxes(ring), A2 = a + extra, B2 = b + extra, r = (A2 * B2) / Math.hypot(B2 * Math.cos(t), A2 * Math.sin(t));
@@ -552,17 +569,18 @@
       // the rings first: all marks on the inner ring if they fit there (with some room to spare), else alternately on two
       // (or three) rings in the order of their directions, so that neighbours do not compete for room; then
       // marks of one ring that still overlap are pushed apart along it (their order stays)
-      const spread = () => {
+      const spread = (extra = 0) => {
         marks.forEach((m) => { m.a = m.phi; m.ring = 0; });
-        // as few rings as fit (at most three; a third only for very many marks, such as set theory with about 40)
-        const total = marks.reduce((sum, m) => sum + 2 * halfOf(m), 0), rings = total <= 0.85 * TAU ? 1 : total <= 1.7 * TAU ? 2 : 3;
+        // as few rings as fit (at most four; more than two only for very many marks, such as set theory with about 40, on a
+        // small screen)
+        const total = marks.reduce((sum, m) => sum + 2 * halfOf(m), 0), rings = Math.min(4, Math.max(1, Math.ceil(total / (0.85 * TAU))) + extra);
         marks.forEach((m, i) => { m.ring = i % rings; });
         // On each ring: the circle is cut at the largest gap between the wanted directions; then, from there on, every
         // mark is a block of its room, and blocks that overlap are merged into one, placed so that the mean distance of
         // its marks from their directions is zero (exact, no iteration; three rounds because the room depends on the
         // place). Fits only if all rooms together are less than the full circle.
         let ok = true;
-        [0, 1, 2].forEach((ring) => {
+        [0, 1, 2, 3, 4].forEach((ring) => {
           const list = marks.filter((m) => m.ring === ring).sort((p, q) => p.phi - q.phi);
           if (list.length < 2) return;
           let cut = 0, gapMax = -1;
@@ -593,11 +611,12 @@
       const deviation = () => Math.max(0, ...marks.map((m) => angDist(m.a, m.phi)));
       const shorten = (t, n) => (t.length <= n ? t : t.slice(0, n - 1).replace(/[\s,;:]+\S*$/, "") + "…");
       let bestTry = null;
-      for (const n of [99, 24, 18, 13]) {
+      // first shorter names, then (if still not fitting within 30°) one more ring
+      search: for (const extra of [0, 1]) for (const n of [99, 24, 18, 13, 10, 8]) {
         marks.forEach((m) => { m.label = shorten(m.full, n) + " (" + m.n + ")"; });
-        const ok = spread(), dev = deviation();
+        const ok = spread(extra), dev = deviation();
         if (!bestTry || (ok && !bestTry.ok) || (ok === bestTry.ok && dev < bestTry.dev - 1e-6)) bestTry = { ok, dev, state: marks.map((m) => [m.a, m.ring, m.label]) };
-        if (ok && dev <= (30 * Math.PI) / 180) break;
+        if (ok && dev <= (29 * Math.PI) / 180) break search;
       }
       marks.forEach((m, i) => { [m.a, m.ring, m.label] = bestTry.state[i]; });
       const arcPath = (a0, a1, ring, extra) => { const pts = []; for (let j = 0; j <= 16; j++) { const Q = onRing(a0 + ((a1 - a0) * j) / 16, ring, extra); pts.push(Q.x.toFixed(2) + "," + Q.y.toFixed(2)); } return "M" + pts.join("L"); };
@@ -646,7 +665,7 @@
       svg.style.setProperty("--zp", pointScale().toFixed(4));
       if (!C || Z.anim || viewPending) return;
       viewPending = true;
-      requestAnimationFrame(() => { viewPending = false; if (C) { placeOutside(); labelInside(); markInside(); } });
+      requestAnimationFrame(() => { viewPending = false; if (C) { placeOutside(); if (Z.geo && Math.abs(api.getView().w - Z.geo.tv.w) < 1e-6 * Z.geo.tv.w) fitRings(); labelInside(); markInside(); } });
     }
 
     // ------------------------------------------------------------ toolbar and panel while zoomed
@@ -655,8 +674,10 @@
       const btn = (attr, val, on, label, title) => `<button ${attr}="${val}" class="${on ? "an" : ""}" title="${esc(title)}">${label}</button>`;
       const div = document.createElement("div");
       div.className = "leiste-gruppe zoom-leiste";
-      // the path "Graph of the areas › <area>"; its first part leads back (user, 5 November 2026)
-      div.innerHTML = `<span class="zoom-pfad"><button data-zoom-out title="back to the map of all areas (Escape)">Graph of the areas</button> › <b>${esc(unitOf(Z.folder).label)}</b></span>` +
+      // the path "Graph of the areas › <group> › <area>"; its first part leads back, the group (of the grouping chosen) is
+      // plain text in its colour; the name of the area stands only here (user, 5 November 2026)
+      const zu = unitOf(Z.folder);
+      div.innerHTML = `<span class="zoom-pfad"><button data-zoom-out title="back to the map of all areas (Escape)">Graph of the areas</button> › <span class="zoom-gruppe" style="color:${zu.F.color}">${esc(zu.F.name)}</span> › <b>${esc(zu.label)}</b></span>` +
         `<div class="stufen">${btn("data-zoom-inner", "concepts", Z.inner === "concepts", "concepts", "the concepts of the area; concepts and theorems keep their places and sectors when switching")}${btn("data-zoom-inner", "theorems", Z.inner === "theorems", "theorems", "the theorems of the area")}${btn("data-zoom-inner", "both", Z.inner === "both", "both", "concepts and theorems together")}</div>` +
         `<button data-zoom-open title="the ${Z.inner === "concepts" ? "concept graph" : Z.inner === "theorems" ? "theorem graph" : "concept graph with the theorems"} of this area on its own page">open detailed graph</button>`;
       api.controls.insertBefore(div, api.controls.firstChild);
@@ -699,17 +720,42 @@
     // Mouse wheel and dragging (dragging is the page's own) move and enlarge the view continuously, from the view of the
     // area (factor 1) up to 6 times; the names are placed again at every step (labelInside)
     const MAXZOOM = 6;
-    function zoomView(f, cx, cy) {
-      const tv = Z.geo.tv, v = api.getView(), w = Math.min(tv.w, Math.max(tv.w / MAXZOOM, v.w * f)), k = w / v.w;
+    function zoomView(f, cx, cy, minF = 1) {
+      const tv = Z.geo.tv, v = api.getView(), w = Math.min(tv.w / minF, Math.max(tv.w / MAXZOOM, v.w * f)), k = w / v.w;
       api.setView({ x: cx - (cx - v.x) * k, y: cy - (cy - v.y) * k, w, h: v.h * k });
+    }
+    // Back to the map by the wheel (user, 5 November 2026): below the view of the area the picture gets visibly smaller,
+    // down to 0.85 times; a wheel movement that would go below that leaves the area with the same animated change as
+    // "Graph of the areas" (address and back button as there). One small turn of the wheel (one step, 0.87) does not leave;
+    // released between 0.85 and 1, the picture returns softly to 1 after a moment.
+    const OUT_LIMIT = 0.85;
+    let springTimer = null, springAnim = null;
+    function springBack() {
+      if (!Z.folder || Z.anim || !Z.geo) return;
+      const from = api.getView(), to = Z.geo.tv;
+      if (from.w <= to.w * 1.0001) return;
+      const t0 = performance.now();
+      const step = (now) => {
+        const x = Math.min(1, (now - t0) / 280), e = 1 - Math.pow(1 - x, 3);
+        const w = from.w + (to.w - from.w) * e, h = from.h + (to.h - from.h) * e;
+        const cx = from.x + from.w / 2 + (to.x + to.w / 2 - from.x - from.w / 2) * e, cy = from.y + from.h / 2 + (to.y + to.h / 2 - from.y - from.h / 2) * e;
+        api.setView({ x: cx - w / 2, y: cy - h / 2, w, h });
+        springAnim = x < 1 && Z.folder ? requestAnimationFrame(step) : null;
+      };
+      springAnim = requestAnimationFrame(step);
     }
     svg.addEventListener("wheel", (ev) => {
       if (!Z.folder || Z.anim || !C) return;
       ev.preventDefault();
       ev.stopImmediatePropagation();
-      const v = api.getView(), rect = svg.getBoundingClientRect(), s = api.scale();
+      clearTimeout(springTimer);
+      if (springAnim) { cancelAnimationFrame(springAnim); springAnim = null; }
+      const v = api.getView(), rect = svg.getBoundingClientRect(), s = api.scale(), f = ev.deltaY > 0 ? 1.15 : 1 / 1.15;
+      // the factor the view would have after this step: below the limit the area is left
+      if (Z.geo.tv.w / (v.w * f) < OUT_LIMIT - 1e-9) { zoomOut(true); return; }
       const cx = v.x + v.w / 2 + (ev.clientX - rect.left - rect.width / 2) * s, cy = v.y + v.h / 2 + (ev.clientY - rect.top - rect.height / 2) * s;
-      zoomView(ev.deltaY > 0 ? 1.15 : 1 / 1.15, cx, cy);
+      zoomView(f, cx, cy, OUT_LIMIT);
+      if (api.getView().w > Z.geo.tv.w * 1.0001) springTimer = setTimeout(springBack, 450);
     }, { capture: true, passive: false });
 
     // ------------------------------------------------------------ leaving the zoom; address; history
